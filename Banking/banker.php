@@ -97,6 +97,15 @@
             exit;
         }
 
+        // Checks to make sure person visiting page is a banker.
+        // Banker id is 13 as of me writing this.
+        $groupstring = $mybb->user['usergroup'] . ',' . $mybb->user['additionalgroups'];
+        $groups = explode(",", $groupstring);
+        if (!in_array("13", $groups)) {
+            echo "You're not a banker. Begone!";
+            exit;
+        }
+
         // If a submit button was pressed
         if (isset($mybb->input["bojopostkey"])) 
         {

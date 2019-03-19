@@ -104,13 +104,18 @@
         $myuid = $mybb->user['uid'];
         $uid = 0;
 
+        if ($myuid <= 0) {
+            exit;
+        }
+
         $isBanker = false;
         // Gets profile of user. If no id provided, gets logged in user by default.
         if (isset($_GET["uid"]) && is_numeric($_GET["uid"])) {
             $uid = intval($_GET["uid"]);
         }
         else {
-            $uid = $myuid;
+            header('Location: http://simulationhockey.com/playerupdater.php?uid='.$myuid);
+            // $uid = $myuid;
         }
 
         if ($uid > 0) 
@@ -239,7 +244,7 @@
             echo '<h2>User Summary</h2>';
             echo '<h4>User Information</h4>';
             echo '<table>';
-            echo "<tr><th>UserId</th><td>" . $uid . "</td></tr>";
+            // echo "<tr><th>UserId</th><td>" . $uid . "</td></tr>";
             echo "<tr><th>User</th><td>" . $currname . "</td></tr>";
             echo "<tr><th>Balance</th><td>$" . number_format($bankbalance, 0) . "</td></tr>";
             echo "</table>";
@@ -264,30 +269,37 @@
             echo '<hr />';
 
             // Bank Transactions
-            $bankRows = $db->simple_select("banktransactions", "*", "uid='" . $uid . "'", array(
-                "order_by" => 'date',
-                "order_dir" => 'DESC'
-            ));
+            $transactionQuery = 
+            "SELECT bt.*, banker.username AS 'owner'
+                FROM mybb_banktransactions bt
+                JOIN mybb_users banker ON bt.bankerid=banker.uid
+                WHERE bt.uid=$uid
+                ORDER BY bt.date DESC
+                LIMIT 50";
+            $bankRows = $db->query($transactionQuery);
             echo '<h4>Bank Transactions</h4>';
             echo '<table>';
             echo '<tr>';
             echo '<th>Title</th>';
             echo '<th>Amount</th>';
             echo '<th>Date</th>';
+            echo '<th>Made By</th>';
             echo '</tr>';
             while ($row = $db->fetch_array($bankRows))
             {
                 $date = new DateTime($row['date']);
 
                 echo "<tr>";
-                echo "<td>" . $row['title'] . "</td>";
+                echo '<td><a href="http://simulationhockey.com/banktransaction.php?id='.$row['id'].'">' . $row['title'] . '</a></td>';
                 if ($row['amount'] < 0) {
-                    echo "<td class='negative'>-$" . number_format(abs($row['amount']), 0) . "</td>";
+                    echo "<td class='negative'>" . '<a href="http://simulationhockey.com/banktransaction.php?id='.$row['id'].'">-$' . number_format(abs($row['amount']), 0) . "</a></td>";
                 }
                 else {
-                    echo "<td class='positive'>$" . number_format($row['amount'], 0) . "</td>";
+                    echo "<td class='positive'>" . '<a href="http://simulationhockey.com/banktransaction.php?id='.$row['id'].'">$' . number_format($row['amount'], 0) . "</a></td>";
                 }
+                echo '</a>';
                 echo "<td>" . $date->format('m/d/y') . "</td>";
+                echo '<td><a href="http://simulationhockey.com/playerupdater.php?uid="'.$row['bankerid'].'">' . $row['owner'] . "</a></td>";
                 echo "</tr>";
             }
             echo "</table>";

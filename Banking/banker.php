@@ -94,6 +94,7 @@
         // Gets current user logged in
         $myuid = $mybb->user['uid'];
         if($myuid <= 0) {
+            echo "You're not logged in. go away";
             exit;
         }
 

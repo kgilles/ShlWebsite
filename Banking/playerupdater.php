@@ -133,6 +133,9 @@
                 $isBanker = true;
             }
             
+            // TODO: remove for testing
+            $isBanker = true;
+
             $curruser = $db->fetch_array($userquery);
             $bankbalance = $curruser["bankbalance"];
             $currname = $curruser["username"];
@@ -142,8 +145,37 @@
             {
                 verify_post_check($mybb->input["bojopostkey"]);
 
+                // If banker undid a transaction.
+                if ($isBanker && isset($mybb->input["undotransaction"], $mybb->input["undoid"]) && is_numeric($mybb->input["undoid"]))
+                {
+                    $transid = intval($mybb->input["undoid"]);
+                    $undoquery = $db->simple_select("banktransactions", "*", "id=$transid", array("limit" => 1));
+                    $undoresult = $db->fetch_array($undoquery);
+
+                    // Removes transaction row
+                    $db->delete_query("banktransactions", "id=$transid");
+
+                    // Undoes the difference to the total balance
+                    $undobalance = intval($undoresult['amount']);
+                    $bankbalance -= $undobalance;
+                    $db->update_query("users", array("bankbalance" => $bankbalance), "uid=$uid", 1);
+
+                    echo '<div class="successSection">';
+                    echo "<h4>Success: Undo transaction</h4>";
+                    echo "<table>";
+                    if($transAmount < 0) {
+                        echo '<tr><th>Amount</th><td>-$'.abs($undobalance).'</td></tr>';
+                    }
+                    else {
+                        echo '<tr><th>Amount</th><td>$'.$undobalance.'</td></tr>';
+                    }
+                    echo '<tr><th>Title</th><td>'.$undoresult['title'].'</td></tr>';
+                    echo "</table>";
+                    echo '</div>';
+                }
+
                 // If banker submitted a transaction.
-                if ($isBanker && isset($mybb->input["submittransaction"], $mybb->input["transactionamount"]) && is_numeric($mybb->input["transactionamount"]))
+                else if ($isBanker && isset($mybb->input["submittransaction"], $mybb->input["transactionamount"]) && is_numeric($mybb->input["transactionamount"]))
                 {
                     $transAmount = intval($mybb->input["transactionamount"]);
                     $transTitle = $mybb->input["transactiontitle"];
@@ -241,30 +273,12 @@
 
             // User Information
             echo '<div class="bojoSection">';
-            echo '<h2>User Summary</h2>';
-            echo '<h4>User Information</h4>';
+            echo '<h2>' . $currname . '</h2>';
             echo '<table>';
-            // echo "<tr><th>UserId</th><td>" . $uid . "</td></tr>";
-            echo "<tr><th>User</th><td>" . $currname . "</td></tr>";
-            echo "<tr><th>Balance</th><td>$" . number_format($bankbalance, 0) . "</td></tr>";
+            echo "<tr><th>Balance</th><td>";
+            if ($bankbalance < 0) { echo '-'; }
+            echo "$" . number_format(abs($bankbalance), 0) . "</td></tr>";
             echo "</table>";
-
-            // New Purchase: Only available to the actual user
-            if ($uid == $myuid)
-            {
-                echo '<hr />';
-
-                echo '<h4>New Purchase</h4>';
-                echo '<form method="post">';
-                echo '<table>';
-                echo '<tr><th>Amount</th><td><input type="number" name="purchaseamount" placeholder="Enter amount..." /></td></tr>';
-                echo '<tr><th>Title</th><td><input type="text" name="purchasetitle" placeholder="Enter title..." /></td></tr>';
-                echo '<tr><th></th><td><input type="submit" name="submitpurchase" value="Make Purchase" /></td></tr>';
-                echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" />';
-                echo '</table>';
-                echo '</form>';
-                echo '<p style="margin-bottom: 0px"><em>Write a postive number for a purchase transaction. Contact a banker if there\'s a mistake.</em></p>';
-            }
 
             echo '<hr />';
 
@@ -289,7 +303,7 @@
             {
                 $date = new DateTime($row['date']);
 
-                echo "<tr>";
+                echo '<tr>';
                 echo '<td><a href="http://simulationhockey.com/banktransaction.php?id='.$row['id'].'">' . $row['title'] . '</a></td>';
                 if ($row['amount'] < 0) {
                     echo "<td class='negative'>" . '<a href="http://simulationhockey.com/banktransaction.php?id='.$row['id'].'">-$' . number_format(abs($row['amount']), 0) . "</a></td>";
@@ -300,10 +314,33 @@
                 echo '</a>';
                 echo "<td>" . $date->format('m/d/y') . "</td>";
                 echo '<td><a href="http://simulationhockey.com/playerupdater.php?uid="'.$row['bankerid'].'">' . $row['owner'] . "</a></td>";
-                echo "</tr>";
+                if($isBanker)
+                {
+                    echo '<form method="post"><td><input type="submit" name="undotransaction" value="Undo" /></td>';
+                    echo '<form method="post"><input type="hidden" name="undoid" value="'. $row['id'] .'" />';
+                    echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" /></form>';
+                }
+                echo "</tr></form>";
             }
             echo "</table>";
             echo "</div>";
+
+            // New Purchase: Only available to the actual user
+            if ($uid == $myuid)
+            {
+                echo '<div class="bojoSection">';
+                echo '<h2>New Purchase</h2>';
+                echo '<form method="post">';
+                echo '<table>';
+                echo '<tr><th>Amount</th><td><input type="number" name="purchaseamount" placeholder="Enter amount..." /></td></tr>';
+                echo '<tr><th>Title</th><td><input type="text" name="purchasetitle" placeholder="Enter title..." /></td></tr>';
+                echo '<tr><th></th><td><input type="submit" name="submitpurchase" value="Make Purchase" /></td></tr>';
+                echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" />';
+                echo '</table>';
+                echo '</form>';
+                echo '<p style="margin-bottom: 0px"><em>Write a postive number for a purchase transaction. Contact a banker if there\'s a mistake.</em></p>';
+                echo '</div>';
+            }
 
             // Add Banker Transaction
             if($isBanker)
@@ -331,7 +368,7 @@
                 echo '<tr><th></th><td><input type="submit" name="submitbalance" value="Set Balance" /></td></tr>';
                 echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" />';
                 echo '</table>';
-                echo '<p style="margin-bottom: 0px"><em>This will add a transaction to set to the new value. Just in case a technical errors happens.</em></p>';
+                echo '<p style="margin-bottom: 0px"><em>Adds a transaction</em></p>';
                 echo '</form>';
                 echo "</div>";
             }

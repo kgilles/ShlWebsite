@@ -63,6 +63,13 @@
             border: 1px solid black;
         }
 
+        .errorSection {
+            background: #f0cfcf;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid black;
+        }
+
         .successSection th,
         .successSection td {
             padding: 0px 10px;
@@ -134,7 +141,7 @@
             }
             
             // TODO: remove for testing
-            $isBanker = true;
+            // $isBanker = true;
 
             $curruser = $db->fetch_array($userquery);
             $bankbalance = $curruser["bankbalance"];
@@ -151,23 +158,26 @@
                     $transid = intval($mybb->input["undoid"]);
                     $undoquery = $db->simple_select("banktransactions", "*", "id=$transid", array("limit" => 1));
                     $undoresult = $db->fetch_array($undoquery);
+                    $undoamount = intval($undoresult["amount"]);
 
                     // Removes transaction row
                     $db->delete_query("banktransactions", "id=$transid");
 
-                    // Undoes the difference to the total balance
-                    $undobalance = intval($undoresult['amount']);
-                    $bankbalance -= $undobalance;
+                    $balancequery = "SELECT sum(amount) AS sumamt FROM mybb_banktransactions WHERE uid=$uid";
+                    $banksumquery = $db->query($balancequery);
+                    $banksumresult = $db->fetch_array($banksumquery);
+                    if ($banksumresult != NULL) { $bankbalance = intval($banksumresult['sumamt']); }
+                    else { $bankbalance = 0; }
                     $db->update_query("users", array("bankbalance" => $bankbalance), "uid=$uid", 1);
 
                     echo '<div class="successSection">';
                     echo "<h4>Success: Undo transaction</h4>";
                     echo "<table>";
-                    if($transAmount < 0) {
-                        echo '<tr><th>Amount</th><td>-$'.abs($undobalance).'</td></tr>';
+                    if($undoamount < 0) {
+                        echo '<tr><th>Amount</th><td>-$'.abs($undoamount).'</td></tr>';
                     }
                     else {
-                        echo '<tr><th>Amount</th><td>$'.$undobalance.'</td></tr>';
+                        echo '<tr><th>Amount</th><td>$'.$undoamount.'</td></tr>';
                     }
                     echo '<tr><th>Title</th><td>'.$undoresult['title'].'</td></tr>';
                     echo "</table>";
@@ -175,11 +185,11 @@
                 }
 
                 // If banker submitted a transaction.
-                else if ($isBanker && isset($mybb->input["submittransaction"], $mybb->input["transactionamount"]) && is_numeric($mybb->input["transactionamount"]))
+                else if ($isBanker && isset($mybb->input["submittransaction"], $mybb->input["transactionamount"]))
                 {
                     $transAmount = intval($mybb->input["transactionamount"]);
-                    $transTitle = $mybb->input["transactiontitle"];
-                    if ($transAmount != 0)
+                    $transTitle = trim(preg_replace('/[^A-Za-z0-9\-]/', '', $mybb->input["transactiontitle"]));
+                    if ($transAmount != 0 && strlen($transTitle) && is_numeric($mybb->input["transactionamount"]))
                     {
                         $db->insert_query("banktransactions", array(
                             "uid" => $uid,
@@ -187,7 +197,11 @@
                             "title" => $transTitle,
                             "bankerid" => $myuid));
                         
-                        $bankbalance += $transAmount;
+                        $balancequery = "SELECT sum(amount) AS sumamt FROM mybb_banktransactions WHERE uid=$uid";
+                        $banksumquery = $db->query($balancequery);
+                        $banksumresult = $db->fetch_array($banksumquery);
+                        if ($banksumresult != NULL) { $bankbalance = intval($banksumresult['sumamt']); }
+                        else { $bankbalance = 0; }
                         $db->update_query("users", array("bankbalance" => $bankbalance), "uid=$uid", 1);
 
                         echo '<div class="successSection">';
@@ -204,22 +218,33 @@
                         echo "</table>";
                         echo '</div>';
                     }
+                    else {
+                        echo '<div class="errorSection">';
+                        echo "<h4>Error</h4>";
+                        echo '<p>Invalid arguments for the transaction</p>';
+                        echo '</div>';
+                    }
                 }
 
                 // If a banker submitted a balance.
-                else if ($isBanker && isset($mybb->input["submitbalance"], $mybb->input["balanceamount"]) && is_numeric($mybb->input["balanceamount"]))
+                else if ($isBanker && isset($mybb->input["submitbalance"], $mybb->input["balanceamount"]))
                 {
                     $transAmount = intval($mybb->input["balanceamount"]) - $bankbalance;
                     $transTitle = "BALANCE AUDIT";
-                    if ($transAmount != 0)
+
+                    if($bankbalance != $transAmount && is_numeric($mybb->input["balanceamount"]))
                     {
                         $db->insert_query("banktransactions", array(
                             "uid" => $uid,
                             "amount" => $transAmount,
                             "title" => $transTitle,
-                            "bankerid" => $myuid));
-                        
-                        $bankbalance += $transAmount;
+                            "bankerid" => $myuid));                        
+
+                        $balancequery = "SELECT sum(amount) AS sumamt FROM mybb_banktransactions WHERE uid=$uid";
+                        $banksumquery = $db->query($balancequery);
+                        $banksumresult = $db->fetch_array($banksumquery);
+                        if ($banksumresult != NULL) { $bankbalance = intval($banksumresult['sumamt']); }
+                        else { $bankbalance = 0; }
                         $db->update_query("users", array("bankbalance" => $bankbalance), "uid=$uid", 1);
 
                         echo '<div class="successSection">';
@@ -236,14 +261,20 @@
                         echo "</table>";
                         echo '</div>';
                     }
+                    else {
+                        echo '<div class="errorSection">';
+                        echo "<h4>Error</h4>";
+                        echo '<p>Invalid arguments for the transaction</p>';
+                        echo '</div>';
+                    }
                 }
 
                 // If the user submitted a transaction himself.
-                else if (isset($mybb->input["submitpurchase"], $mybb->input["purchaseamount"]) && is_numeric($mybb->input["purchaseamount"]))
+                else if (isset($mybb->input["submitpurchase"], $mybb->input["purchaseamount"]))
                 {
                     $transAmount = -abs(intval($mybb->input["purchaseamount"]));
-                    $transTitle = $mybb->input["purchasetitle"];
-                    if ($transAmount != 0)
+                    $transTitle = trim(preg_replace('/[^A-Za-z0-9\-]/', '', $mybb->input["purchasetitle"]));
+                    if ($transAmount != 0 && strlen($transTitle) && is_numeric($mybb->input["purchaseamount"]))
                     {
                         $db->insert_query("banktransactions", array(
                             "uid" => $uid,
@@ -251,7 +282,11 @@
                             "title" => $transTitle,
                             "bankerid" => $myuid));
                         
-                        $bankbalance += $transAmount;
+                        $balancequery = "SELECT sum(amount) AS sumamt FROM mybb_banktransactions WHERE uid=$uid";
+                        $banksumquery = $db->query($balancequery);
+                        $banksumresult = $db->fetch_array($banksumquery);
+                        if ($banksumresult != NULL) { $bankbalance = intval($banksumresult['sumamt']); }
+                        else { $bankbalance = 0; }
                         $db->update_query("users", array("bankbalance" => $bankbalance), "uid=$uid", 1);
                         
                         echo '<div class="successSection">';
@@ -266,6 +301,12 @@
                         }
                         echo '<tr><th>Title</th><td>'.$transTitle.'</td></tr>';
                         echo "</table>";
+                        echo '</div>';
+                    }
+                    else {
+                        echo '<div class="errorSection">';
+                        echo "<h4>Error</h4>";
+                        echo '<p>Invalid arguments for the transaction</p>';
                         echo '</div>';
                     }
                 }
@@ -368,7 +409,7 @@
                 echo '<tr><th></th><td><input type="submit" name="submitbalance" value="Set Balance" /></td></tr>';
                 echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" />';
                 echo '</table>';
-                echo '<p style="margin-bottom: 0px"><em>Adds a transaction</em></p>';
+                echo '<p style="margin-bottom: 0px"><em>Sets the balance to the value, and adds a transaction to get it there.</em></p>';
                 echo '</form>';
                 echo "</div>";
             }

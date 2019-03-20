@@ -1,0 +1,60 @@
+[b]## NOTE: I have the stuff taken down for now for security reasons. ##[/b]
+
+With some help from DT, I've been working on a banking system integrated with the SHL forums. Neat!
+
+On everybody's profile page (well, the light theme for now) you'll see your bank balance. Right now it's at $0, unless I've been using you for testing. If this gets the greenlight everybody will reset, naturally.
+
+[b]Profile with Bank Balance[/b]
+[img]https://i.imgur.com/8rAS9kM.png[/img]
+
+
+Click that number to take you to your profile page. It's only for banking at the moment, but the goal would be to have other features like player updates go through here as well.
+
+There are three parts to the profile page at the moment: General Overview, Add Purchase, and Banker options. You can only view add purchase on your own profile, and only the bankers can view the banker options.
+
+(The undo buttons are only visible to bankers)
+
+[b]Profile View[/b]
+[img]https://i.imgur.com/e5DLaNx.png[/img]
+
+[b]Add Purchase[/b]
+[img]https://i.imgur.com/hkoUVkS.png[/img]
+
+[b]Banker Options for user[/b]
+[img]https://i.imgur.com/D9a95Tw.png[/img]
+
+
+If you make a transaction either by purchasing or as a banker making a transaction for the user you'll get a green success message assuming it goes through properly.
+
+If you click the link of either the title or the amount, it'll take you to a transaction summary page. In your updates you can use the link to this page instead of the post in a team transaction thread.
+
+[b]Success message for transaction on user[/b]
+[img]https://i.imgur.com/JY9N5KN.png[/img]
+
+[b]Bank transaction page[/b]
+[img]https://i.imgur.com/AhHVgIZ.png[/img]
+
+
+For Bankers, there's a specific page for you.
+
+If you're not a banker you can't access it. Them's the rules.
+
+I made a mass update tool, because going to everybody's page one by one would be tedious. Instead, enter in a list of user names, and either enter values for each person or just one time for each person.
+
+[b]Banker page (mass update)[/b]
+[img]https://i.imgur.com/uiX8VZN.png[/img]
+
+
+It starts off entering the names. Either separated by a comma or a new line, place them in the text area and click the button. The result will be the list of users that match. If all are found, a green success block will appear. Otherwise a warning block will let you know some people are missing.
+
+[b]Name search[/b]
+[img]https://i.imgur.com/baCNvQY.png[/img]
+
+
+Enter in the values for each user, or just one time at the bottom. The former allows different money and reasons for each person. Useful for deposits like media. The latter is good if everybody in the list is getting the same amount for the same reason. Like fantasy payouts.
+
+[b]Mass update success[/b]
+[img]https://i.imgur.com/kuKuUFO.png[/img]
+
+
+Would love to hear some feedback/concerns, and general ways to make this better. It's relatively simple from a programming standpoint, so features can easily be implemented. 

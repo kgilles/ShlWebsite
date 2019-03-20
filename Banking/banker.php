@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>SHL Hockey -> Player Updater</title>
+    <title>SHL Hockey -> Banker</title>
     {$headerinclude}
 
     <style>
@@ -148,7 +148,8 @@
                 {
                     $currName = $mybb->input["massname_" . $x];
                     $currId = intval($mybb->input["massid_" . $x]);
-                    $currTitle = $mybb->input["masstitle_" . $x];
+                    $currTitle = trim(preg_replace('/[^A-Za-z0-9\-]/', '', $mybb->input["masstitle_" . $x]));
+
                     $currAmount = intval($mybb->input["massamount_" . $x]);
                     $massinsert[] = [
                         "uid" => $currId,
@@ -157,20 +158,27 @@
                         "title" => $currTitle
                     ];
 
-                    // Gets current user's balance and adds the ammount
-                    $query = $db->simple_select("users", "bankbalance", "uid=$currId", array("limit" => 1));
-                    $result = $db->fetch_array($query);
-                    $currbalance = $result['bankbalance'];
-                    $currbalance += $currAmount;
-
-                    // Updates user's balance
-                    $db->update_query("users", array("bankbalance" => $currbalance), "uid=$currId", 1);
                     $x++;
                 }
 
                 // Adds rows to bank transactions
                 $db->insert_query_multiple("banktransactions", $massinsert);
-                
+
+                $x = 0;
+                while (isset($mybb->input["massid_" . $x]))
+                {
+                    $currId = intval($mybb->input["massid_" . $x]);
+
+                    // Updates user's balance
+                    $balancequery = "SELECT sum(amount) AS sumamt FROM mybb_banktransactions WHERE uid=$currId";
+                    $banksumquery = $db->query($balancequery);
+                    $banksumresult = $db->fetch_array($banksumquery);
+                    if ($banksumresult != NULL) { $bankbalance = intval($banksumresult['sumamt']); }
+                    else { $bankbalance = 0; }
+                    $db->update_query("users", array("bankbalance" => $bankbalance), "uid=$currId", 1);
+
+                    $x++;
+                }
             }
            
             // Submitted Mass Transactions with the same values
@@ -179,7 +187,7 @@
                 $namelist = $mybb->input["namelist"];
 
                 $massinsert = array();
-                $currTitle = $mybb->input["masstitleall"];
+                $currTitle = trim(preg_replace('/[^A-Za-z0-9\-]/', '', $mybb->input["masstitleall"]));
                 $currAmount = intval($mybb->input["massamountall"]);
 
                 $x = 0;
@@ -194,19 +202,27 @@
                         "title" => $currTitle
                     ];
 
-                    // Gets current user's balance and adds the ammount
-                    $query = $db->simple_select("users", "bankbalance", "uid=$currId", array("limit" => 1));
-                    $result = $db->fetch_array($query);
-                    $currbalance = $result['bankbalance'];
-                    $currbalance += $currAmount;
-                  
-                    // Updates user's balance
-                    $db->update_query("users", array("bankbalance" => $currbalance), "uid=$currId", 1);
                     $x++;
                 }
              
                 // Adds rows to bank transactions
                 $db->insert_query_multiple("banktransactions", $massinsert);
+
+                $x = 0;
+                while (isset($mybb->input["massid_" . $x]))
+                {
+                    $currId = intval($mybb->input["massid_" . $x]);
+
+                    // Updates user's balance
+                    $balancequery = "SELECT sum(amount) AS sumamt FROM mybb_banktransactions WHERE uid=$currId";
+                    $banksumquery = $db->query($balancequery);
+                    $banksumresult = $db->fetch_array($banksumquery);
+                    if ($banksumresult != NULL) { $bankbalance = intval($banksumresult['sumamt']); }
+                    else { $bankbalance = 0; }
+                    $db->update_query("users", array("bankbalance" => $bankbalance), "uid=$currId", 1);
+
+                    $x++;
+                }
             }
         }
     ?>

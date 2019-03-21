@@ -139,8 +139,6 @@
         {
             verify_post_check($mybb->input["bojopostkey"]);
 
-            echo 'eadsfadshhh';
-
             // If banker undid a transaction.
             if ($isBanker && isset($mybb->input["undotransaction"], $mybb->input["undoid"]) && is_numeric($mybb->input["undoid"]))
             {

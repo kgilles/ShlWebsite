@@ -1,12 +1,12 @@
 <?php
 function getSafeInput($db, $mybb, $safeInputItem) {
-    $safeInput = $mybb->input[$safeInputItem];
+    $safeInput = trim($mybb->input[$safeInputItem]);
     $safeEscape = $db->escape_string($safeInput);
     return $safeEscape;
 }
 
 function getAlpNum($safeEscape) {
-    return trim(preg_replace('/[^A-Za-z0-9\-]/', '', $safeEscape));
+    return trim(preg_replace('/[^a-zA-Z0-9\s]/', '', $safeEscape));
 }
 
 
@@ -38,15 +38,42 @@ function updateBankBalance($db, $userId) {
     return $bankbalanceresult;
 }
 
-function addBankTransaction($db, $userId, $addAmount, $addTitle, $addBankerId) {
-    $db->insert_query("banktransactions", array(
+function addBankTransaction($db, $userId, $addAmount, $addTitle, $addDescription, $addcreatorId) {
+    $addArray = [
         "uid" => $userId,
         "amount" => $addAmount,
         "title" => $addTitle,
-        "bankerid" => $addBankerId));
+        "createdbyuserid" => $addcreatorId,
+    ];
+
+    if($addDescription != null) {
+        $addArray["description"] = $addDescription;
+    }
+
+    $db->insert_query("banktransactions", $addArray);
 }
 
-function displaySuccessTransaction($disName, $disAmount, $disTitle, $displayMessage) {
+function addBankTransferRequest($db, $requestId, $reqtargetId, $reqamount, $reqtitle, $reqdescription) {
+    if ($reqamount != 0 && strlen($reqtitle))
+    {
+        $addArray = [
+            "userrequestid" => $requestId,
+            "usertargetid" => $reqtargetId,
+            "amount" => $reqamount,
+            "title" => $reqtitle,
+        ];
+    
+        if($reqdescription != null) {
+            $addArray["description"] = $reqdescription;
+        }
+    
+        $db->insert_query("banktransferrequests", $addArray);
+        return true;
+    }
+    return false;
+}
+
+function displaySuccessTransaction($disName, $disAmount, $disTitle, $disDescription, $displayMessage) {
     echo '<div class="successSection">';
     echo "<h4>Success: $displayMessage</h4>";
     echo "<table>";
@@ -58,6 +85,10 @@ function displaySuccessTransaction($disName, $disAmount, $disTitle, $displayMess
         echo '<tr><th>Amount</th><td>$'.$disAmount.'</td></tr>';
     }
     echo '<tr><th>Title</th><td>'.$disTitle.'</td></tr>';
+    if($disDescription != null)
+    {
+        echo '<tr><th>Description</th><td>'.$disDescription.'</td></tr>';
+    }
     echo "</table>";
     echo '</div>';
 }
@@ -69,12 +100,12 @@ function displayErrorTransaction() {
     echo '</div>';
 }
 
-function doTransaction($db, $transAmount, $transTitle, $userid, $bankerid, $username, $displayMessage) {
+function doTransaction($db, $transAmount, $transTitle, $description, $userid, $creatorid, $username, $displayMessage) {
     if ($transAmount != 0 && strlen($transTitle))
     {
-        addBankTransaction($db, $userid, $transAmount, $transTitle, $bankerid);
+        addBankTransaction($db, $userid, $transAmount, $transTitle, $description, $creatorid);
         $newbankbalance = updateBankBalance($db, $userid);
-        displaySuccessTransaction($username, $transAmount, $transTitle, $displayMessage);
+        displaySuccessTransaction($username, $transAmount, $transTitle, $description, $displayMessage);
     }
     else {
         displayErrorTransaction();

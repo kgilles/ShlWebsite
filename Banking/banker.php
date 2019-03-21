@@ -150,6 +150,7 @@
                 $currId = getSafeInputNum($db, $mybb, "massid_$x");
                 $currAmount = getSafeInputNum($db, $mybb, "massamount_$x");
                 $currTitle = getSafeInputAlpNum($db, $mybb, "masstitle_$x");
+                $currDescription = getSafeInputAlpNum($db, $mybb, "massdescription_$x");
 
                 if (strlen($currTitle) <= 0 || $currAmount == 0)
                 {
@@ -157,11 +158,17 @@
                     break;
                 }
 
+                if (strlen($currDescription) == 0)
+                {
+                    $currDescription = null;
+                }
+
                 $massinsert[] = [
                     "uid" => $currId,
-                    "bankerid" => $myuid,
+                    "createdbyuserid" => $myuid,
                     "amount" => $currAmount,
-                    "title" => $currTitle
+                    "title" => $currTitle,
+                    "description" => $currDescription
                 ];
                 $x++;
             }
@@ -213,9 +220,11 @@
     <h2>Banker Controls</h2>
     <h4>Mass Update</h4>
     <small>submit a list of usernames separated by either commas or new lines.</small>
-    <form onsubmit="return validateForms()" method="post">
+    <form method="post">
     <textarea name="namelist" rows="8"><?php echo $namelist ?></textarea><br />
     <input type="submit" name="submitnames" value="Get Users" />
+    <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code; ?>" />
+    </form>
     <?php
     if($nameRows != NULL)
     {
@@ -230,8 +239,9 @@
             else { echo '<div class="nameCompare success">'; }
             echo count($namesArray) . ' names entered<br/>' . $nameCount . ' names found';
             echo '</div>';
+            echo '<form onsubmit="return validateForms()" method="post">';
             echo '<table class="namesTable">';
-            echo '<tr><th>username</th><th>amount</th><th>title</th></tr>';
+            echo '<tr><th>username</th><th>amount</th><th>title</th><th>description</th></tr>';
 
             $massIndex = 0;
             while ($namerow = $db->fetch_array($nameRows))
@@ -240,6 +250,7 @@
                 // echo "<td>" . $namerow['uid'] . "</td>";
                 echo '<td><input type="number" id="massamount_' . $massIndex . '" name="massamount_' . $massIndex . '" value="0" /></td>';
                 echo '<td><input type="text" id="masstitle_' . $massIndex . '" name="masstitle_' . $massIndex . '" /></td>';
+                echo '<td><input type="text" id="massdescription_' . $massIndex . '" name="massdescription_' . $massIndex . '" /></td>';
                 echo '<input type="hidden" name="massid_' . $massIndex . '" value="' . $namerow['uid'] . '" />';
                 echo '<input type="hidden" name="massname_' . $massIndex . '" value="' . $namerow['username'] . '" />';
                 if($massIndex === 0)
@@ -251,13 +262,12 @@
             }
             echo '<tr><td colspan="3" style="height: 8px"></td></tr>';
             echo '<tr><td></td><td></td><td><input type="submit" name="submitmassseparate" value="Submit Transactions" /></td></tr>';
-            echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" />';
             echo '</table>';
+            echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" />';
+            echo '</form>';
         }
     }
-    echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" />';
     ?>
-    </form>
     </div>
 
     <script>
@@ -265,17 +275,21 @@
         var i = 0;
         var firstAmount = 0;
         var firstTitle = "";
+        var firstDescription = "";
         while(true) {
             var idAmount = "massamount_" + i;
             var idTitle = "masstitle_" + i;
+            var idDescription = "massdescription_" + i;
             if (document.getElementById(idAmount) !== null) {
                 if (i == 0) {
                     firstAmount = document.getElementById(idAmount).value;
                     firstTitle = document.getElementById(idTitle).value;
+                    firstDescription = document.getElementById(idDescription).value;
                 }
                 else {
                     document.getElementById(idAmount).value = firstAmount;
                     document.getElementById(idTitle).value = firstTitle;
+                    document.getElementById(idDescription).value = firstDescription;
                 }
             }
             else {

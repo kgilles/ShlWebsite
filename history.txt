@@ -5,9 +5,3 @@
 -modified member_profile (x3)
 -added bankerOps.php
 -added mybb_banktransferrequests table
-
-
-
-todo: add transactions after transfer approvals
-add transfer list to banker controls
-add banker logs

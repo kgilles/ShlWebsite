@@ -169,33 +169,19 @@
                 $approverequester = intval($approveresult["userrequestid"]);
                 $approvetarget = intval($approveresult["usertargetid"]);
 
-                $setapprovequery = "UPDATE mybb_banktransferrequests SET bankerapproverid=$myuid, approvaldate=now() WHERE mybb_banktransferrequests.id=$approveid";
-                $db->query($setapprovequery);
+                $bankbalance = acceptTransferRequest($db, $uid, $myuid, $approveid, $approverequester, $approvetarget, $approveamount, $approvetitle, $approvedescription);
+            }
 
-                $requestname = '';
-                $targetname = '';
-                if($uid == $approverequester) {
-                    $namequery = $db->simple_select("users", "username", "uid=$approvetarget", array("limit" => 1));
-                    $nameresult = $db->fetch_array($namequery);
-                    $requestname = $currname;
-                    $targetname = $nameresult['username'];
-                }
-                else if($uid == $approvetarget) {
-                    $namequery = $db->simple_select("users", "username", "uid=$approverequester", array("limit" => 1));
-                    $nameresult = $db->fetch_array($namequery);
-                    $requestname = $nameresult['username'];
-                    $targetname = $currname;
-                }
-
-                $targetbalance = doTransaction($db, $approveamount, $approvetitle, $approvedescription, $approvetarget, $approverequester, $targetname, "Banker Approved Transfer - Target");
-                $requestbalance = doTransaction($db, -$approveamount, $approvetitle, $approvedescription, $approverequester, $approverequester, $requestname, "Banker Approved Transfer - Requester");
-
-                if($uid == $approverequester) {
-                    $bankbalance = $requestbalance;
-                }
-                else if($uid == $approvetarget) {
-                    $bankbalance = $targetbalance;
-                }
+            // If banker approved a transfer.
+            else if ($isBanker && isset($mybb->input["declinetransfer"], $mybb->input["declineid"]))
+            {
+                $declineid = getSafeInputNum($db, $mybb, "declineid");
+            
+                $db->delete_query("banktransferrequests", "id=$declineid");
+    
+                echo '<div class="successSection">';
+                echo '<h4>Successfully declined transaction</h4>';
+                echo '</div>';
             }
 
             // If banker submitted a transaction.
@@ -282,8 +268,8 @@
                 ORDER BY bt.date DESC
                 LIMIT 50";
 
-$bankRows = $db->query($transactionQuery);
-while ($row = $db->fetch_array($bankRows))
+            $bankRows = $db->query($transactionQuery);
+            while ($row = $db->fetch_array($bankRows))
             {
                 $date = new DateTime($row['date']);
                 $transactionLink = '<a href="http://simulationhockey.com/banktransaction.php?id=' . $row['id'] . '">';
@@ -377,6 +363,10 @@ while ($row = $db->fetch_array($bankRows))
                         {
                             echo '<form method="post"><td><input type="submit" name="approvetransfer" value="Accept" /></td>';
                             echo '<input type="hidden" name="approveid" value="'. $row['id'] .'" />';
+                            echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" /></form>';
+    
+                            echo '<form method="post"><td><input type="submit" name="declinetransfer" value="Decline" /></td>';
+                            echo '<input type="hidden" name="declineid" value="'. $row['id'] .'" />';
                             echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" /></form>';
                         }
                         else { echo '<td></td>'; }

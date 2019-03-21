@@ -127,4 +127,28 @@ function getUser($db, $userId) {
     $userquery = $db->simple_select("users", "*", "uid=$userId", array("limit" => 1));
     return $db->fetch_array($userquery);            
 }
+
+function acceptTransferRequest($db, $uid, $bankerid, $approveid, $approverequester, $approvetarget, $approveamount, $approvetitle, $approvedescription) {
+    $setapprovequery = "UPDATE mybb_banktransferrequests SET bankerapproverid=$bankerid, approvaldate=now() WHERE mybb_banktransferrequests.id=$approveid";
+    $db->query($setapprovequery);
+
+    $namequery = $db->simple_select("users", "username", "uid=$approvetarget", array("limit" => 1));
+    $nameresult = $db->fetch_array($namequery);
+    $targetname = $nameresult['username'];
+
+    $namequery = $db->simple_select("users", "username", "uid=$approverequester", array("limit" => 1));
+    $nameresult = $db->fetch_array($namequery);
+    $requestname = $nameresult['username'];
+
+    $targetbalance = doTransaction($db, $approveamount, $approvetitle, $approvedescription, $approvetarget, $approverequester, $targetname, "Banker Approved Transfer - Target");
+    $requestbalance = doTransaction($db, -$approveamount, $approvetitle, $approvedescription, $approverequester, $approverequester, $requestname, "Banker Approved Transfer - Requester");
+
+    if($uid == $approverequester) {
+        return $requestbalance;
+    }
+    else if($uid == $approvetarget) {
+        return  $targetbalance;
+    }
+    return 0;
+}
 ?>

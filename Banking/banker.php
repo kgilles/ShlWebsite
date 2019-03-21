@@ -135,8 +135,35 @@
             ));
         }
 
+        // If banker approved a transfer.
+        else if ($isBanker && isset($mybb->input["approvetransfer"], $mybb->input["approveid"]))
+        {
+            $approveid = getSafeInputNum($db, $mybb, "approveid");
+            $approvequery = $db->simple_select("banktransferrequests", "*", "id=$approveid", array("limit" => 1));
+            $approveresult = $db->fetch_array($approvequery);
+            $approveamount = intval($approveresult["amount"]);
+            $approvetitle = $approveresult["title"];
+            $approvedescription = $approveresult["description"];
+            $approverequester = intval($approveresult["userrequestid"]);
+            $approvetarget = intval($approveresult["usertargetid"]);
+
+            $bankbalance = acceptTransferRequest($db, $uid, $myuid, $approveid, $approverequester, $approvetarget, $approveamount, $approvetitle, $approvedescription);
+        }
+
+        // If banker approved a transfer.
+        else if ($isBanker && isset($mybb->input["declinetransfer"], $mybb->input["declineid"]))
+        {
+            $declineid = getSafeInputNum($db, $mybb, "declineid");
+            
+            $db->delete_query("banktransferrequests", "id=$declineid");
+
+            echo '<div class="successSection">';
+            echo '<h4>Successfully declined transaction</h4>';
+            echo '</div>';
+        }
+
         // Submitted Mass Transactions
-        else if (isset($mybb->input["submitmassseparate"]))
+        else if ($isBanker && isset($mybb->input["submitmassseparate"]))
         {
             // keeps names in text box
             $namelist = trim($mybb->input["namelist"]);
@@ -217,8 +244,7 @@
     ?>
 
     <div class="bojoSection">
-    <h2>Banker Controls</h2>
-    <h4>Mass Update</h4>
+    <h2>Mass Update</h2>
     <small>submit a list of usernames separated by either commas or new lines.</small>
     <form method="post">
     <textarea name="namelist" rows="8"><?php echo $namelist ?></textarea><br />
@@ -331,6 +357,84 @@
         return true;
     }
     </script>
+
+    <div class="bojoSection">
+    <h2>Active Transfer Requests</h2>
+    <?php 
+        // Transfer Requests
+        $transactionQuery = 
+        "SELECT bt.*, utarget.username AS 'utarget', urequester.username AS 'urequester'
+            FROM mybb_banktransferrequests bt
+            LEFT JOIN mybb_users urequester ON bt.userrequestid=urequester.uid
+            LEFT JOIN mybb_users utarget ON bt.usertargetid=utarget.uid
+            WHERE bt.bankerapproverid IS NULL
+            ORDER BY bt.requestdate DESC
+            LIMIT 50";
+
+        $bankRows = $db->query($transactionQuery);
+        $bankRowCount = mysqli_num_rows($bankRows);
+
+        if ($bankRowCount <= 0) {
+            echo '<p>No active transfers</p>';
+        }        
+        else {
+            echo 
+            '<table>
+            <tr>
+            <th>Title</th>
+            <th>Requester</th>
+            <th>Target</th>
+            <th>Amount</th>
+            <th>Date Requested</th>';
+            if ($isBanker) { echo '<th></th><th></th>'; }
+            echo '<th>Description</th>
+            </tr>';
+
+            while ($row = $db->fetch_array($bankRows))
+            {
+                $requestdate = new DateTime($row['datrequestdatee']);
+                $requestdate = $requestdate->format('m/d/y');
+
+                if($row['approvaldate'] === null) {
+                    $approvedate = '';    
+                } else {
+                    $approvedate = new DateTime($row['approvaldate']);
+                    $approvedate = $approvedate->format('m/d/y');
+                }
+
+                $urequesterLink = '<a href="http://simulationhockey.com/playerupdater.php?uid=' . $row['userrequestid'] . '">';
+                $utargetLink = '<a href="http://simulationhockey.com/playerupdater.php?uid=' . $row['usertargetid'] . '">';
+                $amountClass = ($row['amount'] < 0) ? 'negative' : 'positive';
+                $negativeSign = ($row['amount'] < 0) ? '-' : '';
+
+                echo '<tr>';
+                echo '<td>' . $row['title'] . '</a></td>';
+                echo '<td>' . $urequesterLink . $row['urequester'] . '</a></td>';
+                echo '<td>' . $utargetLink . $row['utarget'] . '</a></td>';
+                echo '<td class="' . $amountClass . '">' . $transactionLink . $negativeSign . '$' . number_format(abs($row['amount']), 0) . "</a></td>";
+                echo "<td>" . $requestdate . "</td>";
+                if($isBanker)
+                {
+                    if($row['bankerapproverid'] == null)
+                    {
+                        echo '<form method="post"><td><input type="submit" name="approvetransfer" value="Accept" /></td>';
+                        echo '<input type="hidden" name="approveid" value="'. $row['id'] .'" />';
+                        echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" /></form>';
+
+                        echo '<form method="post"><td><input type="submit" name="declinetransfer" value="Decline" /></td>';
+                        echo '<input type="hidden" name="declineid" value="'. $row['id'] .'" />';
+                        echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" /></form>';
+                    }
+                    else { echo '<td></td>'; }
+                }
+                echo '<td>' . $row['description'] . "</a></td>";
+                echo "</tr>";
+            }
+            echo '</table>';
+        }
+
+    ?>
+    </div>
 
     <?php $db->close; ?>
 

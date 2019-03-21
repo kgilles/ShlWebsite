@@ -10,7 +10,6 @@
             border: 1px solid black; 
             border-radius: 2px;
             padding: 10px; 
-            background: #f3f3f3; 
         }
 
         .bojoSection th,
@@ -61,6 +60,7 @@
             padding: 10px;
             margin-bottom: 15px;
             border: 1px solid black;
+            color black;
         }
 
         .errorSection {
@@ -68,6 +68,7 @@
             padding: 10px;
             margin-bottom: 15px;
             border: 1px solid black;
+            color black;
         }
 
         .successSection th,
@@ -233,7 +234,7 @@
         
         
         <!-- User Information -->
-        <div class="bojoSection">
+        <div class="bojoSection navigation">
         <h2>{$currname}</h2>
         <table>
         <tr><th>Balance</th><td>
@@ -380,7 +381,7 @@
 
         <!-- New Purchase: Only available to the actual user -->
         <if ($uid == $myuid) then>
-            <div class="bojoSection">
+            <div class="bojoSection navigation">
                 <h2>New Purchase</h2>
                 <form method="post">
                 <table>
@@ -397,7 +398,7 @@
 
         <!-- New Transfer Request: Only available when on another user's page -->
         <if ($uid !== $myuid) then>
-            <div class="bojoSection">
+            <div class="bojoSection navigation">
                 <h2>New Transfer Request</h2>
                 <form method="post">
                 <table>
@@ -416,7 +417,7 @@
         <if ($isBanker) then>
 
             <!-- Add a transaction -->
-            <div class="bojoSection">
+            <div class="bojoSection navigation">
             <h2>Banker Controls</h2>
             <h4>Add Transaction</h4>
             <form method="post">

@@ -10,7 +10,6 @@
             border: 1px solid black; 
             border-radius: 2px;
             padding: 10px; 
-            background: #f3f3f3; 
         }
 
         .bojoSection th,
@@ -61,6 +60,7 @@
             padding: 10px;
             margin-bottom: 15px;
             border: 1px solid black;
+            color: black;
         }
 
         .errorSection {
@@ -68,6 +68,8 @@
             padding: 10px;
             margin-bottom: 15px;
             border: 1px solid black;
+            color: black;
+
         }
 
         .successSection h4 {
@@ -243,7 +245,7 @@
     }
     ?>
 
-    <div class="bojoSection">
+    <div class="bojoSection navigation">
     <h2>Mass Update</h2>
     <small>submit a list of usernames separated by either commas or new lines.</small>
     <form method="post">
@@ -358,7 +360,7 @@
     }
     </script>
 
-    <div class="bojoSection">
+    <div class="bojoSection navigation">
     <h2>Active Transfer Requests</h2>
     <?php 
         // Transfer Requests

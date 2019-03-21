@@ -10,7 +10,6 @@
             border: 1px solid black; 
             border-radius: 2px;
             padding: 10px; 
-            background: #f3f3f3; 
         }
 
         .bojoSection th,
@@ -52,10 +51,10 @@
         if ($id > 0) 
         {
             $transactionQuery = 
-            "SELECT bt.*, usr.username AS 'username', banker.username AS 'owner'
+            "SELECT bt.*, usr.username AS 'username', creator.username AS 'owner'
                 FROM mybb_banktransactions bt
                 JOIN mybb_users usr ON bt.uid=usr.uid
-                JOIN mybb_users banker ON bt.bankerid=banker.uid
+                JOIN mybb_users creator ON bt.createdbyuserid=creator.uid
                 WHERE id=$id
                 LIMIT 1";
 
@@ -64,7 +63,7 @@
 
             if ($transaction['uid'] > 0)
             {
-                echo '<div class="bojoSection">';
+                echo '<div class="bojoSection navigation">';
                 echo '<h4>Bank Transaction</h4>';
                 echo '<table>';
                 echo '<tr><th>Title</th><td>' . $transaction['title'] . '</td></tr>';

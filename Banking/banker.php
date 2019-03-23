@@ -101,6 +101,7 @@
     <div class="bojoSection navigation">
     <h2>Banker Portal</h2>
     <p>At a glance view of active requests requiring banker decisions.</p>
+    <p>Links: <a href="http://simulationhockey.com/bankmassupdate.php">Group Updates</a></p>
     </div>
 
     <?php 

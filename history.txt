@@ -5,3 +5,5 @@
 -modified member_profile (x3)
 -added bankerOps.php
 -added mybb_banktransferrequests table
+-added bankmassupdate.php
+-added bankgrouptransaction.php

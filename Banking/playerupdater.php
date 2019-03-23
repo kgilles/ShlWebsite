@@ -254,7 +254,6 @@
         <th>Date</th>
         <th>Made By</th>
         <if $isBanker then><th></th></if>
-        <th>Description</th>
         </tr>
 
         <?php 
@@ -282,13 +281,14 @@
                 echo '<td class="' . $amountClass . '">' . $transactionLink . $negativeSign . '$' . number_format(abs($row['amount']), 0) . "</a></td>";
                 echo "<td>" . $date->format('m/d/y') . "</td>";
                 echo '<td>' . $creatorLink . $row['creator'] . "</a></td>";
+          
                 if($isBanker)
                 {
                     echo '<form method="post"><td><input type="submit" name="undotransaction" value="Undo" /></td>';
                     echo '<form method="post"><input type="hidden" name="undoid" value="'. $row['id'] .'" />';
                     echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" /></form>';
                 }
-                echo '<td>' . $row['description'] . "</a></td>";
+
                 echo "</tr>";
             }
         ?>
@@ -392,7 +392,7 @@
                     <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
                 </table>
                 </form>
-                <p style="margin-bottom: 0px"><em>Write a postive number for a purchase transaction. Contact a banker if there\'s a mistake.</em></p>
+                <p style="margin-bottom: 0px"><em>Write a postive number for a purchase transaction. No approvals necessary.</em></p>
             </div>
         </if>
 

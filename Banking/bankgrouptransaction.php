@@ -119,7 +119,7 @@
         $myuid = $mybb->user['uid'];
 
         $isBanker = checkIfBanker($mybb);
-        $isBanker = true;
+        // $isBanker = true; // TODO: testing
 
         if ($id > 0) 
         {
@@ -263,7 +263,7 @@
             }
             echo '</table>';
 
-            if($isapproved == NULL)
+            if($isBanker && $isapproved == NULL)
             {
                 echo '<p><form method="post">';
                 echo '<input type="submit" name="submitApprove" value="Approve" /> ';

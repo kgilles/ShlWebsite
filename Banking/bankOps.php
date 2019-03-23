@@ -28,23 +28,26 @@ function getSafeNumber($db, $xNumber) {
     return intval(getAlpNum($safeEscape));
 }
 
+function logAction($db, $title, $details) {
+    $db->insert_query("banklogs", array("title" => $title, "details" => $details));
+}
+
 function updateBankBalance($db, $userId) {
-    $balancequery = "SELECT sum(amount) AS sumamt FROM mybb_banktransactions WHERE uid=$userId AND isaccepted=1";
+    $balancequery = "SELECT sum(amount) AS sumamt FROM mybb_banktransactions WHERE uid=$userId";
     $banksumquery = $db->query($balancequery);
     $banksumresult = $db->fetch_array($banksumquery);
     if ($banksumresult != NULL) { $bankbalanceresult = intval($banksumresult['sumamt']); }
     else { $bankbalanceresult = 0; }
-    $db->update_query("users", array("bankbalance" => $bankbalanceresult, "isaccepted" => 1), "uid=$userId", 1);
+    $db->update_query("users", array("bankbalance" => $bankbalanceresult), "uid=$userId", 1);
     return $bankbalanceresult;
 }
 
-function addBankTransaction($db, $userId, $addAmount, $addTitle, $addDescription, $addcreatorId, $isaccepted) {
+function addBankTransaction($db, $userId, $addAmount, $addTitle, $addDescription, $addcreatorId) {
     $addArray = [
         "uid" => $userId,
         "amount" => $addAmount,
         "title" => $addTitle,
-        "createdbyuserid" => $addcreatorId,
-        "isaccepted" => $isaccepted
+        "createdbyuserid" => $addcreatorId
     ];
 
     if($addDescription != null) {
@@ -104,7 +107,7 @@ function displayErrorTransaction() {
 function doTransaction($db, $transAmount, $transTitle, $description, $userid, $creatorid, $username, $displayMessage) {
     if ($transAmount != 0 && strlen($transTitle))
     {
-        addBankTransaction($db, $userid, $transAmount, $transTitle, $description, $creatorid, 1);
+        addBankTransaction($db, $userid, $transAmount, $transTitle, $description, $creatorid);
         $newbankbalance = updateBankBalance($db, $userid);
         displaySuccessTransaction($username, $transAmount, $transTitle, $description, $displayMessage);
     }
@@ -131,7 +134,7 @@ function getUser($db, $userId) {
 
 function acceptTransferRequest($db, $uid, $bankerid, $approveid, $approverequester, $approvetarget, $approveamount, $approvetitle, $approvedescription) {
     $setapprovequery = "UPDATE mybb_banktransferrequests SET bankerapproverid=$bankerid, approvaldate=now() WHERE mybb_banktransferrequests.id=$approveid";
-    $db->query($setapprovequery);
+    $db->write_query($setapprovequery);
 
     $namequery = $db->simple_select("users", "username", "uid=$approvetarget", array("limit" => 1));
     $nameresult = $db->fetch_array($namequery);

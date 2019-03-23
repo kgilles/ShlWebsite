@@ -130,7 +130,7 @@
     if ($myuid <= 0) { echo 'You are not logged in'; exit; }
 
     $isBanker = checkIfBanker($mybb);
-    $isBanker = true; // TODO: remove for testing
+    // $isBanker = false; // TODO: remove for testing
 
     // If a submit button was pressed
     if (isset($mybb->input["bojopostkey"])) 
@@ -282,14 +282,15 @@
         <?php if ($isBanker)
         {
             echo '<h2>Group Transactions</h2>
-            <p>Submit a group transaction. As a banker no approvals are necessary</p>';
+            <p>Submit a group transaction. <strong>As a banker no approvals are necessary</strong></p>';
         }
         else
         {
             echo "<h2>Group Transactions Request</h2>
-            <p>Submit a group transaction. Will require a banker's approval before the transactions can be completed.</p>";
+            <p>Submit a group transaction. <strong style='color: red;'>Will require a banker's approval before the transactions can be completed.</strong></p>";
         }
         ?>
+        <p>First enter a list of user names for the transaction. Then enter amounts for each person. Positive if deposits otherwise negative. Enter Titles and descriptions. Click "Fill the rest" to have the rest of the users copy the first user's information. The group name should summarize the group's transactions, but can usually just be same as the titles for each person.</p>
     </div>
 
     <div class="bojoSection navigation">
@@ -335,7 +336,7 @@
                 $massIndex++;
             }
             echo '<tr><td style="height: 20px"></td></td>';
-            echo '<tr><th>group name:</th><td colspan="2"><input type="text" id="massgroupname" name="massgroupname"" /></td></tr>';
+            echo '<tr><th>transaction group name:</th><td colspan="2"><input type="text" id="massgroupname" name="massgroupname"" /></td></tr>';
             echo '<tr><td style="height: 8px"></td></tr>';
             echo '<tr><td colspan="3"></td><td><input type="submit" name="submitmassseparate" value="Submit Transactions" /></td></tr>';
             echo '</table>';

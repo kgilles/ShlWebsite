@@ -114,7 +114,7 @@
     if ($myuid <= 0) { echo 'You are not logged in'; exit; }
 
     $isBanker = checkIfBanker($mybb);
-    $isBanker = true; // TODO: remove for testing
+    // $isBanker = true; // TODO: remove for testing
 
     // If a submit button was pressed
     if (isset($mybb->input["bojopostkey"])) 

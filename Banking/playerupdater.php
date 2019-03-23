@@ -138,7 +138,7 @@
         }
 
         $isBanker = checkIfBanker($mybb);
-        $isBanker = true; // TODO: remove for testing
+        // $isBanker = true; // TODO: remove for testing
 
         $curruser = getUser($db, $uid);
         $bankbalance = $curruser["bankbalance"];
@@ -157,11 +157,14 @@
                 $undoquery = $db->simple_select("banktransactions", "*", "id=$transid", array("limit" => 1));
                 $undoresult = $db->fetch_array($undoquery);
                 $undoamount = intval($undoresult["amount"]);
+                $undotitle = $undoresult["title"];
                 $undodescription = $undoresult["description"];
+                $undouid = $undoresult["uid"];
                 $db->delete_query("banktransactions", "id=$transid");
 
                 $bankbalance = updateBankBalance($db, $uid);
 
+                logAction($db, "UNDO", "$myuid undid a transaction for $undouid titled $undotitle. The amount was $undoamount. Description: $undodescription");
                 displaySuccessTransaction($currname, $undoamount, $undoresult['title'], $undodescription, "Undo Transaction");
             }
 
@@ -178,14 +181,23 @@
                 $approvetarget = intval($approveresult["usertargetid"]);
 
                 $bankbalance = acceptTransferRequest($db, $uid, $myuid, $approveid, $approverequester, $approvetarget, $approveamount, $approvetitle, $approvedescription);
+                logAction($db, "UNDO", "$myuid approved transfer ($approveid) for $approvetarget titled $approvetitle. The amount was $approveamount to $approvetarget. Description: $approvedescription");
             }
 
-            // If banker approved a transfer.
+            // If banker declined a transfer.
             else if ($isBanker && isset($mybb->input["declinetransfer"], $mybb->input["declineid"]))
             {
                 $declineid = getSafeInputNum($db, $mybb, "declineid");
-            
+                $approvequery = $db->simple_select("banktransferrequests", "*", "id=$declineid", array("limit" => 1));
+                $approveresult = $db->fetch_array($approvequery);
+                $approveamount = intval($approveresult["amount"]);
+                $approvetitle = $approveresult["title"];
+                $approvedescription = $approveresult["description"];
+                $approverequester = intval($approveresult["userrequestid"]);
+                $approvetarget = intval($approveresult["usertargetid"]);
+
                 $db->delete_query("banktransferrequests", "id=$declineid");
+                logAction($db, "UNDO", "$myuid declined transfer for $approvetarget titled $approvetitle. The amount was $approveamount to $approvetarget. Description: $approvedescription");
     
                 echo '<div class="successSection">';
                 echo '<h4>Successfully declined transaction</h4>';
@@ -304,7 +316,57 @@
         </table>
 
         <hr />
-        <h4>Transfer Requests</h4>
+        <h4>Requests Pending Approval</h4>
+
+        <?php 
+            // Transfer Requests
+            $transactionQuery = 
+            "SELECT bt.*, groups.id as 'gid', groups.groupname, groups.requestdate
+                FROM mybb_banktransactionrequests bt
+                LEFT JOIN mybb_banktransactiongroups groups ON bt.groupid=groups.id && groups.isapproved IS NULL
+                WHERE bt.uid=$uid
+                ORDER BY groups.requestdate DESC
+                LIMIT 50";
+
+            $bankRows = $db->query($transactionQuery);
+            $bankRowCount = mysqli_num_rows($bankRows);
+
+            if ($bankRowCount <= 0) {
+                echo '<p>No active requests for this user</p>';
+            }
+            else {
+                echo 
+                '<table>
+                <tr>
+                <th>Title</th>
+                <th>Amount</th>
+                <th>Date Requested</th>
+                <th>Description</th>
+                </tr>';
+
+                while ($row = $db->fetch_array($bankRows))
+                {
+                    $requestdate = new DateTime($row['requestdate']);
+                    $requestdate = $requestdate->format('m/d/y');
+
+                    $grouplink = '<a href="http://simulationhockey.com/bankgrouptransaction.php?id=' . $row['gid'] . '">';
+                    $amountClass = ($row['amount'] < 0) ? 'negative' : 'positive';
+                    $negativeSign = ($row['amount'] < 0) ? '-' : '';
+
+                    echo '<tr>';
+                    echo '<td>' . $grouplink . $row['title'] . '</a></td>';
+                    echo '<td class="' . $amountClass . '">' . $grouplink . $negativeSign . '$' . number_format(abs($row['amount']), 0) . "</a></td>";
+                    echo "<td>" . $requestdate . "</td>";
+                    echo '<td>' . $row['description'] . "</a></td>";
+                    echo "</tr>";
+                }
+                echo '</table>';
+            }
+
+        ?>
+
+        <hr />
+        <h4>Transfers Pending Approval</h4>
 
         <?php 
             // Transfer Requests
@@ -314,7 +376,7 @@
                 LEFT JOIN mybb_users urequester ON bt.userrequestid=urequester.uid
                 LEFT JOIN mybb_users utarget ON bt.usertargetid=utarget.uid
                 LEFT JOIN mybb_users ubanker ON bt.bankerapproverid=ubanker.uid
-                WHERE bt.userrequestid=$uid OR bt.usertargetid=$uid
+                WHERE (bt.userrequestid=$uid OR bt.usertargetid=$uid) AND bankerapproverid IS NULL
                 ORDER BY bt.requestdate DESC
                 LIMIT 50";
 
@@ -322,7 +384,7 @@
             $bankRowCount = mysqli_num_rows($bankRows);
 
             if ($bankRowCount <= 0) {
-                echo '<p>No Transfers related to this user</p>';
+                echo '<p>No active transfer requests for this user</p>';
             }
             else {
                 echo 
@@ -332,16 +394,14 @@
                 <th>Requester</th>
                 <th>Target</th>
                 <th>Amount</th>
-                <th>Date Requested</th>
-                <th>Approved By</th>
-                <th>Approved Date</th>';
-                if ($isBanker) { echo '<th></th>'; }
+                <th>Date Requested</th>';
+                if ($isBanker) { echo '<th></th><th></th>'; }
                 echo '<th>Description</th>
                 </tr>';
 
                 while ($row = $db->fetch_array($bankRows))
                 {
-                    $requestdate = new DateTime($row['datrequestdatee']);
+                    $requestdate = new DateTime($row['requestdate']);
                     $requestdate = $requestdate->format('m/d/y');
 
                     if($row['approvaldate'] === null) {
@@ -363,8 +423,8 @@
                     echo '<td>' . $utargetLink . $row['utarget'] . '</a></td>';
                     echo '<td class="' . $amountClass . '">' . $transactionLink . $negativeSign . '$' . number_format(abs($row['amount']), 0) . "</a></td>";
                     echo "<td>" . $requestdate . "</td>";
-                    echo '<td>' . $ubankerLink . $row['ubanker'] . '</a></td>';
-                    echo "<td>" . $approvedate . "</td>";
+                    // echo '<td>' . $ubankerLink . $row['ubanker'] . '</a></td>';
+                    // echo "<td>" . $approvedate . "</td>";
                     if($isBanker)
                     {
                         if($row['bankerapproverid'] == null)
@@ -377,7 +437,7 @@
                             echo '<input type="hidden" name="declineid" value="'. $row['id'] .'" />';
                             echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" /></form>';
                         }
-                        else { echo '<td></td>'; }
+                        else { echo '<td></td><td></td>'; }
                     }
                     echo '<td>' . $row['description'] . "</a></td>";
                     echo "</tr>";

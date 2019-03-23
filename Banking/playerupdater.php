@@ -102,6 +102,15 @@
             background: #d1f1cf;
         }
 
+        .hideme {
+            display: none;
+        }
+
+        .expandclick {
+            font-size: 12px;
+            font-weight: normal;
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -382,7 +391,8 @@
         <!-- New Purchase: Only available to the actual user -->
         <if ($uid == $myuid) then>
             <div class="bojoSection navigation">
-                <h2>New Purchase</h2>
+                <h2>New Purchase <span class="expandclick" onclick="toggleArea(this, 'purchasearea')">(expand)</span></h2>
+                <div id="purchasearea" class="hideme">
                 <form method="post">
                 <table>
                     <tr><th>Amount</th><td><input type="number" name="purchaseamount" placeholder="Enter amount..." /></td></tr>
@@ -393,13 +403,15 @@
                 </table>
                 </form>
                 <p style="margin-bottom: 0px"><em>Write a postive number for a purchase transaction. No approvals necessary.</em></p>
+                </div>
             </div>
         </if>
 
         <!-- New Transfer Request: Only available when on another user's page -->
         <if ($uid !== $myuid) then>
             <div class="bojoSection navigation">
-                <h2>New Transfer Request</h2>
+                <h2>New Transfer Request <span class="expandclick" onclick="toggleArea(this, 'transferarea')">(expand)</span></h2>
+                <div id="transferarea" class="hideme">
                 <form method="post">
                 <table>
                     <tr><th>Amount</th><td><input type="number" name="requestamount" placeholder="Enter amount..." /></td></tr>
@@ -410,6 +422,7 @@
                 </table>
                 </form>
                 <p style="margin-bottom: 0px"><em>Write a postive number to send to this user. A request will be sent to the bankers who will need to approve all requests.</em></p>
+                </div>
             </div>
         </if>
 
@@ -418,7 +431,8 @@
 
             <!-- Add a transaction -->
             <div class="bojoSection navigation">
-            <h2>Banker Controls</h2>
+            <h2>Banker Controls <span class="expandclick" onclick="toggleArea(this, 'bankerarea')">(expand)</span></h2>
+            <div id="bankerarea" class="hideme">
             <h4>Add Transaction</h4>
             <form method="post">
             <table>
@@ -444,7 +458,24 @@
             <p style="margin-bottom: 0px"><em>Sets the balance to the value, and adds a transaction to get it there.</em></p>
             </form>
             </div>
+            </div>
         </if>
+
+        <script>
+        function toggleArea(spanlink, idToHide)
+        {
+            if(document.getElementById(idToHide).className != 'hideme')
+            {
+                document.getElementById(idToHide).className = 'hideme';
+                spanlink.innerHTML = "(expand)";
+            }
+            else
+            {
+                document.getElementById(idToHide).className = '';
+                spanlink.innerHTML = "(hide)";
+            }
+        }
+        </script>
 
         <?php $db->close; ?>
 

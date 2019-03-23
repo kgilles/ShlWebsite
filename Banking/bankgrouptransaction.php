@@ -131,7 +131,7 @@
                 if ($isBanker && isset($mybb->input["submitApprove"]))
                 {
                     $setapprovequery = "UPDATE mybb_banktransactiongroups SET bankerid=$myuid, isapproved=1, decisiondate=now() WHERE mybb_banktransactiongroups.id=$id";
-                    $db->query($setapprovequery);
+                    $db->write_query($setapprovequery);
 
                     $grouprows = $db->simple_select("banktransactiongroups", "*", "id='$id'", array("limit" => 1));
                     $groupresult = $db->fetch_array($grouprows);
@@ -199,11 +199,22 @@
             $groupBanker = $groupresult['bankerusername'];
             $isapproved = $groupresult['isapproved'];
 
-            $transactionQuery = 
-            "SELECT bt.*, usr.username AS 'username'
-                FROM mybb_banktransactionrequests bt
-                INNER JOIN mybb_users usr ON bt.uid=usr.uid
-                WHERE groupid=$groupid";
+            if ($isapproved == 1)
+            {
+                $transactionQuery = 
+                "SELECT bt.*, usr.username AS 'username'
+                    FROM mybb_banktransactions bt
+                    INNER JOIN mybb_users usr ON bt.uid=usr.uid
+                    WHERE groupid=$groupid";
+            }
+            else
+            {
+                $transactionQuery = 
+                "SELECT bt.*, usr.username AS 'username'
+                    FROM mybb_banktransactionrequests bt
+                    INNER JOIN mybb_users usr ON bt.uid=usr.uid
+                    WHERE groupid=$groupid";
+            }
 
             $query = $db->query($transactionQuery);
 
@@ -227,7 +238,7 @@
             if ($isapproved != NULL)
             {
                 echo '<tr><th>Decided By</th><td>' . $groupBanker . '</td></tr>';
-                $date = new DateTime($groupresult['	decisiondate']);
+                $date = new DateTime($groupresult['decisiondate']);
                 echo '<tr><th>Decision Date</th><td>' . $date->format('m/d/y H:i:s') . '</td></tr>';
             }
 
@@ -248,8 +259,6 @@
                 
                 echo '<td>' . $transaction['title'] . '</td>';
                 echo '<td>' . $transaction['description'] . '</td>';
-
-                $date = new DateTime($transaction['date']);
                 echo '</tr>';
             }
             echo '</table>';

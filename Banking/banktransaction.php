@@ -152,8 +152,8 @@
                 echo '<tr><th>Date</th><td>' . $date->format('m/d/y') . '</td></tr>';
                 echo '<tr><th>Time</th><td>' . $date->format('H:i:s') . '</td></tr>';
 
-                echo '<tr><th>Group*</th><td><a href="' . $puLink . $transaction['groupid'] . '">' . $transaction['groupname'] . '</a></td></tr>';
-                echo '<tr><th>Banker**</th><td><a href="' . $groupLink . $transaction['groupid'] . '">' . $transaction['bankername'] . '</a></td></tr>';
+                echo '<tr><th>Group*</th><td><a href="' . $groupLink . $transaction['groupid'] . '">' . $transaction['groupname'] . '</a></td></tr>';
+                echo '<tr><th>Banker**</th><td><a href="' . $puLink . $transaction['bankerapproverid'] . '">' . $transaction['bankername'] . '</a></td></tr>';
 
                 echo '</table>';
                 echo '<p>* If part of a mass group update.<br />** Only neccessary for transactions that require approval.</p>';

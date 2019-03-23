@@ -98,6 +98,11 @@
 <body>
     {$header}
 
+    <div class="bojoSection navigation">
+    <h2>Banker Portal</h2>
+    <p>At a glance view of active requests requiring banker decisions.</p>
+    </div>
+
     <?php 
     include 'bankerOps.php';
 
@@ -145,7 +150,8 @@
     ?>
 
     <div class="bojoSection navigation">
-    <h2>Active Group Requests</h2>
+    <h2>Group Requests</h2>
+    <h3>Pending Approval</h3>
     <?php 
         // Transfer Requests
         $transactionQuery = 
@@ -192,13 +198,14 @@
     
     <hr />
 
-    <h2>Previous Group Requests</h2>
+    <h3>Review History</h3>
     <?php 
         // Transfer Requests
         $transactionQuery = 
-        "SELECT bt.*, urequester.username AS 'urequester'
+        "SELECT bt.*, urequester.username AS 'urequester', ubanker.username AS 'bankername'
             FROM mybb_banktransactiongroups bt
             LEFT JOIN mybb_users urequester ON bt.creatorid=urequester.uid
+            LEFT JOIN mybb_users ubanker ON bt.bankerid=ubanker.uid
             WHERE bt.isapproved IS NOT NULL
             ORDER BY bt.requestdate DESC
             LIMIT 50";
@@ -217,11 +224,16 @@
             <th>Requester</th>
             <th>Date Requested</th>
             <th>Approved?</th>
+            <th>Banker</th>
+            <th>Date Decided</th>
             </tr>';
 
             while ($row = $db->fetch_array($bankRows))
             {
-                $requestdate = new DateTime($row['datrequestdatee']);
+                $decisiondate = new DateTime($row['decisiondate']);
+                $decisiondate = $decisiondate->format('m/d/y');
+
+                $requestdate = new DateTime($row['requestdate']);
                 $requestdate = $requestdate->format('m/d/y');
                 $requestApproval = intval($row['isapproved']) ? "Yes" : "No";
 
@@ -233,6 +245,8 @@
                 echo '<td>' . $urequesterLink . $row['urequester'] . '</a></td>';
                 echo "<td>" . $requestdate . "</td>";
                 echo '<td>' . $requestApproval . "</td>";
+                echo '<td>' . $row['bankername'] . "</td>";
+                echo '<td>' . $decisiondate . "</td>";
                 echo "</tr>";
             }
             echo '</table>';

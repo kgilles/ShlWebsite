@@ -101,11 +101,11 @@
     <?php 
     include 'bankerOps.php';
 
-    function displaySuccessGroup($groupName, $mybb, $message) {
+    function displaySuccessGroup($groupName, $mybb, $groupid, $message) {
         echo '<div class="successSection">';
         echo '<h4>Success: ' . $message . '</h4>';
         echo '<table>';
-        echo '<tr><th>Group Name</th><td colspan="3">' . $groupName . '</td></tr>';
+        echo '<tr><th>Group Name</th><td colspan="3"><a href="http://simulationhockey.com/bankgrouptransaction.php?id=' . $groupid . '">' . $groupName . '</td></tr>';
         echo '<tr><th>User</th><th>Amount</th></tr>';
         $x = 0;
         while (isset($mybb->input["massid_" . $x]))
@@ -130,7 +130,7 @@
     if ($myuid <= 0) { echo 'You are not logged in'; exit; }
 
     $isBanker = checkIfBanker($mybb);
-    $isBanker = false; // TODO: remove for testing
+    $isBanker = true; // TODO: remove for testing
 
     // If a submit button was pressed
     if (isset($mybb->input["bojopostkey"])) 
@@ -213,17 +213,32 @@
 
             if ($isValid)
             {
-                $groupArray = [
-                    "creatorid" => $myuid,
-                    "groupname" => $groupName
-                ];
+                if ($isBanker)
+                {
+                    $groupArray = [
+                        "creatorid" => $myuid,
+                        "groupname" => $groupName,
+                        "bankerid" => $myuid,
+                        "isapproved" => 1
+                    ];
+                }
+                else
+                {
+                    $groupArray = [
+                        "creatorid" => $myuid,
+                        "groupname" => $groupName
+                    ];
+                }
+
                 $db->insert_query("banktransactiongroups", $groupArray);
     
-                $grouprows = $db->simple_select("banktransactiongroups", "*", "groupname='$groupName'", array("limit" => 1));
+                $grouprows = $db->simple_select("banktransactiongroups", "*", "groupname='$groupName'", array("order_by" => 'requestdate', "order_dir" => 'DESC', "limit" => 1));
                 $groupresult = $db->fetch_array($grouprows);
                 $groupid = intval($groupresult['id']);
                 $groupName = $groupresult['groupname'];
-    
+
+                $db->update_query("banktransactiongroups", array("decisiondate" => $groupresult['requestdate']), "id=$groupid", 1);
+
                 if ($isBanker)
                 {
                     for ($x = 0; $x < count($massinsert); $x++)
@@ -240,17 +255,17 @@
                         updateBankBalance($db, $currId);
                     }
 
-                    displaySuccessGroup($groupName, $mybb, "Mass Banker Deposits");
+                    displaySuccessGroup($groupName, $mybb, $groupid, "Group Banker Transactions Made");
                 }
                 else
                 {
                     for ($x = 0; $x < count($massinsert); $x++)
                     { $massinsert[$x]["groupid"] = $groupid; }
-
+                    
                     // Adds rows to bank transaction request table
                     $db->insert_query_multiple("banktransactionrequests", $massinsert);
 
-                    displaySuccessGroup($groupName, $mybb, "Mass Deposit Request");
+                    displaySuccessGroup($groupName, $mybb, $groupid, "Group Request Made");
                 }
             }
             else
@@ -264,7 +279,17 @@
     ?>
 
     <div class="bojoSection navigation">
-        <h2>Mass Updates: <?php if ($isBanker) { echo 'Banker Direct Transactions'; } else { echo 'Basic Requests'; } ?></h2>
+        <?php if ($isBanker)
+        {
+            echo '<h2>Group Transactions</h2>
+            <p>Submit a group transaction. As a banker no approvals are necessary</p>';
+        }
+        else
+        {
+            echo "<h2>Group Transactions Request</h2>
+            <p>Submit a group transaction. Will require a banker's approval before the transactions can be completed.</p>";
+        }
+        ?>
     </div>
 
     <div class="bojoSection navigation">
@@ -290,8 +315,6 @@
             echo '</div>';
             echo '<form onsubmit="return validateForms()" method="post">';
             echo '<table class="namesTable">';
-            echo '<tr><th>group name:</th><td colspan="2"><input type="text" id="massgroupname" name="massgroupname"" /></td></tr>';
-            echo '<tr><td style="height: 20px"></td></td>';
             echo '<tr><th>username</th><th>amount</th><th>title</th><th>description</th></tr>';
 
             $massIndex = 0;
@@ -311,6 +334,8 @@
                 echo "</tr>";
                 $massIndex++;
             }
+            echo '<tr><td style="height: 20px"></td></td>';
+            echo '<tr><th>group name:</th><td colspan="2"><input type="text" id="massgroupname" name="massgroupname"" /></td></tr>';
             echo '<tr><td style="height: 8px"></td></tr>';
             echo '<tr><td colspan="3"></td><td><input type="submit" name="submitmassseparate" value="Submit Transactions" /></td></tr>';
             echo '</table>';

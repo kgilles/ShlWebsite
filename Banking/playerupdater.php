@@ -12,8 +12,7 @@
 
         include 'bankerOps.php';
 
-        // Gets logged in user
-        $myuid = $mybb->user['uid'];
+        $myuid = getUserId($mybb);
 
         // if not logged in, go away why are you even here
         if ($myuid <= 0) { echo 'You are not logged in'; exit; }

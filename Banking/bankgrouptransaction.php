@@ -16,8 +16,7 @@
             $id = intval($_GET["id"]);
         }
 
-        // Gets current user logged in
-        $myuid = $mybb->user['uid'];
+        $myuid = getUserId($mybb);
 
         $isBanker = checkIfBanker($mybb);
         // $isBanker = true; // TODO: testing

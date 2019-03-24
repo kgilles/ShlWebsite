@@ -26,15 +26,13 @@
 
             echo '<td><a href="http://simulationhockey.com/playerupdater.php?uid=' . $currId . '">'.$currName.'</a></td>';
             echo '<td>$'.$currAmount.'</td></tr>';
-
             $x++;
         }
         echo '</table>';
         echo '</div>';
     }
 
-    // Gets current user logged in
-    $myuid = $mybb->user['uid'];
+    $myuid = getUserId($mybb);
 
     // if not logged in, go away why are you even here
     if ($myuid <= 0) { echo 'You are not logged in'; exit; }

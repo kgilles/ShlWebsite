@@ -42,6 +42,10 @@ function updateBankBalance($db, $userId) {
     return $bankbalanceresult;
 }
 
+function getUserId($mybb) {
+    return $mybb->user['uid'];
+}
+
 function addBankTransaction($db, $userId, $addAmount, $addTitle, $addDescription, $addcreatorId) {
     $addArray = [
         "uid" => $userId,

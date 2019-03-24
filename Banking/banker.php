@@ -17,10 +17,6 @@
     <?php 
     include 'bankerOps.php';
 
-    function getUserId($mybb) {
-        return $mybb->user['uid'];
-    }
-
     $myuid = getUserId($mybb);
 
     // if not logged in, go away why are you even here

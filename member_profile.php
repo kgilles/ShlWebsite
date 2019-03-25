@@ -94,7 +94,7 @@
                         $curruser = $db->fetch_array($userquery);
                         $bankbalance = intval($curruser["bankbalance"]);
                         
-                        echo '<a href="http://simulationhockey.com/playerupdater.php?uid=' . $uid . '">'; 
+                        echo '<a href="http://simulationhockey.com/bankaccount.php?uid=' . $uid . '">'; 
                         if($bankbalance < 0) { echo '-'; } 
                         echo '$' . number_format(abs($bankbalance), 0);
                         echo '</a>';

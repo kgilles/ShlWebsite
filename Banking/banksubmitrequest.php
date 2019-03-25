@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>SHL Hockey -> Bank Mass Update</title>
+    <title>SHL Hockey -> Submit Bank Transactions</title>
     {$headerinclude}
 </head>
 

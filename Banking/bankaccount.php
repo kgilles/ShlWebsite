@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>SHL Hockey -> Player Updater</title>
+    <title>SHL Hockey -> Bank Account</title>
     {$headerinclude}
 </head>
 
@@ -24,7 +24,7 @@
         }
         else {
             // ... or redirects to your own page
-            header('Location: http://simulationhockey.com/playerupdater.php?uid='.$myuid);
+            header('Location: http://simulationhockey.com/bankaccount.php?uid='.$myuid);
         }
 
         $isBanker = checkIfBanker($mybb);
@@ -183,8 +183,8 @@
             {
                 $date = new DateTime($row['date']);
                 $transactionLink = '<a href="http://simulationhockey.com/banktransaction.php?id=' . $row['id'] . '">';
-                $creatorLink = '<a href="http://simulationhockey.com/playerupdater.php?uid=' . $row['createdbyuserid'] . '">';
-                $bankerLink = '<a href="http://simulationhockey.com/playerupdater.php?uid=' . $row['bankerapprovalid'] . '">';
+                $creatorLink = '<a href="http://simulationhockey.com/bankaccount.php?uid=' . $row['createdbyuserid'] . '">';
+                $bankerLink = '<a href="http://simulationhockey.com/bankaccount.php?uid=' . $row['bankerapprovalid'] . '">';
                 $amountClass = ($row['amount'] < 0) ? 'negative' : 'positive';
                 $negativeSign = ($row['amount'] < 0) ? '-' : '';
 
@@ -240,7 +240,7 @@
                     $requestdate = new DateTime($row['requestdate']);
                     $requestdate = $requestdate->format('m/d/y');
 
-                    $grouplink = '<a href="http://simulationhockey.com/bankgrouptransaction.php?id=' . $row['gid'] . '">';
+                    $grouplink = '<a href="http://simulationhockey.com/bankrequest.php?id=' . $row['gid'] . '">';
                     $amountClass = ($row['amount'] < 0) ? 'negative' : 'positive';
                     $negativeSign = ($row['amount'] < 0) ? '-' : '';
 
@@ -302,9 +302,9 @@
                         $approvedate = $approvedate->format('m/d/y');
                     }
 
-                    $urequesterLink = '<a href="http://simulationhockey.com/playerupdater.php?uid=' . $row['userrequestid'] . '">';
-                    $utargetLink = '<a href="http://simulationhockey.com/playerupdater.php?uid=' . $row['usertargetid'] . '">';
-                    $ubankerLink = '<a href="http://simulationhockey.com/playerupdater.php?uid=' . $row['bankerapprovalid'] . '">';
+                    $urequesterLink = '<a href="http://simulationhockey.com/bankaccount.php?uid=' . $row['userrequestid'] . '">';
+                    $utargetLink = '<a href="http://simulationhockey.com/bankaccount.php?uid=' . $row['usertargetid'] . '">';
+                    $ubankerLink = '<a href="http://simulationhockey.com/bankaccount.php?uid=' . $row['bankerapprovalid'] . '">';
                     $amountClass = ($row['amount'] < 0) ? 'negative' : 'positive';
                     $negativeSign = ($row['amount'] < 0) ? '-' : '';
 

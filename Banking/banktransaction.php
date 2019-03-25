@@ -10,6 +10,8 @@
 
     <?php 
 
+        include 'bankerOps.php';
+
         $id = 0;
         if (isset($_GET["id"]) && is_numeric($_GET["id"])) {
             $id = intval($_GET["id"]);
@@ -50,15 +52,15 @@
                 $ba3Link = getBankAccountLink($transaction['bankerapproverid']);
                 $requestLink = getBankRequestLink($transaction['groupid']);
 
-                echo '<tr><th>User</th><td><a href="' . $ba1Link . $transaction['uid'] . '">' . $transaction['username'] . '</a></td></tr>';
-                echo '<tr><th>Made by</th><td><a href="' . $ba2Link . $transaction['createdbyuserid'] . '">' . $transaction['owner'] . '</a></td></tr>';
+                echo '<tr><th>User</th><td><a href="' . $ba1Link . '">' . $transaction['username'] . '</a></td></tr>';
+                echo '<tr><th>Made by</th><td><a href="' . $ba2Link . '">' . $transaction['owner'] . '</a></td></tr>';
 
                 $date = new DateTime($transaction['date']);
                 echo '<tr><th>Date</th><td>' . $date->format('m/d/y') . '</td></tr>';
                 echo '<tr><th>Time</th><td>' . $date->format('H:i:s') . '</td></tr>';
 
-                echo '<tr><th>Group*</th><td><a href="' . $requestLink . $transaction['groupid'] . '">' . $transaction['groupname'] . '</a></td></tr>';
-                echo '<tr><th>Banker**</th><td><a href="' . $ba3Link . $transaction['bankerapproverid'] . '">' . $transaction['bankername'] . '</a></td></tr>';
+                echo '<tr><th>Group*</th><td><a href="' . $requestLink . '">' . $transaction['groupname'] . '</a></td></tr>';
+                echo '<tr><th>Banker**</th><td><a href="' . $ba3Link . '">' . $transaction['bankername'] . '</a></td></tr>';
 
                 echo '</table>';
                 echo '<p>* If part of a mass group update.<br />** Only neccessary for transactions that require approval.</p>';

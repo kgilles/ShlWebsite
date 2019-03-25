@@ -192,7 +192,7 @@
 
                 echo '<tr>';
                 echo "<td>$transactionLink" . $row['title'] . '</a></td>';
-                echo "<td class='$amountClass'>$transactionLink" . $negativeSign . '$' . $$numberformat . "</a></td>";
+                echo "<td class='$amountClass'>$transactionLink" . $negativeSign . '$' . $numberformat . "</a></td>";
                 echo "<td>$dateformat</td>";
                 echo "<td>$creatorLink" . $row['creator'] . "</a></td>";
           
@@ -318,7 +318,7 @@
                     echo "<td>$title</td>";
                     echo "<td>$urequesterLink" . $row['urequester'] . "</a></td>";
                     echo "<td>$utargetLink" . $row['utarget'] . "</a></td>";
-                    echo "<td class=\"$amountClass\">$negativeSign$$amountformat</td>";
+                    echo "<td class=\"$amountClass\">$negativeSign . '$' . $amountformat</td>";
                     echo "<td>$requestdate</td>";
 
                     if($isBanker)

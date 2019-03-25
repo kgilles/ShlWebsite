@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>SHL Hockey -> Banker</title>
+    <title>SHL Hockey -> Bank Summary</title>
     {$headerinclude}
 </head>
 
@@ -95,8 +95,8 @@
                 $urequesterLink = getBankAccountLink($row['creatorid']);
 
                 echo '<tr>';
-                echo '<td>' . $ugroupLink . $row['groupname'] . '</a></td>';
-                echo '<td>' . $urequesterLink . $row['urequester'] . '</a></td>';
+                echo '<td><a href="' . $ugroupLink . '">' . $row['groupname'] . '</a></td>';
+                echo '<td><a href="' . $urequesterLink . '">' . $row['urequester'] . '</a></td>';
                 echo "<td>" . $requestdate . "</td>";
                 echo '<td>' . $row['description'] . "</a></td>";
                 echo "</tr>";
@@ -151,8 +151,8 @@
                 $urequesterLink = getBankAccountLink($row['creatorid']);
 
                 echo '<tr>';
-                echo '<td>' . $ugroupLink . $row['groupname'] . '</a></td>';
-                echo '<td>' . $urequesterLink . $row['urequester'] . '</a></td>';
+                echo '<td><a href="' . $ugroupLink . '">' . $row['groupname'] . '</a></td>';
+                echo '<td><a href="' . $urequesterLink . '">' . $row['urequester'] . '</a></td>';
                 echo "<td>" . $requestdate . "</td>";
                 echo '<td>' . $requestApproval . "</td>";
                 echo '<td>' . $row['bankername'] . "</td>";
@@ -216,8 +216,8 @@
 
                 echo '<tr>';
                 echo '<td>' . $row['title'] . '</a></td>';
-                echo '<td>' . $urequesterLink . $row['urequester'] . '</a></td>';
-                echo '<td>' . $utargetLink . $row['utarget'] . '</a></td>';
+                echo '<td><a href="' . $urequesterLink . '">' . $row['urequester'] . '</a></td>';
+                echo '<td><a href="' . $utargetLink . '">' . $row['utarget'] . '</a></td>';
                 echo '<td class="' . $amountClass . '">' . $transactionLink . $negativeSign . '$' . number_format(abs($row['amount']), 0) . "</a></td>";
                 echo "<td>" . $requestdate . "</td>";
                 if($isBanker)

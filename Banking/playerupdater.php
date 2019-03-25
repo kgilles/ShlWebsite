@@ -43,7 +43,7 @@
             if ($isBanker && isset($mybb->input["undotransaction"], $mybb->input["undoid"]) && is_numeric($mybb->input["undoid"]))
             {
                 // Removes transaction row
-                $transid = getSafeInputNum($db, $mybb, "undoid");
+                $transid = getSafeNumber($db, $mybb->input["undoid"]);
                 $undoquery = $db->simple_select("banktransactions", "*", "id=$transid", array("limit" => 1));
                 $undoresult = $db->fetch_array($undoquery);
                 $undoamount = intval($undoresult["amount"]);
@@ -61,7 +61,7 @@
             // If banker approved a transfer.
             else if ($isBanker && isset($mybb->input["approvetransfer"], $mybb->input["approveid"]))
             {
-                $approveid = getSafeInputNum($db, $mybb, "approveid");
+                $approveid = getSafeNumber($db, $mybb->input["approveid"]);
                 $approvequery = $db->simple_select("banktransferrequests", "*", "id=$approveid", array("limit" => 1));
                 $approveresult = $db->fetch_array($approvequery);
                 $approveamount = intval($approveresult["amount"]);
@@ -77,7 +77,7 @@
             // If banker declined a transfer.
             else if ($isBanker && isset($mybb->input["declinetransfer"], $mybb->input["declineid"]))
             {
-                $declineid = getSafeInputNum($db, $mybb, "declineid");
+                $declineid = getSafeNumber($db, $mybb->input["declineid"]);
                 $approvequery = $db->simple_select("banktransferrequests", "*", "id=$declineid", array("limit" => 1));
                 $approveresult = $db->fetch_array($approvequery);
                 $approveamount = intval($approveresult["amount"]);
@@ -97,38 +97,49 @@
             // If banker submitted a transaction.
             else if ($isBanker && isset($mybb->input["submittransaction"], $mybb->input["transactionamount"]))
             {
-                $transAmount = getSafeInputNum($db, $mybb, "transactionamount");
-                $transTitle = getSafeInputAlpNum($db, $mybb, "transactiontitle");
-                $transDescription = getSafeInputAlpNum($db, $mybb, "transactiondescription");
+                $transAmount = getSafeNumber($db, $mybb->input["transactionamount"]);
+                $transTitle = getSafeAlpNum($db, $mybb->input["transactiontitle"]);
+                $transDescription = getSafeAlpNum($db, $mybb->input["transactiondescription"]);
                 if(strlen($transDescription) == 0) $transDescription = null;
+
                 $bankbalance = doTransaction($db, $transAmount, $transTitle, $transDescription, $uid, $myuid, $currname, "Banker Transaction");
             }
 
             // If a banker submitted a balance.
             else if ($isBanker && isset($mybb->input["submitbalance"], $mybb->input["balanceamount"]))
             {
-                $transAmount = getSafeInputNum($db, $mybb, "balanceamount") - $bankbalance;
+                $transAmount = getSafeNumber($db, $mybb->input["balanceamount"]) - $bankbalance;
                 $transTitle = "BALANCE AUDIT";
                 $transDescription = null;
+
                 $bankbalance = doTransaction($db, $transAmount, $transTitle, $transDescription, $uid, $myuid, $currname, "Banker Setting Balance");
             }
 
             // If the user submitted a transaction himself.
             else if (isset($mybb->input["submitpurchase"], $mybb->input["purchaseamount"]))
             {
-                $transAmount = -abs(getSafeInputNum($db, $mybb, "purchaseamount"));
-                $transTitle = getSafeInputAlpNum($db, $mybb, "purchasetitle");
-                $transDescription = getSafeInputAlpNum($db, $mybb, "purchasedescription");
+                $transAmount = -abs(getSafeNumber($db, $mybb->input["purchaseamount"]));
+                $transTitle = getSafeAlpNum($db, $mybb->input["purchasetitle"]);
+                $transDescription = getSafeAlpNum($db, $mybb->input["purchasedescription"]);
                 if(strlen($transDescription) == 0) { $transDescription = null; }
-                $bankbalance = doTransaction($db, $transAmount, $transTitle, $transDescription, $uid, $myuid, $currname, "User Purchase");
+
+                if ($transAmount != 0 && strlen($transTitle))
+                {
+                    $bankbalance = addBankTransaction($db, $userid, $transAmount, $transTitle, $description, $creatorid);
+                    displaySuccessTransaction($currname, $transAmount, $transTitle, $description, "User Purchase");
+                }
+                else
+                {
+                    displayErrorTransaction();
+                }
             }
 
             // If user submitted a transfer request for another user.
             else if (isset($mybb->input["submitrequest"], $mybb->input["requestamount"]))
             {
-                $transAmount = abs(getSafeInputNum($db, $mybb, "requestamount"));
-                $transTitle = getSafeInputAlpNum($db, $mybb, "requesttitle");
-                $transDescription = getSafeInputAlpNum($db, $mybb, "requestdescription");
+                $transAmount = -abs(getSafeNumber($db, $mybb->input["requestamount"]));
+                $transTitle = getSafeAlpNum($db, $mybb->input["requesttitle"]);
+                $transDescription = getSafeAlpNum($db, $mybb->input["requestdescription"]);
                 if(strlen($transDescription) == 0) { $transDescription = null; }
 
                 if ($transAmount != 0 && strlen($transTitle))

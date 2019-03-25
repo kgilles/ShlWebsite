@@ -33,7 +33,7 @@
         // If banker approved a transfer.
         if ($isBanker && isset($mybb->input["approvetransfer"], $mybb->input["approveid"]))
         {
-            $approveid = getSafeInputNum($db, $mybb, "approveid");
+            $approveid = getSafeNumber($db, $mybb->input["approveid"]);
             $approvequery = $db->simple_select("banktransferrequests", "*", "id=$approveid", array("limit" => 1));
             $approveresult = $db->fetch_array($approvequery);
             $approveamount = intval($approveresult["amount"]);
@@ -48,7 +48,7 @@
         // If banker declined a transfer.
         else if ($isBanker && isset($mybb->input["declinetransfer"], $mybb->input["declineid"]))
         {
-            $declineid = getSafeInputNum($db, $mybb, "declineid");
+            $declineid = getSafeNumber($db, $mybb->input["declineid"]);
             
             $db->delete_query("banktransferrequests", "id=$declineid");
 

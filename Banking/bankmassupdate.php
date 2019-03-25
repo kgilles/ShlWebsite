@@ -77,7 +77,7 @@
 
             $isValid = true;
 
-            $groupName = getSafeInputAlpNum($db, $mybb, "massgroupname");
+            $declineid = getSafeAlpNum($db, $mybb->input["massgroupname"]);
             if(strlen($groupName) <= 0)
             {
                 $isValid = false;
@@ -87,10 +87,10 @@
             $massinsert = array();
             while (isset($mybb->input["massid_" . $x]))
             {
-                $currId = getSafeInputNum($db, $mybb, "massid_$x");
-                $currAmount = getSafeInputNum($db, $mybb, "massamount_$x");
-                $currTitle = getSafeInputAlpNum($db, $mybb, "masstitle_$x");
-                $currDescription = getSafeInputAlpNum($db, $mybb, "massdescription_$x");
+                $currId = getSafeNumber($db, $mybb->input["massid_$x"]);
+                $currAmount = getSafeNumber($db, $mybb->input["massamount_$x"]);
+                $currTitle = getSafeAlpNum($db, $mybb->input["masstitle_$x"]);
+                $currDescription = getSafeAlpNum($db, $mybb->input["massdescription_$x"]);
 
                 if (strlen($currTitle) <= 0 || $currAmount == 0) { $isValid = false; break; }
                 if (strlen($currDescription) == 0) { $currDescription = null; }

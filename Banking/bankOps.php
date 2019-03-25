@@ -1,31 +1,33 @@
 <?php
-function getSafeInput($db, $mybb, $safeInputItem) {
-    $safeInput = trim($mybb->input[$safeInputItem]);
-    $safeEscape = $db->escape_string($safeInput);
-    return $safeEscape;
+function getAlpNum($inputText) {
+    return trim(preg_replace('/[^a-zA-Z0-9\s]/', '', $inputText));
 }
 
-function getAlpNum($safeEscape) {
-    return trim(preg_replace('/[^a-zA-Z0-9\s]/', '', $safeEscape));
+function getSafeString($db, $inputText) {
+    return trim($db->escape_string($inputText));
 }
 
-
-function getSafeInputAlpNum($db, $mybb, $safeInputItem) {
-    $safeEscape = getSafeInput($db, $mybb, $safeInputItem);
-    return getAlpNum($safeEscape);
+function getSafeNumber($db, $inputText) {
+    $safeInput = getSafeString($db, $inputText);
+    return intval(getAlpNum($safeInput));
 }
 
-function getSafeInputNum($db, $mybb, $safeInputItem) {
-    return intval(getSafeInputAlpNum($db, $mybb, $safeInputItem));
+function getSafeAlpNum($db, $inputText) {
+    $safeInput = getSafeString($db, $inputText);
+    return getAlpNum($safeInput);
 }
 
-function getEscapeString($db, $safeInputItem) {
-    return $db->escape_string($safeInputItem);
+function checkIfBanker($mybb) {
+    // Banker id is 13 as of me writing this.
+    $groupstring = $mybb->user['usergroup'] . ',' . $mybb->user['additionalgroups'];
+    $groups = explode(",", $groupstring);
+    return in_array("13", $groups);
 }
 
-function getSafeNumber($db, $xNumber) {
-    $safeEscape = $db->escape_string($xNumber);
-    return intval(getAlpNum($safeEscape));
+function getUser($db, $userId, $columns = "*") {
+    // Gets user from DB.
+    $userquery = $db->simple_select("users", $columns, "uid=$userId", array("limit" => 1));
+    return $db->fetch_array($userquery);            
 }
 
 function logAction($db, $title, $details) {
@@ -59,6 +61,9 @@ function addBankTransaction($db, $userId, $addAmount, $addTitle, $addDescription
     }
 
     $db->insert_query("banktransactions", $addArray);
+
+    $newbankbalance = updateBankBalance($db, $userId);
+    return $newbankbalance;
 }
 
 function addBankTransferRequest($db, $requestId, $reqtargetId, $reqamount, $reqtitle, $reqdescription) {
@@ -79,6 +84,44 @@ function addBankTransferRequest($db, $requestId, $reqtargetId, $reqamount, $reqt
         return true;
     }
     return false;
+}
+
+function doTransaction($db, $transAmount, $transTitle, $description, $userid, $creatorid, $username, $displayMessage) {
+    if ($transAmount != 0 && strlen($transTitle) > 0)
+    {
+        addBankTransaction($db, $userid, $transAmount, $transTitle, $description, $creatorid);
+        $newbankbalance = updateBankBalance($db, $userid);
+        displaySuccessTransaction($username, $transAmount, $transTitle, $description, $displayMessage);
+    }
+    else {
+        displayErrorTransaction();
+        $newbankbalance = null;
+    }
+
+    return $newbankbalance;
+}
+
+function acceptTransferRequest($db, $uid, $bankerid, $approveid, $approverequester, $approvetarget, $approveamount, $approvetitle, $approvedescription) 
+{
+    // Sets transfer request to accepted
+    $setapprovequery = "UPDATE mybb_banktransferrequests SET bankerapproverid=$bankerid, approvaldate=now() WHERE mybb_banktransferrequests.id=$approveid";
+    $db->write_query($setapprovequery);
+
+    // Gets Target User
+    $targetUser = getUser($db, $approvetarget, "username");
+    $targetname = $targetUser['username'];
+
+    // Gets Approving Banker
+    $requestUser = getUser($db, $approvetarget, "username");
+    $requestname = $requestUser['username'];
+
+    // Adds transactions and updates the balances
+    $targetbalance = doTransaction($db, $approveamount, $approvetitle, $approvedescription, $approvetarget, $approverequester, $targetname, "Banker Approved Transfer - Target");
+    $requestbalance = doTransaction($db, -$approveamount, $approvetitle, $approvedescription, $approverequester, $approverequester, $requestname, "Banker Approved Transfer - Requester");
+
+    if ($uid == $approverequester) { return $requestbalance; }
+    else if ($uid == $approvetarget) { return  $targetbalance; }
+    return 0;
 }
 
 function displaySuccessTransaction($disName, $disAmount, $disTitle, $disDescription, $displayMessage) {
@@ -106,57 +149,5 @@ function displayErrorTransaction() {
     echo "<h4>Error</h4>";
     echo '<p>Invalid arguments for the transaction</p>';
     echo '</div>';
-}
-
-function doTransaction($db, $transAmount, $transTitle, $description, $userid, $creatorid, $username, $displayMessage) {
-    if ($transAmount != 0 && strlen($transTitle))
-    {
-        addBankTransaction($db, $userid, $transAmount, $transTitle, $description, $creatorid);
-        $newbankbalance = updateBankBalance($db, $userid);
-        displaySuccessTransaction($username, $transAmount, $transTitle, $description, $displayMessage);
-    }
-    else {
-        displayErrorTransaction();
-        $newbankbalance = null;
-    }
-
-    return $newbankbalance;
-}
-
-function checkIfBanker($mybb) {
-    // Banker id is 13 as of me writing this.
-    $groupstring = $mybb->user['usergroup'] . ',' . $mybb->user['additionalgroups'];
-    $groups = explode(",", $groupstring);
-    return in_array("13", $groups);
-}
-
-function getUser($db, $userId) {
-    // Gets user from DB.
-    $userquery = $db->simple_select("users", "*", "uid=$userId", array("limit" => 1));
-    return $db->fetch_array($userquery);            
-}
-
-function acceptTransferRequest($db, $uid, $bankerid, $approveid, $approverequester, $approvetarget, $approveamount, $approvetitle, $approvedescription) {
-    $setapprovequery = "UPDATE mybb_banktransferrequests SET bankerapproverid=$bankerid, approvaldate=now() WHERE mybb_banktransferrequests.id=$approveid";
-    $db->write_query($setapprovequery);
-
-    $namequery = $db->simple_select("users", "username", "uid=$approvetarget", array("limit" => 1));
-    $nameresult = $db->fetch_array($namequery);
-    $targetname = $nameresult['username'];
-
-    $namequery = $db->simple_select("users", "username", "uid=$approverequester", array("limit" => 1));
-    $nameresult = $db->fetch_array($namequery);
-    $requestname = $nameresult['username'];
-
-    $targetbalance = doTransaction($db, $approveamount, $approvetitle, $approvedescription, $approvetarget, $approverequester, $targetname, "Banker Approved Transfer - Target");
-    $requestbalance = doTransaction($db, -$approveamount, $approvetitle, $approvedescription, $approverequester, $approverequester, $requestname, "Banker Approved Transfer - Requester");
-
-    if($uid == $approverequester) {
-        return $requestbalance;
-    }
-    else if($uid == $approvetarget) {
-        return  $targetbalance;
-    }
-    return 0;
 }
 ?>

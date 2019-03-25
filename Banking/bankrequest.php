@@ -147,7 +147,7 @@
 
             while($transaction = $db->fetch_array($query))
             {
-                $userlink = '<a href="http://simulationhockey.com/playerupdater.php?uid=' . $transaction['uid'] . '">';
+                $userlink = '<a href="' . getBankAccountLink($transaction['uid']) . '">';
                 echo '<td>' . $userlink . $transaction['username'] . '</a></td>';
                 
                 if ($transaction['amount'] < 0) {

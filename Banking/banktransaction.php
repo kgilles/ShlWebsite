@@ -45,18 +45,20 @@
                     echo "<tr><th>Amount</th><td class='positive'>$" . number_format($transaction['amount'], 0) . "</td></tr>";
                 }
 
-                $puLink = "http://simulationhockey.com/playerupdater.php?uid=";
-                $groupLink = "http://simulationhockey.com/bankgrouptransaction.php?id=";
+                $ba1Link = getBankAccountLink($transaction['uid']);
+                $ba2Link = getBankAccountLink($transaction['createdbyuserid']);
+                $ba3Link = getBankAccountLink($transaction['bankerapproverid']);
+                $requestLink = getBankRequestLink($transaction['groupid']);
 
-                echo '<tr><th>User</th><td><a href="' . $puLink . $transaction['uid'] . '">' . $transaction['username'] . '</a></td></tr>';
-                echo '<tr><th>Made by</th><td><a href="' . $puLink . $transaction['createdbyuserid'] . '">' . $transaction['owner'] . '</a></td></tr>';
+                echo '<tr><th>User</th><td><a href="' . $ba1Link . $transaction['uid'] . '">' . $transaction['username'] . '</a></td></tr>';
+                echo '<tr><th>Made by</th><td><a href="' . $ba2Link . $transaction['createdbyuserid'] . '">' . $transaction['owner'] . '</a></td></tr>';
 
                 $date = new DateTime($transaction['date']);
                 echo '<tr><th>Date</th><td>' . $date->format('m/d/y') . '</td></tr>';
                 echo '<tr><th>Time</th><td>' . $date->format('H:i:s') . '</td></tr>';
 
-                echo '<tr><th>Group*</th><td><a href="' . $groupLink . $transaction['groupid'] . '">' . $transaction['groupname'] . '</a></td></tr>';
-                echo '<tr><th>Banker**</th><td><a href="' . $puLink . $transaction['bankerapproverid'] . '">' . $transaction['bankername'] . '</a></td></tr>';
+                echo '<tr><th>Group*</th><td><a href="' . $requestLink . $transaction['groupid'] . '">' . $transaction['groupname'] . '</a></td></tr>';
+                echo '<tr><th>Banker**</th><td><a href="' . $ba3Link . $transaction['bankerapproverid'] . '">' . $transaction['bankername'] . '</a></td></tr>';
 
                 echo '</table>';
                 echo '<p>* If part of a mass group update.<br />** Only neccessary for transactions that require approval.</p>';

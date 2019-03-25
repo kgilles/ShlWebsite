@@ -15,7 +15,9 @@
         echo '<div class="successSection">';
         echo '<h4>Success: ' . $message . '</h4>';
         echo '<table>';
-        echo '<tr><th>Group Name</th><td colspan="3"><a href="http://simulationhockey.com/bankgrouptransaction.php?id=' . $groupid . '">' . $groupName . '</td></tr>';
+
+        $requestlink = getBankRequestLink($groupid);
+        echo '<tr><th>Group Name</th><td colspan="3">' . $requestlink . $groupName . '</a></td></tr>';
         echo '<tr><th>User</th><th>Amount</th></tr>';
         $x = 0;
         while (isset($mybb->input["massid_" . $x]))
@@ -23,9 +25,10 @@
             $currName = $mybb->input["massname_" . $x];
             $currId = $mybb->input["massid_" . $x];
             $currAmount = $mybb->input["massamount_" . $x];
+            $accountlink = getBankAccountLink($currId);
 
-            echo '<td><a href="http://simulationhockey.com/playerupdater.php?uid=' . $currId . '">'.$currName.'</a></td>';
-            echo '<td>$'.$currAmount.'</td></tr>';
+            echo '<td>' . $accountlink . $currName . '</a></td>';
+            echo '<td>$' . $currAmount . '</td></tr>';
             $x++;
         }
         echo '</table>';

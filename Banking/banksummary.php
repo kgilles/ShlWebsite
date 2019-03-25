@@ -11,7 +11,7 @@
     <div class="bojoSection navigation">
     <h2>Banker Portal</h2>
     <p>At a glance view of active requests requiring banker decisions.</p>
-    <p>Links: <a href="http://simulationhockey.com/bankmassupdate.php">Group Updates</a></p>
+    <p>Links: <a href="http://simulationhockey.com/banksubmitrequest.php">Submit Request</a></p>
     </div>
 
     <?php 
@@ -91,8 +91,8 @@
                 $requestdate = new DateTime($row['datrequestdatee']);
                 $requestdate = $requestdate->format('m/d/y');
 
-                $ugroupLink = '<a href="http://simulationhockey.com/bankgrouptransaction.php?id=' . $row['id'] . '">';
-                $urequesterLink = '<a href="http://simulationhockey.com/playerupdater.php?uid=' . $row['creatorid'] . '">';
+                $ugroupLink =  getBankRequestLink($row['id']);
+                $urequesterLink = getBankAccountLink($row['creatorid']);
 
                 echo '<tr>';
                 echo '<td>' . $ugroupLink . $row['groupname'] . '</a></td>';
@@ -147,8 +147,8 @@
                 $requestdate = $requestdate->format('m/d/y');
                 $requestApproval = intval($row['isapproved']) ? "Yes" : "No";
 
-                $ugroupLink = '<a href="http://simulationhockey.com/bankgrouptransaction.php?id=' . $row['id'] . '">';
-                $urequesterLink = '<a href="http://simulationhockey.com/playerupdater.php?uid=' . $row['creatorid'] . '">';
+                $ugroupLink =  getBankRequestLink($row['id']);
+                $urequesterLink = getBankAccountLink($row['creatorid']);
 
                 echo '<tr>';
                 echo '<td>' . $ugroupLink . $row['groupname'] . '</a></td>';
@@ -209,8 +209,8 @@
                     $approvedate = $approvedate->format('m/d/y');
                 }
 
-                $urequesterLink = '<a href="http://simulationhockey.com/playerupdater.php?uid=' . $row['userrequestid'] . '">';
-                $utargetLink = '<a href="http://simulationhockey.com/playerupdater.php?uid=' . $row['usertargetid'] . '">';
+                $urequesterLink = getBankAccountLink($row['userrequestid']);
+                $utargetLink = getBankAccountLink($row['usertargetid']);
                 $amountClass = ($row['amount'] < 0) ? 'negative' : 'positive';
                 $negativeSign = ($row['amount'] < 0) ? '-' : '';
 

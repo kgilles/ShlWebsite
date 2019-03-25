@@ -34,6 +34,10 @@ function getBankAccountLink($userid) {
     return 'http://simulationhockey.com/bankaccount.php?uid=' . $userid;
 }
 
+function getBankRequestLink($linkid) {
+    return 'http://simulationhockey.com/bankrequest.php?id=' . $linkid;
+}
+
 function getBankTransactionLink($linkid) {
     return 'http://simulationhockey.com/banktransaction.php?id=' . $linkid;
 }

@@ -182,17 +182,19 @@
             while ($row = $db->fetch_array($bankRows))
             {
                 $date = new DateTime($row['date']);
-                $transactionLink = '<a href="http://simulationhockey.com/banktransaction.php?id=' . $row['id'] . '">';
-                $creatorLink = '<a href="http://simulationhockey.com/bankaccount.php?uid=' . $row['createdbyuserid'] . '">';
-                $bankerLink = '<a href="http://simulationhockey.com/bankaccount.php?uid=' . $row['bankerapprovalid'] . '">';
+                $transactionLink = '<a href="' . getBankTransactionLink($row['id']) . '">';
+                $creatorLink = '<a href="' . getBankAccountLink($row['createdbyuserid']) . '">';
+                $bankerLink = '<a href="' . getBankAccountLink($row['bankerapprovalid']) . '">';
                 $amountClass = ($row['amount'] < 0) ? 'negative' : 'positive';
                 $negativeSign = ($row['amount'] < 0) ? '-' : '';
+                $dateformat = $date->format('m/d/y');
+                $numberformat = number_format(abs($row['amount']), 0);
 
                 echo '<tr>';
-                echo '<td>' . $transactionLink . $row['title'] . '</a></td>';
-                echo '<td class="' . $amountClass . '">' . $transactionLink . $negativeSign . '$' . number_format(abs($row['amount']), 0) . "</a></td>";
-                echo "<td>" . $date->format('m/d/y') . "</td>";
-                echo '<td>' . $creatorLink . $row['creator'] . "</a></td>";
+                echo "<td>$transactionLink" . $row['title'] . '</a></td>';
+                echo "<td class='$amountClass'>$transactionLink" . $negativeSign . '$' . $$numberformat . "</a></td>";
+                echo "<td>$dateformat</td>";
+                echo "<td>$creatorLink" . $row['creator'] . "</a></td>";
           
                 if($isBanker)
                 {
@@ -243,12 +245,15 @@
                     $grouplink = '<a href="http://simulationhockey.com/bankrequest.php?id=' . $row['gid'] . '">';
                     $amountClass = ($row['amount'] < 0) ? 'negative' : 'positive';
                     $negativeSign = ($row['amount'] < 0) ? '-' : '';
+                    $description = $row['description'];
+                    $title = $row['title'];
+                    $amountformat = number_format(abs($row['amount']), 0);
 
                     echo '<tr>';
-                    echo '<td>' . $grouplink . $row['title'] . '</a></td>';
-                    echo '<td class="' . $amountClass . '">' . $grouplink . $negativeSign . '$' . number_format(abs($row['amount']), 0) . "</a></td>";
-                    echo "<td>" . $requestdate . "</td>";
-                    echo '<td>' . $row['description'] . "</a></td>";
+                    echo "<td>$grouplink" . $title . '</a></td>';
+                    echo "<td class='$amountClass'>$grouplink" . $negativeSign . '$' . $amountformat . "</a></td>";
+                    echo "<td>$requestdate</td>";
+                    echo "<td>$description</td>";
                     echo "</tr>";
                 }
                 echo '</table>';
@@ -302,20 +307,20 @@
                         $approvedate = $approvedate->format('m/d/y');
                     }
 
-                    $urequesterLink = '<a href="http://simulationhockey.com/bankaccount.php?uid=' . $row['userrequestid'] . '">';
-                    $utargetLink = '<a href="http://simulationhockey.com/bankaccount.php?uid=' . $row['usertargetid'] . '">';
-                    $ubankerLink = '<a href="http://simulationhockey.com/bankaccount.php?uid=' . $row['bankerapprovalid'] . '">';
+                    $urequesterLink = '<a href="' . getBankAccountLink($row['userrequestid']) . '">';
+                    $utargetLink = '<a href="' . getBankAccountLink($row['usertargetid']) . '">';
                     $amountClass = ($row['amount'] < 0) ? 'negative' : 'positive';
                     $negativeSign = ($row['amount'] < 0) ? '-' : '';
+                    $amountformat = number_format(abs($row['amount']), 0);
+                    $title = $row['title'];
 
-                    echo '<tr>';
-                    echo '<td>' . $row['title'] . '</a></td>';
-                    echo '<td>' . $urequesterLink . $row['urequester'] . '</a></td>';
-                    echo '<td>' . $utargetLink . $row['utarget'] . '</a></td>';
-                    echo '<td class="' . $amountClass . '">' . $transactionLink . $negativeSign . '$' . number_format(abs($row['amount']), 0) . "</a></td>";
-                    echo "<td>" . $requestdate . "</td>";
-                    // echo '<td>' . $ubankerLink . $row['ubanker'] . '</a></td>';
-                    // echo "<td>" . $approvedate . "</td>";
+                    echo "<tr>";
+                    echo "<td>$title</td>";
+                    echo "<td>$urequesterLink" . $row['urequester'] . "</a></td>";
+                    echo "<td>$utargetLink" . $row['utarget'] . "</a></td>";
+                    echo "<td class=\"$amountClass\">$negativeSign$$amountformat</td>";
+                    echo "<td>$requestdate</td>";
+
                     if($isBanker)
                     {
                         if($row['bankerapproverid'] == null)

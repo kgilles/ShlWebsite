@@ -30,6 +30,14 @@ function getUser($db, $userId, $columns = "*") {
     return $db->fetch_array($userquery);            
 }
 
+function getBankAccountLink($userid) {
+    return 'http://simulationhockey.com/bankaccount.php?uid=' . $userid;
+}
+
+function getBankTransactionLink($linkid) {
+    return 'http://simulationhockey.com/banktransaction.php?id=' . $linkid;
+}
+
 function logAction($db, $title, $details) {
     $db->insert_query("banklogs", array("title" => $title, "details" => $details));
 }

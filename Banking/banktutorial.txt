@@ -28,4 +28,9 @@ Bankers
     - Audits
     - A situation where the user can't do it himself
 
-- 
+- Undo Transaction
+
+- Approve/Decline Transfer Request
+
+- Approve/Decline Transaction Request
+

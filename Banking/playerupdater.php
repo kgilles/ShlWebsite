@@ -28,7 +28,7 @@
         }
 
         $isBanker = checkIfBanker($mybb);
-        // $isBanker = true; // TODO: remove for testing
+        $isBanker = true; // TODO: remove for testing
 
         $curruser = getUser($db, $uid);
         $bankbalance = $curruser["bankbalance"];
@@ -103,16 +103,6 @@
                 if(strlen($transDescription) == 0) $transDescription = null;
 
                 $bankbalance = doTransaction($db, $transAmount, $transTitle, $transDescription, $uid, $myuid, $currname, "Banker Transaction");
-            }
-
-            // If a banker submitted a balance.
-            else if ($isBanker && isset($mybb->input["submitbalance"], $mybb->input["balanceamount"]))
-            {
-                $transAmount = getSafeNumber($db, $mybb->input["balanceamount"]) - $bankbalance;
-                $transTitle = "BALANCE AUDIT";
-                $transDescription = null;
-
-                $bankbalance = doTransaction($db, $transAmount, $transTitle, $transDescription, $uid, $myuid, $currname, "Banker Setting Balance");
             }
 
             // If the user submitted a transaction himself.
@@ -404,19 +394,6 @@
             <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code; ?>" />
             </table>
             <p style="margin-bottom: 0px"><em>Adds a transaction. If removing money, make sure to add the negative sign.</em></p>
-            </form>
-    
-            <hr />
-    
-            <!-- Audit Balance -->
-            <h4>Fix Balance</h4>
-            <form method="post">
-            <table>
-            <tr><th>Amount</th><td><input type="number" name="balanceamount" placeholder="Enter balance..." /></td></tr>
-            <tr><th></th><td><input type="submit" name="submitbalance" value="Set Balance" /></td></tr>
-            <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code; ?>" />
-            </table>
-            <p style="margin-bottom: 0px"><em>Sets the balance to the value, and adds a transaction to get it there.</em></p>
             </form>
             </div>
             </div>

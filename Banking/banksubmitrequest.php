@@ -16,7 +16,7 @@
         echo '<h4>Success: ' . $message . '</h4>';
         echo '<table>';
 
-        $requestlink = getBankRequestLink($groupid);
+        $requestlink = '<a href="' . getBankRequestLink($groupid) . '">';
         echo '<tr><th>Group Name</th><td colspan="3">' . $requestlink . $groupName . '</a></td></tr>';
         echo '<tr><th>User</th><th>Amount</th></tr>';
         $x = 0;
@@ -25,7 +25,7 @@
             $currName = $mybb->input["massname_" . $x];
             $currId = $mybb->input["massid_" . $x];
             $currAmount = $mybb->input["massamount_" . $x];
-            $accountlink = getBankAccountLink($currId);
+            $accountlink = '<a href="' . getBankAccountLink($currId) . '">';
 
             echo '<td>' . $accountlink . $currName . '</a></td>';
             echo '<td>$' . $currAmount . '</td></tr>';
@@ -59,7 +59,7 @@
             $namesArray = array_map('trim', explode($charToSplit, $namelist));
 
             for ($x = 0; $x < count($namesArray); $x++) 
-                $namesArray[$x] = "'" . getEscapeString($db, $namesArray[$x]) . "'";
+                $namesArray[$x] = "'" . getSafeString($db, $namesArray[$x]) . "'";
 
             $names = implode(",", $namesArray);
 
@@ -80,9 +80,10 @@
 
             $isValid = true;
 
-            $declineid = getSafeAlpNum($db, $mybb->input["massgroupname"]);
+            $groupName = getSafeAlpNum($db, $mybb->input["massgroupname"]);
             if(strlen($groupName) <= 0)
             {
+                echo 'no group name';
                 $isValid = false;
             }
 
@@ -95,7 +96,10 @@
                 $currTitle = getSafeAlpNum($db, $mybb->input["masstitle_$x"]);
                 $currDescription = getSafeAlpNum($db, $mybb->input["massdescription_$x"]);
 
-                if (strlen($currTitle) <= 0 || $currAmount == 0) { $isValid = false; break; }
+                if (strlen($currTitle) <= 0 || $currAmount == 0) {
+                    echo 'no ammount or title';                
+                    $isValid = false; break; 
+                }
                 if (strlen($currDescription) == 0) { $currDescription = null; }
 
                 if ($isBanker) 

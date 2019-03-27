@@ -98,9 +98,11 @@
             foreach ($teamusers as $user) {
                 $negativeSign = ($user["bankbalance"] < 0) ? '-' : '';
                 $bankoutput = $negativeSign . '$' . number_format(abs($user["bankbalance"]), 0);
+                $userid = intval($user["uid"]);
+                $userlink = getBankAccountLink($userid);
 
                 echo '<tr>';
-                echo '<td>' . $user["username"] . '</td>';
+                echo '<td><a href="'.$userlink.'">' . $user["username"] . '</a></td>';
                 echo '<td>' . $bankoutput . '</td>';
                 echo '</tr>';
             }

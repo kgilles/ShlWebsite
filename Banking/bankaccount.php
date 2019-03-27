@@ -33,17 +33,20 @@
     $isBanker = true; // TODO: remove for testing
 
     $curruser = getUser($db, $uid);
+    if ($curruser == null)
+        header('Location: http://simulationhockey.com/bankaccount.php?uid=' . $myuid);
+
     $bankbalance = $curruser["bankbalance"];
     $currname = $curruser["username"];
     $teamid = $curruser["teamid"];
 
     if ($teamid !== null) {
-            $teamQuery = $db->simple_select("teams", "*", "id=$teamid", array("limit" => 1));
-            $teamRow = $db->fetch_array($teamQuery);
-            $teamName = $teamRow['name'];
-        }
+        $teamQuery = $db->simple_select("teams", "*", "id=$teamid", array("limit" => 1));
+        $teamRow = $db->fetch_array($teamQuery);
+        $teamName = $teamRow['name'];
+    }
     if ($teamName == null)
-        echo $teamName = "Unassigned";
+        $teamName = "Unassigned";
 
     // If a submit button was pressed
     if (isset($mybb->input["bojopostkey"])) {
@@ -121,11 +124,37 @@
             }
 
             if ($transAmount != 0 && strlen($transTitle)) {
-                $bankbalance = addBankTransaction($db, $uid, $transAmount, $transTitle, $description, $creatorid);
+                $bankbalance = addBankTransaction($db, $uid, $transAmount, $transTitle, $description, $uid);
                 displaySuccessTransaction($currname, $transAmount, $transTitle, $description, "User Purchase");
             } else {
                 displayErrorTransaction();
             }
+        }
+
+        // If the user submitted a training +5
+        else if (isset($mybb->input["submittraining5"]) && $myuid == $uid) {
+            echo 'test';
+            $transAmount = -1000000;
+            $transTitle = 'Training +5';
+            $transDescription = 'Purchased training for player.';
+            $bankbalance = addBankTransaction($db, $uid, $transAmount, $transTitle, $transDescription, $uid);
+            displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "User Training");
+        }
+        // If the user submitted a training +3
+        else if (isset($mybb->input["submittraining3"]) && $myuid == $uid) {
+            $transAmount = -500000;
+            $transTitle = 'Training +3';
+            $transDescription = 'Purchased training for player.';
+            $bankbalance = addBankTransaction($db, $uid, $transAmount, $transTitle, $transDescription, $uid);
+            displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "User Training");
+        }
+        // If the user submitted a training +1
+        else if (isset($mybb->input["submittraining1"]) && $myuid == $uid) {
+            $transAmount = -100000;
+            $transTitle = 'Training +1';
+            $transDescription = 'Purchased training for player.';
+            $bankbalance = addBankTransaction($db, $uid, $transAmount, $transTitle, $transDescription, $uid);
+            displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "User Training");
         }
 
         // If user submitted a transfer request for another user.
@@ -357,7 +386,36 @@
         <div class="bojoSection navigation">
             <h2>New Purchase <span class="expandclick" onclick="toggleArea(this, 'purchasearea')">(expand)</span></h2>
             <div id="purchasearea" class="hideme">
-                <form method="post">
+                <form onsubmit="return areYouSure();" method="post">
+                    <h4>Weekly Training</h4>
+                    <table>
+                        <tr>
+                            <th>Cost</th>
+                            <th>Points</th>
+                        </tr>
+                        <if $teamid !==null then>
+                            <tr>
+                                <td>$1,000,000</td>
+                                <td>+5</td>
+                                <td><input type="submit" name="submittraining5" value="Purchase Training" /></td>
+                            </tr>
+                        </if>
+                        <tr>
+                            <td>$500,000</td>
+                            <td>+3</td>
+                            <td><input type="submit" name="submittraining3" value="Purchase Training" /></td>
+                        </tr>
+                        <tr>
+                            <td>$100,000</td>
+                            <td>+1</td>
+                            <td><input type="submit" name="submittraining1" value="Purchase Training" /></td>
+                        </tr>
+                        <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                    </table>
+                </form>
+                <p><em>+5 Training only available when you've been drafted to an SHL team</em></p>
+                <form onsubmit="return areYouSure();" method="post">
+                    <h4 style="margin-top: 10px;">Other Purchases</h4>
                     <table>
                         <tr>
                             <th>Amount</th>
@@ -388,7 +446,7 @@
         <div class="bojoSection navigation">
             <h2>New Transfer Request <span class="expandclick" onclick="toggleArea(this, 'transferarea')">(expand)</span></h2>
             <div id="transferarea" class="hideme">
-                <form method="post">
+                <form onsubmit="return areYouSure();" method="post">
                     <table>
                         <tr>
                             <th>Amount</th>
@@ -422,7 +480,7 @@
             <h2>Banker Controls <span class="expandclick" onclick="toggleArea(this, 'bankerarea')">(expand)</span></h2>
             <div id="bankerarea" class="hideme">
                 <h4>Add Transaction</h4>
-                <form method="post">
+                <form onsubmit="return areYouSure();" method="post">
                     <table>
                         <tr>
                             <th>Amount</th>
@@ -457,6 +515,10 @@
                 document.getElementById(idToHide).className = '';
                 spanlink.innerHTML = "(hide)";
             }
+        }
+
+        function areYouSure() {
+            return confirm("Are you sure you want to make this transaction?");
         }
     </script>
 

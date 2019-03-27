@@ -9,9 +9,41 @@
     {$header}
 
     <div class="bojoSection navigation">
-    <h2>Banker Portal</h2>
-    <p>At a glance view of active requests requiring banker decisions.</p>
-    <p>Links: <a href="http://simulationhockey.com/banksubmitrequest.php">Submit Request</a></p>
+        <h2>Banker Portal</h2>
+        <p>At a glance view of active requests requiring banker decisions.</p>
+        <p>Links:
+            <ul>
+                <li><a href="http://simulationhockey.com/banksubmitrequest.php">Submit Request</a></li>
+                <li><a href="http://simulationhockey.com/teamaddusers.php">Assign Users to Team</a></li>
+            </ul>
+        </p>
+    </div>
+
+    <?php 
+    $teamRows = $db->simple_select("teams", "*", "id > 1", array(
+        "order_by" => 'name',
+        "order_dir" => 'ASC'
+    ));
+
+    while ($teamrow = $db->fetch_array($teamRows)) {
+        $teams[] = [
+            "id" => $teamrow['id'],
+            "name" => $teamrow['name'],
+        ];
+    }
+    ?>
+    <div class="bojoSection navigation">
+        <h2>User Accounts by Team</h2>
+        <p>
+            <ul>
+                <?php 
+                for($x = 0; $x < count($teams); $x++)
+                {
+                    echo '<li><a href="http://simulationhockey.com/bankteam.php?id='.$teams[$x]["id"].'">'.$teams[$x]["name"].'</a></li>';
+                }
+                ?>
+            </ul>
+        </p>
     </div>
 
     <?php 
@@ -20,19 +52,20 @@
     $myuid = getUserId($mybb);
 
     // if not logged in, go away why are you even here
-    if ($myuid <= 0) { echo 'You are not logged in'; exit; }
+    if ($myuid <= 0) {
+        echo 'You are not logged in';
+        exit;
+    }
 
     $isBanker = checkIfBanker($mybb);
     // $isBanker = true; // TODO: For Testing
 
     // If a submit button was pressed
-    if (isset($mybb->input["bojopostkey"])) 
-    {
+    if (isset($mybb->input["bojopostkey"])) {
         verify_post_check($mybb->input["bojopostkey"]);
 
         // If banker approved a transfer.
-        if ($isBanker && isset($mybb->input["approvetransfer"], $mybb->input["approveid"]))
-        {
+        if ($isBanker && isset($mybb->input["approvetransfer"], $mybb->input["approveid"])) {
             $approveid = getSafeNumber($db, $mybb->input["approveid"]);
             $approvequery = $db->simple_select("banktransferrequests", "*", "id=$approveid", array("limit" => 1));
             $approveresult = $db->fetch_array($approvequery);
@@ -46,10 +79,9 @@
         }
 
         // If banker declined a transfer.
-        else if ($isBanker && isset($mybb->input["declinetransfer"], $mybb->input["declineid"]))
-        {
+        else if ($isBanker && isset($mybb->input["declinetransfer"], $mybb->input["declineid"])) {
             $declineid = getSafeNumber($db, $mybb->input["declineid"]);
-            
+
             $db->delete_query("banktransferrequests", "id=$declineid");
 
             echo '<div class="successSection">';
@@ -60,12 +92,12 @@
     ?>
 
     <div class="bojoSection navigation">
-    <h2>Group Requests</h2>
-    <h3>Pending Approval</h3>
-    <?php 
+        <h2>Group Requests</h2>
+        <h3>Pending Approval</h3>
+        <?php 
         // Transfer Requests
-        $transactionQuery = 
-        "SELECT bt.*, urequester.username AS 'urequester'
+        $transactionQuery =
+            "SELECT bt.*, urequester.username AS 'urequester'
             FROM mybb_banktransactiongroups bt
             LEFT JOIN mybb_users urequester ON bt.creatorid=urequester.uid
             WHERE bt.isapproved IS NULL
@@ -76,18 +108,16 @@
 
         if ($bankRowCount <= 0) {
             echo '<p>No active transfers</p>';
-        }        
-        else {
-            echo 
-            '<table>
+        } else {
+            echo
+                '<table>
             <tr>
             <th>Group Name</th>
             <th>Requester</th>
             <th>Date Requested</th>
             </tr>';
 
-            while ($row = $db->fetch_array($bankRows))
-            {
+            while ($row = $db->fetch_array($bankRows)) {
                 $requestdate = new DateTime($row['datrequestdatee']);
                 $requestdate = $requestdate->format('m/d/y');
 
@@ -104,15 +134,15 @@
             echo '</table>';
         }
 
-    ?>
-    
-    <hr />
+        ?>
 
-    <h3>Review History</h3>
-    <?php 
+        <hr />
+
+        <h3>Review History</h3>
+        <?php 
         // Transfer Requests
-        $transactionQuery = 
-        "SELECT bt.*, urequester.username AS 'urequester', ubanker.username AS 'bankername'
+        $transactionQuery =
+            "SELECT bt.*, urequester.username AS 'urequester', ubanker.username AS 'bankername'
             FROM mybb_banktransactiongroups bt
             LEFT JOIN mybb_users urequester ON bt.creatorid=urequester.uid
             LEFT JOIN mybb_users ubanker ON bt.bankerid=ubanker.uid
@@ -125,10 +155,9 @@
 
         if ($bankRowCount <= 0) {
             echo '<p>No transfers</p>';
-        }        
-        else {
-            echo 
-            '<table>
+        } else {
+            echo
+                '<table>
             <tr>
             <th>Group Name</th>
             <th>Requester</th>
@@ -138,8 +167,7 @@
             <th>Date Decided</th>
             </tr>';
 
-            while ($row = $db->fetch_array($bankRows))
-            {
+            while ($row = $db->fetch_array($bankRows)) {
                 $decisiondate = new DateTime($row['decisiondate']);
                 $decisiondate = $decisiondate->format('m/d/y');
 
@@ -162,15 +190,15 @@
             echo '</table>';
         }
 
-    ?>
+        ?>
     </div>
 
     <div class="bojoSection navigation">
-    <h2>Active Transfer Requests</h2>
-    <?php 
+        <h2>Active Transfer Requests</h2>
+        <?php 
         // Transfer Requests
-        $transactionQuery = 
-        "SELECT bt.*, utarget.username AS 'utarget', urequester.username AS 'urequester'
+        $transactionQuery =
+            "SELECT bt.*, utarget.username AS 'utarget', urequester.username AS 'urequester'
             FROM mybb_banktransferrequests bt
             LEFT JOIN mybb_users urequester ON bt.userrequestid=urequester.uid
             LEFT JOIN mybb_users utarget ON bt.usertargetid=utarget.uid
@@ -183,27 +211,27 @@
 
         if ($bankRowCount <= 0) {
             echo '<p>No active transfers</p>';
-        }        
-        else {
-            echo 
-            '<table>
+        } else {
+            echo
+                '<table>
             <tr>
             <th>Title</th>
             <th>Requester</th>
             <th>Target</th>
             <th>Amount</th>
             <th>Date Requested</th>';
-            if ($isBanker) { echo '<th></th><th></th>'; }
+            if ($isBanker) {
+                echo '<th></th><th></th>';
+            }
             echo '<th>Description</th>
             </tr>';
 
-            while ($row = $db->fetch_array($bankRows))
-            {
+            while ($row = $db->fetch_array($bankRows)) {
                 $requestdate = new DateTime($row['datrequestdatee']);
                 $requestdate = $requestdate->format('m/d/y');
 
-                if($row['approvaldate'] === null) {
-                    $approvedate = '';    
+                if ($row['approvaldate'] === null) {
+                    $approvedate = '';
                 } else {
                     $approvedate = new DateTime($row['approvaldate']);
                     $approvedate = $approvedate->format('m/d/y');
@@ -220,19 +248,18 @@
                 echo '<td><a href="' . $utargetLink . '">' . $row['utarget'] . '</a></td>';
                 echo '<td class="' . $amountClass . '">' . $transactionLink . $negativeSign . '$' . number_format(abs($row['amount']), 0) . "</a></td>";
                 echo "<td>" . $requestdate . "</td>";
-                if($isBanker)
-                {
-                    if($row['bankerapproverid'] == null)
-                    {
+                if ($isBanker) {
+                    if ($row['bankerapproverid'] == null) {
                         echo '<form method="post"><td><input type="submit" name="approvetransfer" value="Accept" /></td>';
-                        echo '<input type="hidden" name="approveid" value="'. $row['id'] .'" />';
+                        echo '<input type="hidden" name="approveid" value="' . $row['id'] . '" />';
                         echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" /></form>';
 
                         echo '<form method="post"><td><input type="submit" name="declinetransfer" value="Decline" /></td>';
-                        echo '<input type="hidden" name="declineid" value="'. $row['id'] .'" />';
+                        echo '<input type="hidden" name="declineid" value="' . $row['id'] . '" />';
                         echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" /></form>';
+                    } else {
+                        echo '<td></td>';
                     }
-                    else { echo '<td></td>'; }
                 }
                 echo '<td>' . $row['description'] . "</a></td>";
                 echo "</tr>";
@@ -240,7 +267,7 @@
             echo '</table>';
         }
 
-    ?>
+        ?>
     </div>
 
     <?php $db->close; ?>
@@ -250,4 +277,4 @@
     {$footer}
 </body>
 
-</html>
+</html> 

@@ -101,8 +101,7 @@ function addBankTransferRequest($db, $requestId, $reqtargetId, $reqamount, $reqt
 function doTransaction($db, $transAmount, $transTitle, $description, $userid, $creatorid, $username, $displayMessage) {
     if ($transAmount != 0 && strlen($transTitle) > 0)
     {
-        addBankTransaction($db, $userid, $transAmount, $transTitle, $description, $creatorid);
-        $newbankbalance = updateBankBalance($db, $userid);
+        $newbankbalance = addBankTransaction($db, $userid, $transAmount, $transTitle, $description, $creatorid);
         displaySuccessTransaction($username, $transAmount, $transTitle, $description, $displayMessage);
     }
     else {

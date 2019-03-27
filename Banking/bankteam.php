@@ -30,7 +30,6 @@
     }
 
     $isBanker = checkIfBanker($mybb);
-    $isBanker = true; // TODO: remove for testing
 
     $teamquery = $db->simple_select("teams", "*", "id=$tid", array("limit" => 1));
     $teamrow = $db->fetch_array($teamquery);

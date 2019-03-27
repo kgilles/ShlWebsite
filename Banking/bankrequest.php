@@ -19,7 +19,6 @@
         $myuid = getUserId($mybb);
 
         $isBanker = checkIfBanker($mybb);
-        // $isBanker = true; // TODO: testing
 
         if ($id > 0) 
         {

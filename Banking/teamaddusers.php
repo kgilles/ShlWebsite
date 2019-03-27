@@ -49,7 +49,6 @@
     }
 
     $isBanker = checkIfBanker($mybb);
-    // $isBanker = false; // TODO: remove for testing
 
     $teamRows = $db->simple_select("teams", "*", "id > 1", array(
         "order_by" => 'name',

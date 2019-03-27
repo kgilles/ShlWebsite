@@ -36,10 +36,10 @@
             {
                 echo '<div class="bojoSection navigation">';
                 echo '<h4>Bank Transaction</h4>';
-                echo '<table>';
-                echo '<tr><th>Title</th><td>' . $transaction['title'] . '</td></tr>';
-                echo '<tr><th>Description</th><td>' . $transaction['description'] . '</td></tr>';
+                echo '<h2>' . $transaction['title'] . '</h2>';
+                echo '<p>' . $transaction['description'] . '</p>';
 
+                echo '<table>';
                 if ($transaction['amount'] < 0) {
                     echo "<tr><th>Amount</th><td class='negative'>-$" . number_format(abs($transaction['amount']), 0) . "</td></tr>";
                 }
@@ -63,8 +63,8 @@
                 echo '<tr><th>Banker**</th><td><a href="' . $ba3Link . '">' . $transaction['bankername'] . '</a></td></tr>';
 
                 echo '</table>';
-                echo '<p>* If part of a mass group update.<br />** Only neccessary for transactions that require approval.</p>';
                 echo "</div>";
+                echo '<p>* If part of a mass group update.<br />** Only neccessary for transactions that require approval.</p>';
             }
             else
             {

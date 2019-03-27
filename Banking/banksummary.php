@@ -58,7 +58,6 @@
     }
 
     $isBanker = checkIfBanker($mybb);
-    // $isBanker = true; // TODO: For Testing
 
     // If a submit button was pressed
     if (isset($mybb->input["bojopostkey"])) {

@@ -30,7 +30,6 @@
     }
 
     $isBanker = checkIfBanker($mybb);
-    $isBanker = true; // TODO: remove for testing
 
     $curruser = getUser($db, $uid);
     if ($curruser == null)

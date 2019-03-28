@@ -256,9 +256,10 @@
                 <th>SHL Team</th>
                 <td><a href="http://simulationhockey.com/bankteam.php?id=<?php echo $curruser['teamid']; ?>"><?php echo $teamName; ?></a></td>
             </tr>
+            <tr>
+                <td><a href="http://simulationhockey.com/bankexportaccount.php?uid=<?php echo $currentUserId; ?>">Export Data</a></td>
+            </tr>
         </table>
-
-        <a href="http://simulationhockey.com/bankexportaccount.php?uid=<?php echo $currentUserId; ?>">Export Data</a>
 
         <hr />
 
@@ -626,6 +627,6 @@
     {$boardstats}
     <br class="clear" />
     {$footer}
-    </body>
+</body>
 
 </html> 

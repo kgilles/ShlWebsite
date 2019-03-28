@@ -131,29 +131,23 @@
         }
 
         // If the user submitted a training +5
-        else if (isset($mybb->input["submittraining5"]) && $myuid == $uid) {
-            echo 'test';
-            $transAmount = -1000000;
-            $transTitle = 'Training +5';
-            $transDescription = 'Purchased training for player.';
-            $bankbalance = addBankTransaction($db, $uid, $transAmount, $transTitle, $transDescription, $uid);
-            displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "User Training");
-        }
-        // If the user submitted a training +3
-        else if (isset($mybb->input["submittraining3"]) && $myuid == $uid) {
-            $transAmount = -500000;
-            $transTitle = 'Training +3';
-            $transDescription = 'Purchased training for player.';
-            $bankbalance = addBankTransaction($db, $uid, $transAmount, $transTitle, $transDescription, $uid);
-            displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "User Training");
-        }
-        // If the user submitted a training +1
-        else if (isset($mybb->input["submittraining1"]) && $myuid == $uid) {
-            $transAmount = -100000;
-            $transTitle = 'Training +1';
-            $transDescription = 'Purchased training for player.';
-            $bankbalance = addBankTransaction($db, $uid, $transAmount, $transTitle, $transDescription, $uid);
-            displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "User Training");
+        else if (isset($mybb->input["submittraining"], $mybb->input["trainingvalue"]) && $myuid == $uid && is_numeric($mybb->input["trainingvalue"])) {
+            $trainvalue = getSafeNumber($db, $mybb->input["trainingvalue"]);
+            switch ($trainvalue)
+            {
+                case 5: $transAmount = -1000000; break;
+                case 3: $transAmount = -500000; break;
+                case 2: $transAmount = -250000; break;
+                case 1: $transAmount = -100000; break;
+            }
+
+            if ($transAmount < -10)
+            {
+                $transTitle = "Training +$trainvalue";
+                $transDescription = 'Purchased training for player.';
+                $bankbalance = addBankTransaction($db, $uid, $transAmount, $transTitle, $transDescription, $uid);
+                displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "User Training");
+            }
         }
 
         // If user submitted a transfer request for another user.
@@ -385,33 +379,70 @@
         <div class="bojoSection navigation">
             <h2>New Purchase <span class="expandclick" onclick="toggleArea(this, 'purchasearea')">(expand)</span></h2>
             <div id="purchasearea" class="hideme">
-                <form onsubmit="return areYouSure();" method="post">
-                    <h4>Weekly Training</h4>
-                    <table>
+                <h4>Weekly Training</h4>
+                <table>
+                    <tr>
+                        <th>Points</th>
+                        <th>Cost</th>
+                    </tr>
+                    <if $teamid == null then>
                         <tr>
-                            <th>Cost</th>
-                            <th>Points</th>
-                        </tr>
-                        <if $teamid !==null then>
-                            <tr>
-                                <td>$1,000,000</td>
-                                <td>+5</td>
-                                <td><input type="submit" name="submittraining5" value="Purchase Training" /></td>
-                            </tr>
-                        </if>
-                        <tr>
-                            <td>$500,000</td>
                             <td>+3</td>
-                            <td><input type="submit" name="submittraining3" value="Purchase Training" /></td>
+                            <td>$500,000</td>
+                            <form onsubmit="return areYouSure();" method="post">
+                                <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
+                                <input type="hidden" name="trainingvalue" value="3" />
+                                <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                            </form>
                         </tr>
                         <tr>
-                            <td>$100,000</td>
-                            <td>+1</td>
-                            <td><input type="submit" name="submittraining1" value="Purchase Training" /></td>
+                            <td>+2</td>
+                            <td>$250,000</td>
+                            <form onsubmit="return areYouSure();" method="post">
+                                <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
+                                <input type="hidden" name="trainingvalue" value="2" />
+                                <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                            </form>
                         </tr>
-                        <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
-                    </table>
-                </form>
+                        <tr>
+                            <td>+1</td>
+                            <td>$100,000</td>
+                            <form onsubmit="return areYouSure();" method="post">
+                                <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
+                                <input type="hidden" name="trainingvalue" value="1" />
+                                <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                            </form>
+                        </tr>
+                    <else>
+                        <tr>
+                            <td>+5</td>
+                            <td>$1,000,000</td>
+                            <form onsubmit="return areYouSure();" method="post">
+                                <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
+                                <input type="hidden" name="trainingvalue" value="5" />
+                                <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                            </form>
+                        </tr>
+                        <tr>
+                            <td>+3</td>
+                            <td>$500,000</td>
+                            <form onsubmit="return areYouSure();" method="post">
+                                <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
+                                <input type="hidden" name="trainingvalue" value="3" />
+                                <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                            </form>
+                        </tr>
+                        <tr>
+                            <td>+1</td>
+                            <td>$100,000</td>
+                            <form onsubmit="return areYouSure();" method="post">
+                                <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
+                                <input type="hidden" name="trainingvalue" value="1" />
+                                <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                            </form>
+                        </tr>
+                    </if>
+                </table>
                 <p><em>+5 Training only available when you've been drafted to an SHL team</em></p>
                 <form onsubmit="return areYouSure();" method="post">
                     <h4 style="margin-top: 10px;">Other Purchases</h4>

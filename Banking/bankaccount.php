@@ -19,19 +19,25 @@
     }
 
     $isBanker = checkIfBanker($mybb);
-    $isMyAccount = ($myuid == $uid);
 
     // Gets id of user from URL
     if (isset($_GET["uid"]) && is_numeric($_GET["uid"]))
-        $uid = getSafeNumber($db, $_GET["uid"]);
+        $currentUserId = getSafeNumber($db, $_GET["uid"]);
     else
+    {
         header('Location: http://simulationhockey.com/bankaccount.php?uid=' . $myuid);
+        exit;
+    }
 
-    $curruser = getUser($db, $uid);
 
+    $curruser = getUser($db, $currentUserId);
     if ($curruser == null)
+    {
         header('Location: http://simulationhockey.com/bankaccount.php?uid=' . $myuid);
+        exit;
+    }
 
+    $isMyAccount = ($myuid == $currentUserId);
     $currbankbalance = $curruser["bankbalance"];
     $currname = $curruser["username"];
     $currteamid = $curruser["teamid"];
@@ -65,7 +71,7 @@
                     $db->delete_query("banktransactions", "id=$transid");
 
                     // Updates user's balance
-                    $currbankbalance = updateBankBalance($db, $uid);
+                    $currbankbalance = updateBankBalance($db, $currentUserId);
 
                     logAction($db, "UNDO", "$myuid undid a transaction for $transUserId titled $transTitle. The amount was $transAmount. Description: $transDescription");
                     displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "Undo Transaction");
@@ -92,7 +98,7 @@
                     $requestTargetId = intval($xRow["usertargetid"]);
 
                     // Accepts and updates both users' balances.
-                    $currbankbalance = acceptTransferRequest($db, $uid, $myuid, $transferRequestId, $requestRequesterId, $requestTargetId, $requestAmount, $requestTitle, $requestDescription);
+                    $currbankbalance = acceptTransferRequest($db, $currentUserId, $myuid, $transferRequestId, $requestRequesterId, $requestTargetId, $requestAmount, $requestTitle, $requestDescription);
                     logAction($db, "UNDO", "$myuid approved transfer ($transferRequestId) for $requestTargetId titled $requestTitle. The amount was $requestAmount to $requestTargetId. Description: $requestDescription");
 
                     // TODO: Success Message.
@@ -145,7 +151,7 @@
                 if (strlen($transDescription) == 0) $transDescription = null;
 
                 // Adds a transaction via banker
-                $currbankbalance = doTransaction($db, $transAmount, $transTitle, $transDescription, $uid, $myuid, $currname, "Banker Transaction");
+                $currbankbalance = doTransaction($db, $transAmount, $transTitle, $transDescription, $currentUserId, $myuid, $currname, "Banker Transaction");
             } else {
                 echo "You're not a banker. shoo.";
                 exit;
@@ -161,7 +167,7 @@
                 if (strlen($transDescription) == 0) $transDescription = null;
 
                 if ($transAmount != 0 && strlen($transTitle)) {
-                    $currbankbalance = addBankTransaction($db, $uid, $transAmount, $transTitle, $transDescription, $uid);
+                    $currbankbalance = addBankTransaction($db, $currentUserId, $transAmount, $transTitle, $transDescription, $currentUserId);
                     displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "User Purchase");
                 } else
                     displayErrorTransaction();
@@ -193,7 +199,7 @@
                 if ($transAmount < -10) {
                     $transTitle = "Training +$trainvalue";
                     $transDescription = 'Purchased training for player.';
-                    $currbankbalance = addBankTransaction($db, $uid, $transAmount, $transTitle, $transDescription, $uid);
+                    $currbankbalance = addBankTransaction($db, $currentUserId, $transAmount, $transTitle, $transDescription, $currentUserId);
                     displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "User Training");
                 } else {
                     echo "there was an error with the buttons somehow";
@@ -214,7 +220,7 @@
                 if (strlen($transDescription) == 0) $transDescription = null;
 
                 if ($transAmount != 0 && strlen($transTitle)) {
-                    addBankTransferRequest($db, $myuid, $uid, $transAmount, $transTitle, $transDescription);
+                    addBankTransferRequest($db, $myuid, $currentUserId, $transAmount, $transTitle, $transDescription);
                     displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "Transfer Request");
                 } else {
                     displayErrorTransaction();
@@ -267,7 +273,7 @@
                 "SELECT bt.*, creator.username AS 'creator'
                 FROM mybb_banktransactions bt
                 LEFT JOIN mybb_users creator ON bt.createdbyuserid=creator.uid
-                WHERE bt.uid=$uid
+                WHERE bt.uid=$currentUserId
                 ORDER BY bt.date DESC
                 LIMIT 50";
 
@@ -307,7 +313,7 @@
             "SELECT bt.*, groups.id as 'gid', groups.groupname, groups.requestdate
                 FROM mybb_banktransactionrequests bt
                 LEFT JOIN mybb_banktransactiongroups groups ON bt.groupid=groups.id && groups.isapproved IS NULL
-                WHERE bt.uid=$uid
+                WHERE bt.uid=$currentUserId
                 ORDER BY groups.requestdate DESC
                 LIMIT 50";
 
@@ -360,7 +366,7 @@
                 LEFT JOIN mybb_users urequester ON bt.userrequestid=urequester.uid
                 LEFT JOIN mybb_users utarget ON bt.usertargetid=utarget.uid
                 LEFT JOIN mybb_users ubanker ON bt.bankerapproverid=ubanker.uid
-                WHERE (bt.userrequestid=$uid OR bt.usertargetid=$uid) AND bankerapproverid IS NULL
+                WHERE (bt.userrequestid=$currentUserId OR bt.usertargetid=$currentUserId) AND bankerapproverid IS NULL
                 ORDER BY bt.requestdate DESC
                 LIMIT 50";
 
@@ -432,7 +438,7 @@
     </div>
 
     <!-- New Purchase: Only available to the actual user -->
-    <if ($uid==$myuid) then>
+    <if ($currentUserId==$myuid) then>
         <div class="bojoSection navigation">
             <h2>New Purchase <span class="expandclick" onclick="toggleArea(this, 'purchasearea')">(expand)</span></h2>
             <div id="purchasearea" class="hideme">
@@ -529,7 +535,7 @@
     </if>
 
     <!-- New Transfer Request: Only available when on another user's page -->
-    <if ($uid !==$myuid) then>
+    <if ($currentUserId !==$myuid) then>
         <div class="bojoSection navigation">
             <h2>New Transfer Request <span class="expandclick" onclick="toggleArea(this, 'transferarea')">(expand)</span></h2>
             <div id="transferarea" class="hideme">

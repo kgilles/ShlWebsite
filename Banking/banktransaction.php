@@ -48,11 +48,12 @@
                 $ba3Link = getBankAccountLink($xRow['bankerapproverid']);
                 $requestLink = getBankRequestLink($xRow['groupid']);
                 $date = new DateTime($xRow['date']);
+                $date->setTimeZone(new DateTimeZone('America/New_York'));
 
                 echo '<tr><th>User</th><td><a href="' . $ba1Link . '">' . $xRow['username'] . '</a></td></tr>
                       <tr><th>Made by</th><td><a href="' . $ba2Link . '">' . $xRow['owner'] . '</a></td></tr>
                       <tr><th>Date</th><td>' . $date->format('m/d/y') . '</td></tr>
-                      <tr><th>Time</th><td>' . $date->format('H:i:s') . '</td></tr>
+                      <tr><th>Time</th><td>' . $date->format('g:i A') . ' ET</td></tr>
                       <tr><th>Group*</th><td><a href="' . $requestLink . '">' . $xRow['groupname'] . '</a></td></tr>
                       <tr><th>Banker**</th><td><a href="' . $ba3Link . '">' . $xRow['bankername'] . '</a></td></tr>
                       </table>

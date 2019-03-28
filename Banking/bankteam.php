@@ -76,6 +76,16 @@
         </table>
     </div>
 
+    <!-- Banker Controls: Bankers only -->
+    <if ($isBanker) then>
+
+        <!-- Add a transaction -->
+        <div class="bojoSection navigation">
+            <h2>Banker Controls</h2>
+            <p><a href="http://simulationhockey.com/banksubmitrequest.php?teamid=<?php echo $currentTeamId; ?>">Add transactions to team</a></p>
+        </div>
+    </if>
+
     <?php $db->close; ?>
 
     {$boardstats}

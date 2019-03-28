@@ -1,0 +1,6 @@
+- Modified mybb_users
+- Added mybb_banktransactions table
+- Added mybb_banktransferrequests table
+- Added mybb_banktransactiongroups table
+- Added mybb_banktransactionrequests table
+- Added mybb_banklogs table

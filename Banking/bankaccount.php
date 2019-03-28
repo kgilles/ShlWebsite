@@ -254,7 +254,7 @@
             </tr>
             <tr>
                 <th>SHL Team</th>
-                <td><?php echo $teamName; ?></td>
+                <td><a href="http://simulationhockey.com/bankteam.php?id=<?php echo $curruser['teamid']; ?>"><?php echo $teamName; ?></a></td>
             </tr>
         </table>
 

@@ -45,6 +45,32 @@
 
     $isBanker = checkIfBanker($mybb);
 
+    // Gets id of team from URL
+    if (isset($_GET["teamid"]) && is_numeric($_GET["teamid"])) {
+        $currentTeamId = getSafeNumber($db, $_GET["teamid"]);
+        $xQuery = $db->simple_select("teams", "*", "id=$currentTeamId", array("limit" => 1));
+        $currteam = $db->fetch_array($xQuery);
+    }
+
+    if ($currteam == null && $currentTeamId !== null)
+        header('Location: http://simulationhockey.com/banksummary.php');
+
+    if ($currentTeamId !== null) {
+        $xQuery = $db->simple_select("users", "*", "teamid=$currentTeamId", array());
+
+        while ($teamuser = $db->fetch_array($xQuery)) {
+            $namesArray[] = $teamuser['username'];
+        }
+
+        for ($x = 0; $x < count($namesArray); $x++)
+            $namesArray[$x] = "'" . getSafeString($db, $namesArray[$x]) . "'";
+
+        $names = implode(",", $namesArray);
+        $xQueryNames = $db->simple_select("users", "*", "username in (" . $names . ")", array("order_by" => 'username', "order_dir" => 'ASC'));
+        $nameCount = mysqli_num_rows($xQueryNames);
+        $nameEnteredCount = count($namesArray);
+    }
+
     // If a submit button was pressed
     if (isset($mybb->input["bojopostkey"])) {
         verify_post_check($mybb->input["bojopostkey"]);
@@ -156,7 +182,7 @@
                         $x = 0;
                         while (isset($mybb->input["massid_" . $x])) {
                             // Updates user balances
-                            $currId = getSafeInputNum($db, $mybb, "massid_" . $x++);
+                            $currId = getSafeNumber($db, $mybb->input["massid_" . $x++]);
                             updateBankBalance($db, $currId);
                         }
 
@@ -196,12 +222,14 @@
     </div>
 
     <div class="bojoSection navigation">
+        <if $currentTeamId == null then>
         <small>submit a list of usernames separated by either commas or new lines.</small>
         <form method="post">
             <textarea name="namelist" rows="8"><?php echo $namelist ?></textarea><br />
             <input type="submit" name="submitnames" value="Get Users" />
             <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code; ?>" />
         </form>
+        </if>
         <?php
         if ($nameEnteredCount > 0) {
             echo '<hr />';

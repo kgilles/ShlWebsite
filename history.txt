@@ -1,9 +1,0 @@
--added playerupdater.php
--added bankbalance column in mybb_users table
--added mybb_banktransactions table
--added banker.php
--modified member_profile (x3)
--added bankerOps.php
--added mybb_banktransferrequests table
--added bankmassupdate.php
--added bankgrouptransaction.php

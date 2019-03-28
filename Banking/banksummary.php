@@ -72,6 +72,7 @@
             <ul>
             <li><a href="http://simulationhockey.com/bankaccount.php">Your Bank Account</a></li>
             <li><a href="http://simulationhockey.com/banksubmitrequest.php">Submit Request</a></li>
+            <li><a href="http://simulationhockey.com/bankexportbalances.php">Download Bank Balances</a></li>
                 <?php if ($isBanker) {
                     echo '<li><a href="http://simulationhockey.com/teamaddusers.php">Assign Users to Team</a></li>';
                 } ?>

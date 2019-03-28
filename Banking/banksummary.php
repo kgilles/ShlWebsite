@@ -152,7 +152,7 @@
 
         <hr />
 
-        <h3>Review History</h3>
+        <h3>Review History (Last 25)</h3>
         <?php 
         // Transfer Requests
         $transactionQuery =
@@ -162,7 +162,7 @@
             LEFT JOIN mybb_users ubanker ON bt.bankerid=ubanker.uid
             WHERE bt.isapproved IS NOT NULL
             ORDER BY bt.requestdate DESC
-            LIMIT 50";
+            LIMIT 25";
 
         $bankRows = $db->query($transactionQuery);
         $bankRowCount = mysqli_num_rows($bankRows);

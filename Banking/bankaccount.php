@@ -43,9 +43,9 @@
     $currteamid = $curruser["teamid"];
 
     if ($currteamid !== null) {
-        $xQuery = $db->simple_select("teams", "*", "id=$currteamid", array("limit" => 1));
+        $xQuery = $db->simple_select("teams", "name", "id=$currteamid", array("limit" => 1));
         if ($xRow = $db->fetch_array($xQuery))
-            $teamName = $teamRow['name'];
+            $teamName = $xRow['name'];
         else
             $teamName = "Unassigned";
     } else {

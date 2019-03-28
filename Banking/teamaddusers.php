@@ -50,6 +50,11 @@
 
     $isBanker = checkIfBanker($mybb);
 
+    if (!$isBanker) {
+        echo "You're not a banker, shoo";
+        exit;
+    }
+
     $teamRows = $db->simple_select("teams", "*", "id > 1", array(
         "order_by" => 'name',
         "order_dir" => 'ASC'

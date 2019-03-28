@@ -18,6 +18,8 @@ function getSafeAlpNum($db, $inputText) {
 }
 
 function checkIfBanker($mybb) {
+    return true;
+
     // Banker id is 13 as of me writing this.
     $groupstring = $mybb->user['usergroup'] . ',' . $mybb->user['additionalgroups'];
     $groups = explode(",", $groupstring);

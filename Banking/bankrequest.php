@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>SHL Hockey -> Bank Group Transaction</title>
+    <title>SHL Hockey -> Bank Transaction Request</title>
     {$headerinclude}
 </head>
 

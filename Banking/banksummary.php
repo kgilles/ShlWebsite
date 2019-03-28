@@ -14,7 +14,7 @@
         <p>Links:
             <ul>
                 <li><a href="http://simulationhockey.com/banksubmitrequest.php">Submit Request</a></li>
-                <li><a href="http://simulationhockey.com/teamaddusers.php">Assign Users to Team</a></li>
+                <?php if ($isBanker) { echo '<li><a href="http://simulationhockey.com/teamaddusers.php">Assign Users to Team</a></li>'; } ?>
             </ul>
         </p>
     </div>

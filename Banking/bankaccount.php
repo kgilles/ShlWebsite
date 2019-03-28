@@ -258,6 +258,8 @@
             </tr>
         </table>
 
+        <a href="http://simulationhockey.com/bankexportaccount.php?uid=<?php echo $currentUserId; ?>">Export Data</a>
+
         <hr />
 
         <h4>Bank Transactions</h4>
@@ -300,7 +302,7 @@
 
                 if ($isBanker) {
                     echo '<form method="post"><td><input type="submit" name="undotransaction" value="Undo" /></td>';
-                    echo '<form method="post"><input type="hidden" name="undoid" value="' . $row['id'] . '" />';
+                    echo '<input type="hidden" name="undoid" value="' . $row['id'] . '" />';
                     echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" /></form>';
                 }
 
@@ -624,6 +626,6 @@
     {$boardstats}
     <br class="clear" />
     {$footer}
-    </bo dy>
+    </body>
 
 </html> 

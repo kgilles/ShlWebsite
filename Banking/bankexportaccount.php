@@ -52,5 +52,7 @@ foreach ($exportDataCsv as $line) {
 }
 fclose($fp);
 
+$db->close;
+
 ?>
 --- 

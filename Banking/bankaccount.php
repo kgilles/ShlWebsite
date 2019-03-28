@@ -8,162 +8,221 @@
 <body>
     {$header}
 
-    <?php 
-
-    include 'bankerOps.php';
+    <?php include 'bankerOps.php';
 
     $myuid = getUserId($mybb);
 
-    // if not logged in, go away why are you even here
+    // if not logged in, go away
     if ($myuid <= 0) {
         echo 'You are not logged in';
         exit;
     }
 
-    // Gets id of user from URL
-    $uid = 0;
-    if (isset($_GET["uid"]) && is_numeric($_GET["uid"])) {
-        $uid = getSafeNumber($db, $_GET["uid"]);
-    } else {
-        // ... or redirects to your own page
-        header('Location: http://simulationhockey.com/bankaccount.php?uid=' . $myuid);
-    }
-
     $isBanker = checkIfBanker($mybb);
+    $isMyAccount = ($myuid == $uid);
+
+    // Gets id of user from URL
+    if (isset($_GET["uid"]) && is_numeric($_GET["uid"]))
+        $uid = getSafeNumber($db, $_GET["uid"]);
+    else
+        header('Location: http://simulationhockey.com/bankaccount.php?uid=' . $myuid);
 
     $curruser = getUser($db, $uid);
+
     if ($curruser == null)
         header('Location: http://simulationhockey.com/bankaccount.php?uid=' . $myuid);
 
-    $bankbalance = $curruser["bankbalance"];
+    $currbankbalance = $curruser["bankbalance"];
     $currname = $curruser["username"];
-    $teamid = $curruser["teamid"];
+    $currteamid = $curruser["teamid"];
 
-    if ($teamid !== null) {
-        $teamQuery = $db->simple_select("teams", "*", "id=$teamid", array("limit" => 1));
-        $teamRow = $db->fetch_array($teamQuery);
-        $teamName = $teamRow['name'];
-    }
-    if ($teamName == null)
+    if ($currteamid !== null) {
+        $xQuery = $db->simple_select("teams", "*", "id=$currteamid", array("limit" => 1));
+        if ($xRow = $db->fetch_array($xQuery))
+            $teamName = $teamRow['name'];
+        else
+            $teamName = "Unassigned";
+    } else {
         $teamName = "Unassigned";
+    }
 
     // If a submit button was pressed
     if (isset($mybb->input["bojopostkey"])) {
+
         verify_post_check($mybb->input["bojopostkey"]);
 
         // If banker undid a transaction.
-        if ($isBanker && isset($mybb->input["undotransaction"], $mybb->input["undoid"]) && is_numeric($mybb->input["undoid"])) {
-            // Removes transaction row
-            $transid = getSafeNumber($db, $mybb->input["undoid"]);
-            $undoquery = $db->simple_select("banktransactions", "*", "id=$transid", array("limit" => 1));
-            $undoresult = $db->fetch_array($undoquery);
-            $undoamount = intval($undoresult["amount"]);
-            $undotitle = $undoresult["title"];
-            $undodescription = $undoresult["description"];
-            $undouid = $undoresult["uid"];
-            $db->delete_query("banktransactions", "id=$transid");
+        if (isset($mybb->input["undotransaction"], $mybb->input["undoid"]) && is_numeric($mybb->input["undoid"])) {
+            if ($isBanker) {
+                $transid = getSafeNumber($db, $mybb->input["undoid"]);
+                $xQuery = $db->simple_select("banktransactions", "*", "id=$transid", array("limit" => 1));
+                if ($xRow = $db->fetch_array($xQuery)) {
+                    $transAmount = intval($xRow["amount"]);
+                    $transTitle = $xRow["title"];
+                    $transDescription = $xRow["description"];
+                    $transUserId = $xRow["uid"];
 
-            $bankbalance = updateBankBalance($db, $uid);
+                    // Removes the transaction
+                    $db->delete_query("banktransactions", "id=$transid");
 
-            logAction($db, "UNDO", "$myuid undid a transaction for $undouid titled $undotitle. The amount was $undoamount. Description: $undodescription");
-            displaySuccessTransaction($currname, $undoamount, $undoresult['title'], $undodescription, "Undo Transaction");
+                    // Updates user's balance
+                    $currbankbalance = updateBankBalance($db, $uid);
+
+                    logAction($db, "UNDO", "$myuid undid a transaction for $transUserId titled $transTitle. The amount was $transAmount. Description: $transDescription");
+                    displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "Undo Transaction");
+                } else {
+                    echo "transaction not found...";
+                    exit;
+                }
+            } else {
+                echo "You're not a banker. shoo.";
+                exit;
+            }
         }
 
         // If banker approved a transfer.
-        else if ($isBanker && isset($mybb->input["approvetransfer"], $mybb->input["approveid"])) {
-            $approveid = getSafeNumber($db, $mybb->input["approveid"]);
-            $approvequery = $db->simple_select("banktransferrequests", "*", "id=$approveid", array("limit" => 1));
-            $approveresult = $db->fetch_array($approvequery);
-            $approveamount = intval($approveresult["amount"]);
-            $approvetitle = $approveresult["title"];
-            $approvedescription = $approveresult["description"];
-            $approverequester = intval($approveresult["userrequestid"]);
-            $approvetarget = intval($approveresult["usertargetid"]);
+        else if (isset($mybb->input["approvetransfer"], $mybb->input["approveid"])) {
+            if ($isBanker) {
+                $transferRequestId = getSafeNumber($db, $mybb->input["approveid"]);
+                $xQuery = $db->simple_select("banktransferrequests", "*", "id=$transferRequestId", array("limit" => 1));
+                if ($xRow = $db->fetch_array($xQuery)) {
+                    $requestAmount = intval($xRow["amount"]);
+                    $requestTitle = $xRow["title"];
+                    $requestDescription = $xRow["description"];
+                    $requesterId = intval($xRow["userrequestid"]);
+                    $requestTargetId = intval($xRow["usertargetid"]);
 
-            $bankbalance = acceptTransferRequest($db, $uid, $myuid, $approveid, $approverequester, $approvetarget, $approveamount, $approvetitle, $approvedescription);
-            logAction($db, "UNDO", "$myuid approved transfer ($approveid) for $approvetarget titled $approvetitle. The amount was $approveamount to $approvetarget. Description: $approvedescription");
+                    // Accepts and updates both users' balances.
+                    $currbankbalance = acceptTransferRequest($db, $uid, $myuid, $transferRequestId, $requestRequesterId, $requestTargetId, $requestAmount, $requestTitle, $requestDescription);
+                    logAction($db, "UNDO", "$myuid approved transfer ($transferRequestId) for $requestTargetId titled $requestTitle. The amount was $requestAmount to $requestTargetId. Description: $requestDescription");
+
+                    // TODO: Success Message.
+                } else {
+                    echo "transfer request not found...";
+                    exit;
+                }
+            } else {
+                echo "You're not a banker. shoo.";
+                exit;
+            }
         }
 
         // If banker declined a transfer.
-        else if ($isBanker && isset($mybb->input["declinetransfer"], $mybb->input["declineid"])) {
-            $declineid = getSafeNumber($db, $mybb->input["declineid"]);
-            $approvequery = $db->simple_select("banktransferrequests", "*", "id=$declineid", array("limit" => 1));
-            $approveresult = $db->fetch_array($approvequery);
-            $approveamount = intval($approveresult["amount"]);
-            $approvetitle = $approveresult["title"];
-            $approvedescription = $approveresult["description"];
-            $approverequester = intval($approveresult["userrequestid"]);
-            $approvetarget = intval($approveresult["usertargetid"]);
+        else if (isset($mybb->input["declinetransfer"], $mybb->input["declineid"])) {
+            if ($isBanker) {
+                $declineid = getSafeNumber($db, $mybb->input["declineid"]);
+                $xQuery = $db->simple_select("banktransferrequests", "*", "id=$declineid", array("limit" => 1));
+                if ($xRow = $db->fetch_array($xQuery)) {
+                    $requestAmount = intval($xRow["amount"]);
+                    $requestTitle = $xRow["title"];
+                    $requestDescription = $xRow["description"];
+                    $requestRequesterId = intval($xRow["userrequestid"]);
+                    $requestTargetId = intval($xRow["usertargetid"]);
 
-            $db->delete_query("banktransferrequests", "id=$declineid");
-            logAction($db, "UNDO", "$myuid declined transfer for $approvetarget titled $approvetitle. The amount was $approveamount to $approvetarget. Description: $approvedescription");
+                    // Deletes Transfer Request
+                    // TODO: Set to not approved instead
+                    $db->delete_query("banktransferrequests", "id=$declineid");
+                    logAction($db, "UNDO", "$myuid declined transfer for $requestTargetId titled $requestTitle. The amount was $requestAmount to $requestTargetId. Description: $requestDescription");
 
-            echo '<div class="successSection">';
-            echo '<h4>Successfully declined transaction</h4>';
-            echo '</div>';
+                    echo '<div class="successSection">';
+                    echo '<h4>Successfully declined transaction</h4>';
+                    echo '</div>';
+                } else {
+                    echo "transfer request not found...";
+                    exit;
+                }
+            } else {
+                echo "You're not a banker. shoo.";
+                exit;
+            }
         }
 
         // If banker submitted a transaction.
-        else if ($isBanker && isset($mybb->input["submittransaction"], $mybb->input["transactionamount"])) {
-            $transAmount = getSafeNumber($db, $mybb->input["transactionamount"]);
-            $transTitle = getSafeAlpNum($db, $mybb->input["transactiontitle"]);
-            $transDescription = getSafeAlpNum($db, $mybb->input["transactiondescription"]);
-            if (strlen($transDescription) == 0) $transDescription = null;
+        else if (isset($mybb->input["submittransaction"], $mybb->input["transactionamount"])) {
+            if ($isBanker) {
+                $transAmount = getSafeNumber($db, $mybb->input["transactionamount"]);
+                $transTitle = getSafeAlpNum($db, $mybb->input["transactiontitle"]);
+                $transDescription = getSafeAlpNum($db, $mybb->input["transactiondescription"]);
+                if (strlen($transDescription) == 0) $transDescription = null;
 
-            $bankbalance = doTransaction($db, $transAmount, $transTitle, $transDescription, $uid, $myuid, $currname, "Banker Transaction");
+                // Adds a transaction via banker
+                $currbankbalance = doTransaction($db, $transAmount, $transTitle, $transDescription, $uid, $myuid, $currname, "Banker Transaction");
+            } else {
+                echo "You're not a banker. shoo.";
+                exit;
+            }
         }
 
         // If the user submitted a transaction himself.
-        else if (isset($mybb->input["submitpurchase"], $mybb->input["purchaseamount"]) && $myuid == $uid) {
-            $transAmount = -abs(getSafeNumber($db, $mybb->input["purchaseamount"]));
-            $transTitle = getSafeAlpNum($db, $mybb->input["purchasetitle"]);
-            $transDescription = getSafeAlpNum($db, $mybb->input["purchasedescription"]);
-            if (strlen($transDescription) == 0) {
-                $transDescription = null;
-            }
+        else if (isset($mybb->input["submitpurchase"], $mybb->input["purchaseamount"])) {
+            if ($isMyAccount) {
+                $transAmount = -abs(getSafeNumber($db, $mybb->input["purchaseamount"]));
+                $transTitle = getSafeAlpNum($db, $mybb->input["purchasetitle"]);
+                $transDescription = getSafeAlpNum($db, $mybb->input["purchasedescription"]);
+                if (strlen($transDescription) == 0) $transDescription = null;
 
-            if ($transAmount != 0 && strlen($transTitle)) {
-                $bankbalance = addBankTransaction($db, $uid, $transAmount, $transTitle, $description, $uid);
-                displaySuccessTransaction($currname, $transAmount, $transTitle, $description, "User Purchase");
+                if ($transAmount != 0 && strlen($transTitle)) {
+                    $currbankbalance = addBankTransaction($db, $uid, $transAmount, $transTitle, $transDescription, $uid);
+                    displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "User Purchase");
+                } else
+                    displayErrorTransaction();
             } else {
-                displayErrorTransaction();
+                echo "You're not this user. shoo";
+                exit;
             }
         }
 
         // If the user submitted a training +5
-        else if (isset($mybb->input["submittraining"], $mybb->input["trainingvalue"]) && $myuid == $uid && is_numeric($mybb->input["trainingvalue"])) {
-            $trainvalue = getSafeNumber($db, $mybb->input["trainingvalue"]);
-            switch ($trainvalue)
-            {
-                case 5: $transAmount = -1000000; break;
-                case 3: $transAmount = -500000; break;
-                case 2: $transAmount = -250000; break;
-                case 1: $transAmount = -100000; break;
-            }
+        else if (isset($mybb->input["submittraining"], $mybb->input["trainingvalue"]) && is_numeric($mybb->input["trainingvalue"])) {
+            if ($isMyAccount) {
+                $trainvalue = getSafeNumber($db, $mybb->input["trainingvalue"]);
+                switch ($trainvalue) {
+                    case 5:
+                        $transAmount = -1000000;
+                        break;
+                    case 3:
+                        $transAmount = -500000;
+                        break;
+                    case 2:
+                        $transAmount = -250000;
+                        break;
+                    case 1:
+                        $transAmount = -100000;
+                        break;
+                }
 
-            if ($transAmount < -10)
-            {
-                $transTitle = "Training +$trainvalue";
-                $transDescription = 'Purchased training for player.';
-                $bankbalance = addBankTransaction($db, $uid, $transAmount, $transTitle, $transDescription, $uid);
-                displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "User Training");
+                if ($transAmount < -10) {
+                    $transTitle = "Training +$trainvalue";
+                    $transDescription = 'Purchased training for player.';
+                    $currbankbalance = addBankTransaction($db, $uid, $transAmount, $transTitle, $transDescription, $uid);
+                    displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "User Training");
+                } else {
+                    echo "there was an error with the buttons somehow";
+                    exit;
+                }
+            } else {
+                echo "You're not this user. shoo";
+                exit;
             }
         }
 
         // If user submitted a transfer request for another user.
         else if (isset($mybb->input["submitrequest"], $mybb->input["requestamount"])) {
-            $transAmount = -abs(getSafeNumber($db, $mybb->input["requestamount"]));
-            $transTitle = getSafeAlpNum($db, $mybb->input["requesttitle"]);
-            $transDescription = getSafeAlpNum($db, $mybb->input["requestdescription"]);
-            if (strlen($transDescription) == 0) {
-                $transDescription = null;
-            }
+            if (!$isMyAccount) {
+                $transAmount = -abs(getSafeNumber($db, $mybb->input["requestamount"]));
+                $transTitle = getSafeAlpNum($db, $mybb->input["requesttitle"]);
+                $transDescription = getSafeAlpNum($db, $mybb->input["requestdescription"]);
+                if (strlen($transDescription) == 0) $transDescription = null;
 
-            if ($transAmount != 0 && strlen($transTitle)) {
-                addBankTransferRequest($db, $myuid, $uid, $transAmount, $transTitle, $transDescription);
-                displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "Transfer Request");
+                if ($transAmount != 0 && strlen($transTitle)) {
+                    addBankTransferRequest($db, $myuid, $uid, $transAmount, $transTitle, $transDescription);
+                    displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "Transfer Request");
+                } else {
+                    displayErrorTransaction();
+                }
             } else {
-                displayErrorTransaction();
+                echo "you can't transfer money to yourself. dummy.";
+                exit;
             }
         }
     }
@@ -178,8 +237,8 @@
                 <th>Balance</th>
                 <td>
                     <?php 
-                    if ($bankbalance < 0) echo '-';
-                    echo "$" . number_format(abs($bankbalance), 0) . "";
+                    if ($currbankbalance < 0) echo '-';
+                    echo "$" . number_format(abs($currbankbalance), 0) . "";
                     ?>
                 </td>
             </tr>
@@ -218,7 +277,6 @@
                 $date = new DateTime($row['date']);
                 $transactionLink = '<a href="' . getBankTransactionLink($row['id']) . '">';
                 $creatorLink = '<a href="' . getBankAccountLink($row['createdbyuserid']) . '">';
-                $bankerLink = '<a href="' . getBankAccountLink($row['bankerapprovalid']) . '">';
                 $amountClass = ($row['amount'] < 0) ? 'negative' : 'positive';
                 $negativeSign = ($row['amount'] < 0) ? '-' : '';
                 $dateformat = $date->format('m/d/y');
@@ -385,7 +443,7 @@
                         <th>Points</th>
                         <th>Cost</th>
                     </tr>
-                    <if $teamid == null then>
+                    <if $currteamid==null then>
                         <tr>
                             <td>+3</td>
                             <td>$500,000</td>
@@ -413,34 +471,34 @@
                                 <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
                             </form>
                         </tr>
-                    <else>
-                        <tr>
-                            <td>+5</td>
-                            <td>$1,000,000</td>
-                            <form onsubmit="return areYouSure();" method="post">
-                                <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
-                                <input type="hidden" name="trainingvalue" value="5" />
-                                <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
-                            </form>
-                        </tr>
-                        <tr>
-                            <td>+3</td>
-                            <td>$500,000</td>
-                            <form onsubmit="return areYouSure();" method="post">
-                                <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
-                                <input type="hidden" name="trainingvalue" value="3" />
-                                <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
-                            </form>
-                        </tr>
-                        <tr>
-                            <td>+1</td>
-                            <td>$100,000</td>
-                            <form onsubmit="return areYouSure();" method="post">
-                                <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
-                                <input type="hidden" name="trainingvalue" value="1" />
-                                <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
-                            </form>
-                        </tr>
+                        <else>
+                            <tr>
+                                <td>+5</td>
+                                <td>$1,000,000</td>
+                                <form onsubmit="return areYouSure();" method="post">
+                                    <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
+                                    <input type="hidden" name="trainingvalue" value="5" />
+                                    <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                                </form>
+                            </tr>
+                            <tr>
+                                <td>+3</td>
+                                <td>$500,000</td>
+                                <form onsubmit="return areYouSure();" method="post">
+                                    <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
+                                    <input type="hidden" name="trainingvalue" value="3" />
+                                    <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                                </form>
+                            </tr>
+                            <tr>
+                                <td>+1</td>
+                                <td>$100,000</td>
+                                <form onsubmit="return areYouSure();" method="post">
+                                    <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
+                                    <input type="hidden" name="trainingvalue" value="1" />
+                                    <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                                </form>
+                            </tr>
                     </if>
                 </table>
                 <p><em>+5 Training only available when you've been drafted to an SHL team</em></p>
@@ -557,6 +615,6 @@
     {$boardstats}
     <br class="clear" />
     {$footer}
-</body>
+    </bo dy>
 
 </html> 

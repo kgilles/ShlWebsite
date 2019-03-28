@@ -8,13 +8,72 @@
 <body>
     {$header}
 
+    <?php include 'bankerOps.php';
+
+    $myuid = getUserId($mybb);
+
+    // if not logged in, go away
+    if ($myuid <= 0) {
+        echo 'You are not logged in';
+        exit;
+    }
+
+    $isBanker = checkIfBanker($mybb);
+
+    // If a submit button was pressed
+    if (isset($mybb->input["bojopostkey"])) {
+        verify_post_check($mybb->input["bojopostkey"]);
+
+        // If banker approved a transfer.
+        if (isset($mybb->input["approvetransfer"], $mybb->input["approveid"]) && is_numeric($mybb->input["approveid"])) {
+            if ($isBanker) {
+                $requestid = getSafeNumber($db, $mybb->input["approveid"]);
+                $xQuery = $db->simple_select("banktransferrequests", "*", "id=$requestid", array("limit" => 1));
+                if ($xRow = $db->fetch_array($xQuery)) {
+                    $requestAmount = intval($xRow["amount"]);
+                    $requestTitle = $xRow["title"];
+                    $requestDescription = $xRow["description"];
+                    $requesterId = intval($xRow["userrequestid"]);
+                    $requestTargetId = intval($xRow["usertargetid"]);
+                    acceptTransferRequest($db, $uid, $myuid, $requestid, $requesterId, $requestTargetId, $requestAmount, $requestTitle, $requestDescription);
+                } else {
+                    echo "request not found...";
+                    exit;
+                }
+            } else {
+                echo "You're not a banker. shoo.";
+                exit;
+            }
+        }
+
+        // If banker declined a transfer.
+        else if (isset($mybb->input["declinetransfer"], $mybb->input["declineid"]) && is_numeric($mybb->input["declineid"])) {
+            if ($isBanker) {
+                $declineid = getSafeNumber($db, $mybb->input["declineid"]);
+
+                // TODO: replace delete with a approval column
+                $db->delete_query("banktransferrequests", "id=$declineid");
+
+                echo '<div class="successSection">';
+                echo '<h4>Successfully declined transaction</h4>';
+                echo '</div>';
+            } else {
+                echo "You're not a banker. shoo.";
+                exit;
+            }
+        }
+    }
+    ?>
+
     <div class="bojoSection navigation">
         <h2>Banker Portal</h2>
         <p>At a glance view of active requests requiring banker decisions.</p>
         <p>Links:
             <ul>
                 <li><a href="http://simulationhockey.com/banksubmitrequest.php">Submit Request</a></li>
-                <?php if ($isBanker) { echo '<li><a href="http://simulationhockey.com/teamaddusers.php">Assign Users to Team</a></li>'; } ?>
+                <?php if ($isBanker) {
+                    echo '<li><a href="http://simulationhockey.com/teamaddusers.php">Assign Users to Team</a></li>';
+                } ?>
             </ul>
         </p>
     </div>
@@ -37,58 +96,12 @@
         <p>
             <ul>
                 <?php 
-                for($x = 0; $x < count($teams); $x++)
-                {
-                    echo '<li><a href="http://simulationhockey.com/bankteam.php?id='.$teams[$x]["id"].'">'.$teams[$x]["name"].'</a></li>';
-                }
+                foreach ($teams as $item)
+                    echo '<li><a href="http://simulationhockey.com/bankteam.php?id=' . $item["id"] . '">' . $item["name"] . '</a></li>';
                 ?>
             </ul>
         </p>
     </div>
-
-    <?php 
-    include 'bankerOps.php';
-
-    $myuid = getUserId($mybb);
-
-    // if not logged in, go away why are you even here
-    if ($myuid <= 0) {
-        echo 'You are not logged in';
-        exit;
-    }
-
-    $isBanker = checkIfBanker($mybb);
-
-    // If a submit button was pressed
-    if (isset($mybb->input["bojopostkey"])) {
-        verify_post_check($mybb->input["bojopostkey"]);
-
-        // If banker approved a transfer.
-        if ($isBanker && isset($mybb->input["approvetransfer"], $mybb->input["approveid"])) {
-            $approveid = getSafeNumber($db, $mybb->input["approveid"]);
-            $approvequery = $db->simple_select("banktransferrequests", "*", "id=$approveid", array("limit" => 1));
-            $approveresult = $db->fetch_array($approvequery);
-            $approveamount = intval($approveresult["amount"]);
-            $approvetitle = $approveresult["title"];
-            $approvedescription = $approveresult["description"];
-            $approverequester = intval($approveresult["userrequestid"]);
-            $approvetarget = intval($approveresult["usertargetid"]);
-
-            $bankbalance = acceptTransferRequest($db, $uid, $myuid, $approveid, $approverequester, $approvetarget, $approveamount, $approvetitle, $approvedescription);
-        }
-
-        // If banker declined a transfer.
-        else if ($isBanker && isset($mybb->input["declinetransfer"], $mybb->input["declineid"])) {
-            $declineid = getSafeNumber($db, $mybb->input["declineid"]);
-
-            $db->delete_query("banktransferrequests", "id=$declineid");
-
-            echo '<div class="successSection">';
-            echo '<h4>Successfully declined transaction</h4>';
-            echo '</div>';
-        }
-    }
-    ?>
 
     <div class="bojoSection navigation">
         <h2>Group Requests</h2>

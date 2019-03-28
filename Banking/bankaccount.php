@@ -48,7 +48,6 @@
 
     // If a submit button was pressed
     if (isset($mybb->input["bojopostkey"])) {
-
         verify_post_check($mybb->input["bojopostkey"]);
 
         // If banker undid a transaction.

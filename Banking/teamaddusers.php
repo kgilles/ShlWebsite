@@ -8,37 +8,7 @@
 <body>
     {$header}
 
-    <?php 
-    include 'bankerOps.php';
-
-    function displaySuccessMsg($message)
-    {
-        echo '<div class="successSection">';
-        echo '<h4>Success: ' . $message . '</h4>';
-        // TODO: team change summary
-        echo '</div>';
-    }
-
-    function getTeamDropDown($teams, $rowIndex)
-    {
-        echo '<select name="massteamid_' . $rowIndex . '" id="massteamid_' . $rowIndex . '">';
-        echo '<option value="999">Unassigned</option>';
-        for ($x = 0; $x < count($teams); $x++) {
-            $teams[$x]['id'];
-            echo '<option value="' . $teams[$x]['id'] . '">' . $teams[$x]['name'] . '</option>';
-        }
-        echo '</select>';
-    }
-
-    function getTeamDropDownRosterForum($teams)
-    {
-        echo '<select name="massteamforum" id="massteamforum">';
-        for ($x = 0; $x < count($teams); $x++) {
-            $teams[$x]['id'];
-            echo '<option value="' . $teams[$x]['id'] . '">' . $teams[$x]['name'] . '</option>';
-        }
-        echo '</select>';
-    }
+    <?php include 'bankerOps.php';
 
     $myuid = getUserId($mybb);
 
@@ -49,21 +19,42 @@
     }
 
     $isBanker = checkIfBanker($mybb);
-
     if (!$isBanker) {
         echo "You're not a banker, shoo";
         exit;
     }
 
-    $teamRows = $db->simple_select("teams", "*", "id > 1", array(
-        "order_by" => 'name',
-        "order_dir" => 'ASC'
-    ));
+    function displaySuccessMsg($message)
+    {
+        echo '<div class="successSection"><h4>Success: ' . $message . '</h4></div>';
+        // TODO: team change summary
+    }
 
-    while ($teamrow = $db->fetch_array($teamRows)) {
+    function getTeamDropDown($teams, $rowIndex)
+    {
+        echo '<select name="massteamid_' . $rowIndex . '" id="massteamid_' . $rowIndex . '">
+                <option value="999">Unassigned</option>';
+
+        foreach ($teams as $item)
+            echo '<option value="' . $item['id'] . '">' . $item['name'] . '</option>';
+
+        echo '</select>';
+    }
+
+    function getTeamDropDownRosterForum($teams)
+    {
+        echo '<select name="massteamforum" id="massteamforum">';
+        foreach ($teams as $item)
+            echo '<option value="' . $item['id'] . '">' . $item['name'] . '</option>';
+        echo '</select>';
+    }
+
+    $xQuery = $db->simple_select("teams", "*", "id > 1", array("order_by" => 'name', "order_dir" => 'ASC'));
+
+    while ($xRow = $db->fetch_array($xQuery)) {
         $teams[] = [
-            "id" => $teamrow['id'],
-            "name" => $teamrow['name'],
+            "id" => $xRow['id'],
+            "name" => $xRow['name'],
         ];
     }
 
@@ -75,8 +66,8 @@
         $namelist = trim($mybb->input["namelist"]);
 
         // Submitted list of names to search for
+        // Split by commas if present. otherwise split by new lines
         if (isset($mybb->input["submitnames"])) {
-            // Split by commas if present. otherwise split by new lines
             $charToSplit = (strpos($namelist, ',') !== false) ? "," : "\n";
             $namesArray = array_map('trim', explode($charToSplit, $namelist));
 
@@ -86,48 +77,52 @@
             $names = implode(",", $namesArray);
 
             // Gets list of users from db
-            $nameRows = $db->simple_select("users", "*", "username in (" . $names . ")", array(
-                "order_by" => 'username',
-                "order_dir" => 'ASC'
-            ));
+            $xQueryNames = $db->simple_select("users", "*", "username in (" . $names . ")", array("order_by" => 'username', "order_dir" => 'ASC'));
+
+            $nameCount = mysqli_num_rows($xQueryNames);
+            $nameEnteredCount = count($namesArray);
         }
 
         // Submitted add team from roster forum
         else if (isset($mybb->input["submitforumroster"])) {
             $teamid = getSafeNumber($db, $mybb->input["massteamforum"]);
 
-            $teamquery = $db->simple_select("teams", "*", "id=$teamid", array("limit" => 1));
-            $teamrow = $db->fetch_array($teamquery);
-            $teamname = $teamrow['name'];
-            $teamforumid = intval($teamrow['rosterforumid']);
+            $xQuery = $db->simple_select("teams", "*", "id=$teamid", array("limit" => 1));
+            if ($xRow = $db->fetch_array($xQuery)) {
+                $teamname = $xRow['name'];
+                $teamforumid = intval($xRow['rosterforumid']);
 
-            $threadquery = $db->simple_select("threads", "*", "fid=$teamforumid", array());
-            while ($row = $db->fetch_array($threadquery)) {
-                $userid = $row['uid'];
-                $usernames[] = $row['username'];
-                $db->update_query("users", array("teamid" => $teamid), "uid=$userid", 1);
-            }
-
-            $threadquery = $db->simple_select("forums", "*", "pid=$teamforumid", array());
-            while ($subrow = $db->fetch_array($threadquery)) {
-                $prospectforumid = intval($subrow['fid']);
-                $threadquery = $db->simple_select("threads", "*", "fid=$prospectforumid", array());
+                // Updates users in team subforum
+                $threadquery = $db->simple_select("threads", "*", "fid=$teamforumid", array());
                 while ($row = $db->fetch_array($threadquery)) {
                     $userid = $row['uid'];
                     $usernames[] = $row['username'];
                     $db->update_query("users", array("teamid" => $teamid), "uid=$userid", 1);
                 }
-            }
 
-            echo '<div class="successSection">';
-            echo '<h4>Success: Players added from Roster Forum';
-            echo 'Team: ' . $teamname;
-            echo '<ul>';
-            for ($x = 0; $x < count($usernames); $x++) {
-                echo '<li>' . $usernames[$x] . '</li>';
+                // Updates users in team prospects subforum
+                $threadquery = $db->simple_select("forums", "*", "pid=$teamforumid", array());
+                while ($subrow = $db->fetch_array($threadquery)) {
+                    $prospectforumid = intval($subrow['fid']);
+                    $threadquery = $db->simple_select("threads", "*", "fid=$prospectforumid", array());
+                    while ($row = $db->fetch_array($threadquery)) {
+                        $userid = $row['uid'];
+                        $usernames[] = $row['username'];
+                        $db->update_query("users", array("teamid" => $teamid), "uid=$userid", 1);
+                    }
+                }
+
+                echo '<div class="successSection">
+                        <h4>Success: Players added from Roster Forum</h4>
+                        Team: ' . $teamname .
+                    '<ul>';
+
+                foreach ($usernames as $item)
+                    echo '<li>' . $item . '</li>';
+
+                echo '</ul>
+                      </div>';
             }
-            echo '</ul>';
-            echo '</div>';
         }
 
         // Submitted player names to teams
@@ -135,14 +130,13 @@
             $isValid = true;
 
             $x = 0;
-            $massinsert = array();
             while (isset($mybb->input["massid_" . $x])) {
                 $currId = getSafeNumber($db, $mybb->input["massid_$x"]);
                 $teamid = getSafeNumber($db, $mybb->input["massteamid_$x"]);
 
-                if ($teamid == 999) {
+                // Unassigning a player
+                if ($teamid == 999)
                     $teamid = null;
-                }
 
                 $massupdate[] = [
                     "id" => $currId,
@@ -153,12 +147,13 @@
             }
 
             if ($isValid) {
-                for ($x = 0; $x < count($massupdate); $x++) {
-                    $teamid = $massupdate[$x]['teamid'];
-                    $userid = $massupdate[$x]['id'];
+                // Assign the users to a team
+                foreach ($massupdate as $item) {
+                    $teamid = $item['teamid'];
+                    $userid = $item['id'];
 
+                    // IDK how to use update_query to set something null. Research mybb's functions. Also date now()
                     if ($teamid == null) {
-                        // IDK how to use update_query to set something null. 
                         $updateTeamQuery = "UPDATE mybb_users SET teamid=NULL WHERE mybb_users.uid=$userid LIMIT 1";
                         $db->write_query($updateTeamQuery);
                     } else {
@@ -168,9 +163,7 @@
 
                 displaySuccessMsg("Change teams for users");
             } else {
-                echo '<div class="errorSection">';
-                echo '<h4>Error: There was something wrong.</h4>';
-                echo '</div>';
+                echo '<div class="errorSection"><h4>Error: There was something wrong.</h4></div>';
             }
         }
     }
@@ -197,42 +190,44 @@
         </form>
 
         <?php
-        if ($nameRows != null) {
-            $nameCount = mysqli_num_rows($nameRows);
-            $enteredCount = count($namesArray);
+        if ($nameEnteredCount > 0) {
+            echo '<hr />';
             if ($nameCount > 0) {
-                echo '<hr />';
-                if ($nameCount != $enteredCount) {
+                if ($nameCount != $nameEnteredCount)
                     echo '<div class="nameCompare warning">';
-                } else {
+                else
                     echo '<div class="nameCompare success">';
-                }
+
                 echo count($namesArray) . ' names entered<br/>' . $nameCount . ' names found';
-                echo '</div>';
-                echo '<form onsubmit="return validateForms()" method="post">';
-                echo '<table class="namesTable">';
-                echo '<tr><th>username</th><th>team</th></tr>';
+                echo '</div>
+                      <form onsubmit="return validateForms()" method="post">
+                      <table class="namesTable">
+                          <tr><th>username</th><th>team</th></tr>';
 
                 $massIndex = 0;
-                while ($namerow = $db->fetch_array($nameRows)) {
-                    echo "<tr><td>" . $namerow['username'] . "</td>";
+                while ($xRow = $db->fetch_array($xQueryNames)) {
+                    echo "<tr><td>" . $xRow['username'] . "</td>";
+
                     echo '<td>';
                     getTeamDropDown($teams, $massIndex);
                     echo "</td>";
-                    echo '<input type="hidden" name="massid_' . $massIndex . '" value="' . $namerow['uid'] . '" />';
-                    echo '<input type="hidden" name="massname_' . $massIndex . '" value="' . $namerow['username'] . '" />';
-                    if ($massIndex === 0) {
+
+                    echo '<input type="hidden" name="massid_' . $massIndex . '" value="' . $xRow['uid'] . '" />
+                          <input type="hidden" name="massname_' . $massIndex . '" value="' . $xRow['username'] . '" />';
+
+                    if ($massIndex === 0)
                         echo '<td><input type="button" onclick="fillInUsers()" value="Fill the rest" /></td>';
-                    }
+
                     echo "</tr>";
                     $massIndex++;
                 }
-                echo '<tr><td style="height: 8px"></td></tr>';
-                echo '<tr><td colspan="1"></td><td><input type="submit" name="submitmassseparate" value="Add Users to Teams" /></td></tr>';
-                echo '</table>';
-                echo '<input type="hidden" name="namelist" value="' . $namelist . '" />';
-                echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" />';
-                echo '</form>';
+
+                echo '<tr><td style="height: 8px"></td></tr>
+                      <tr><td colspan="1"></td><td><input type="submit" name="submitmassseparate" value="Add Users to Teams" /></td></tr>
+                      </table>
+                      <input type="hidden" name="namelist" value="' . $namelist . '" />
+                      <input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" />
+                      </form>';
             }
         }
         ?>

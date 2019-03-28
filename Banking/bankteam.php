@@ -8,80 +8,47 @@
 <body>
     {$header}
 
-    <?php 
-
-    include 'bankerOps.php';
+    <?php include 'bankerOps.php';
 
     $myuid = getUserId($mybb);
 
-    // if not logged in, go away why are you even here
+    // if not logged in, go away
     if ($myuid <= 0) {
         echo 'You are not logged in';
         exit;
     }
 
     // Gets id of team from URL
-    $tid = 0;
-    if (isset($_GET["id"]) && is_numeric($_GET["id"])) {
-        $tid = getSafeNumber($db, $_GET["id"]);
-    } else {
-        // ... or redirects to your own page
+    if (isset($_GET["id"]) && is_numeric($_GET["id"]))
+        $currentTeamId = getSafeNumber($db, $_GET["id"]);
+    else
         header('Location: http://simulationhockey.com/banksummary.php');
-    }
 
     $isBanker = checkIfBanker($mybb);
 
-    $teamquery = $db->simple_select("teams", "*", "id=$tid", array("limit" => 1));
-    $teamrow = $db->fetch_array($teamquery);
-    $teamname = $teamrow['name'];
-    $teamforumid = $teamrow['rosterforumid'];
+    $xQuery = $db->simple_select("teams", "*", "id=$currentTeamId", array("limit" => 1));
+    if ($xRow = $db->fetch_array($xQuery)) {
+        $teamname = $xRow['name'];
+        $teamforumid = $xRow['rosterforumid'];
 
-    $threadquery = $db->simple_select("users", "*", "teamid=$tid", array());
-    while ($row = $db->fetch_array($threadquery)) {
-        $userid = intval($row['uid']);
-        $username = $row['username'];
-        $userbalance = intval($row['bankbalance']);
-        $teamusers[] = [
-            "uid" => $userid,
-            "username" => $username,
-            "bankbalance" => $userbalance,
-        ];
-    }
-
-    $threadquery = $db->simple_select("forums", "*", "pid=$teamforumid", array());
-    while ($subrow = $db->fetch_array($threadquery)) {
-        $prospectforumid = intval($subrow['fid']);
-        $threadquery = $db->simple_select("threads", "*", "fid=$prospectforumid", array());
-        while ($row = $db->fetch_array($threadquery)) {
-            $userid = intval($row['uid']);
-            $username = $row['username'];
-            $userbalance = intval($row['bankbalance']);
-
-            $isduplicate = false;
-            foreach ($teamusers as $user) {
-                if ($user["uid"] == $userid) { 
-                    $isduplicate = true;
-                    break;
-                }
-            }
-
-            if ($isduplicate) {
-                continue;
-            }
-
+        // Get users with matching team
+        $xQueryUser = $db->simple_select("users", "*", "teamid=$currentTeamId", array());
+        while ($xRowUser = $db->fetch_array($xQueryUser)) {
+            $userid = intval($xRowUser['uid']);
+            $username = $xRowUser['username'];
+            $userbalance = intval($xRowUser['bankbalance']);
             $teamusers[] = [
                 "uid" => $userid,
                 "username" => $username,
                 "bankbalance" => $userbalance,
             ];
         }
+
+        // Sorts by name
+        usort($teamusers, function ($item1, $item2) {
+            return $item1['username'] <=> $item2['username'];
+        });
     }
-
-    usort($teamusers, function ($item1, $item2) {
-        return $item1['username'] <=> $item2['username'];
-    });
-
-    array_unique($teamusers);
 
     ?>
 
@@ -100,10 +67,10 @@
                 $userid = intval($user["uid"]);
                 $userlink = getBankAccountLink($userid);
 
-                echo '<tr>';
-                echo '<td><a href="'.$userlink.'">' . $user["username"] . '</a></td>';
-                echo '<td>' . $bankoutput . '</td>';
-                echo '</tr>';
+                echo '<tr>
+                        <td><a href="' . $userlink . '">' . $user["username"] . '</a></td>
+                        <td>' . $bankoutput . '</td>
+                      </tr>';
             }
             ?>
         </table>

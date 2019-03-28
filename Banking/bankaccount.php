@@ -23,16 +23,14 @@
     // Gets id of user from URL
     if (isset($_GET["uid"]) && is_numeric($_GET["uid"]))
         $currentUserId = getSafeNumber($db, $_GET["uid"]);
-    else
-    {
+    else {
         header('Location: http://simulationhockey.com/bankaccount.php?uid=' . $myuid);
         exit;
     }
 
 
     $curruser = getUser($db, $currentUserId);
-    if ($curruser == null)
-    {
+    if ($curruser == null) {
         header('Location: http://simulationhockey.com/bankaccount.php?uid=' . $myuid);
         exit;
     }
@@ -98,8 +96,8 @@
                     $requestTargetId = intval($xRow["usertargetid"]);
 
                     // Accepts and updates both users' balances.
-                    $currbankbalance = acceptTransferRequest($db, $currentUserId, $myuid, $transferRequestId, $requestRequesterId, $requestTargetId, $requestAmount, $requestTitle, $requestDescription);
-                    logAction($db, "UNDO", "$myuid approved transfer ($transferRequestId) for $requestTargetId titled $requestTitle. The amount was $requestAmount to $requestTargetId. Description: $requestDescription");
+                    $currbankbalance = acceptTransferRequest($db, $currentUserId, $myuid, $transferRequestId, $requesterId, $requestTargetId, $requestAmount, $requestTitle, $requestDescription);
+                    logAction($db, "UNDO", "$myuid approved transfer ($transferRequestId) from $requesterId titled $requestTitle. The amount was $requestAmount to $requestTargetId. Description: $requestDescription");
 
                     // TODO: Success Message.
                 } else {
@@ -214,7 +212,7 @@
         // If user submitted a transfer request for another user.
         else if (isset($mybb->input["submitrequest"], $mybb->input["requestamount"])) {
             if (!$isMyAccount) {
-                $transAmount = -abs(getSafeNumber($db, $mybb->input["requestamount"]));
+                $transAmount = abs(getSafeNumber($db, $mybb->input["requestamount"]));
                 $transTitle = getSafeAlpNum($db, $mybb->input["requesttitle"]);
                 $transDescription = getSafeAlpNum($db, $mybb->input["requestdescription"]);
                 if (strlen($transDescription) == 0) $transDescription = null;
@@ -242,8 +240,15 @@
                 <th>Balance</th>
                 <td>
                     <?php 
-                    if ($currbankbalance < 0) echo '-';
-                    echo "$" . number_format(abs($currbankbalance), 0) . "";
+                    if ($currbankbalance < 0) {
+                        $balanceclass = "red negative";
+                        $negativesign = '-';
+                    } else {
+                        $balanceclass = "positive";
+                        $negativesign = '';
+                    }
+                    $bankbalancedisplay = number_format(abs($currbankbalance), 0);
+                    echo "<span class=\"$balanceclass\">$negativesign" . "$" . $bankbalancedisplay . "</span>";
                     ?>
                 </td>
             </tr>
@@ -280,16 +285,16 @@
             $bankRows = $db->query($transactionQuery);
             while ($row = $db->fetch_array($bankRows)) {
                 $date = new DateTime($row['date']);
-                $transactionLink = '<a href="' . getBankTransactionLink($row['id']) . '">';
-                $creatorLink = '<a href="' . getBankAccountLink($row['createdbyuserid']) . '">';
                 $amountClass = ($row['amount'] < 0) ? 'negative' : 'positive';
+                $transactionLink = '<a class="' . $amountClass . '" href="' . getBankTransactionLink($row['id']) . '">';
+                $creatorLink = '<a class="' . $amountClass . '" href="' . getBankAccountLink($row['createdbyuserid']) . '">';
                 $negativeSign = ($row['amount'] < 0) ? '-' : '';
                 $dateformat = $date->format('m/d/y');
                 $numberformat = number_format(abs($row['amount']), 0);
 
                 echo '<tr>';
                 echo "<td>$transactionLink" . $row['title'] . '</a></td>';
-                echo "<td class='$amountClass'>$transactionLink" . $negativeSign . '$' . $numberformat . "</a></td>";
+                echo "<td>$transactionLink<span class=\"$amountClass\">" . $negativeSign . '$' . $numberformat . "</span></a></td>";
                 echo "<td>$dateformat</td>";
                 echo "<td>$creatorLink" . $row['creator'] . "</a></td>";
 
@@ -336,16 +341,16 @@
                 $requestdate = new DateTime($row['requestdate']);
                 $requestdate = $requestdate->format('m/d/y');
 
-                $grouplink = '<a href="http://simulationhockey.com/bankrequest.php?id=' . $row['gid'] . '">';
                 $amountClass = ($row['amount'] < 0) ? 'negative' : 'positive';
+                $grouplink = '<a href="http://simulationhockey.com/bankrequest.php?id=' . $row['gid'] . '">';
                 $negativeSign = ($row['amount'] < 0) ? '-' : '';
                 $description = $row['description'];
                 $title = $row['title'];
                 $amountformat = number_format(abs($row['amount']), 0);
 
                 echo '<tr>';
-                echo "<td>$grouplink" . $title . '</a></td>';
-                echo "<td class='$amountClass'>$grouplink" . $negativeSign . '$' . $amountformat . "</a></td>";
+                echo "<td>$grouplink" . $title . "</a></td>";
+                echo "<td>$grouplink<span class=\"$amountClass\">$negativeSign" . '$' . "$amountformat</span></a></td>";
                 echo "<td>$requestdate</td>";
                 echo "<td>$description</td>";
                 echo "</tr>";
@@ -404,7 +409,6 @@
                 $urequesterLink = '<a href="' . getBankAccountLink($row['userrequestid']) . '">';
                 $utargetLink = '<a href="' . getBankAccountLink($row['usertargetid']) . '">';
                 $amountClass = ($row['amount'] < 0) ? 'negative' : 'positive';
-                $negativeSign = ($row['amount'] < 0) ? '-' : '';
                 $amountformat = number_format(abs($row['amount']), 0);
                 $title = $row['title'];
 
@@ -412,7 +416,7 @@
                 echo "<td>$title</td>";
                 echo "<td>$urequesterLink" . $row['urequester'] . "</a></td>";
                 echo "<td>$utargetLink" . $row['utarget'] . "</a></td>";
-                echo "<td class=\"$amountClass\">$negativeSign . '$' . $amountformat</td>";
+                echo '<td class="' . $amountClass . '">$' . $amountformat . "</td>";
                 echo "<td>$requestdate</td>";
 
                 if ($isBanker) {

@@ -10,6 +10,35 @@
 
     <?php include 'bankerOps.php';
 
+    // Testing out some time related stuff. Might not use though.
+    // $xQuery = $db->write_query("SELECT now() as serverTime");
+    // if ($xRow = $db->fetch_array($xQuery)) {
+    //     $serverDate = new DateTime($xRow['serverTime']);
+    //     $startDate = new DateTime('last friday');
+    //     $startDate->setTime(4, 0);
+    //     $endDate = new DateTime('last friday');
+    //     $endDate->setTime(12, 0);
+
+    //     $startDate->setTimeZone(new DateTimeZone('America/New_York'));
+    //     $endDate->setTimeZone(new DateTimeZone('America/New_York'));
+    //     $serverDate->setTimeZone(new DateTimeZone('America/New_York'));
+
+    //     echo '<table>';
+    //     echo '<tr>';
+    //     echo '<th>Start of week</th> ';
+    //     echo '<td>' . $startDate->format('m/d/y g:i A') . ' ET</td>';
+    //     echo '</tr>';
+    //     echo '<tr>';
+    //     echo '<th>End of week deadline</th> ';
+    //     echo '<td>' . $endDate->format('m/d/y g:i A') . ' ET</td>';
+    //     echo '</tr>';
+    //     echo '<tr>';
+    //     echo '<th>Current server time</th> ';
+    //     echo '<td>' . $serverDate->format('m/d/y g:i A') . ' ET</td>';
+    //     echo '</tr>';
+    //     echo '</table>';
+    // }
+
     $myuid = getUserId($mybb);
 
     // if not logged in, go away

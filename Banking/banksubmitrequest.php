@@ -81,6 +81,8 @@
         // Submitted list of names to search for
         // Split by commas if present. otherwise split by new lines
         if (isset($mybb->input["submitnames"])) {
+            logAction($db, "ACTION", "$myuid attempts to submit a list of names for a transaction request");
+
             $charToSplit = (strpos($namelist, ',') !== false) ? "," : "\n";
             $namesArray = array_map('trim', explode($charToSplit, $namelist));
 
@@ -95,6 +97,8 @@
 
         // Submitted Mass Transactions
         else if (isset($mybb->input["submitmassseparate"])) {
+            logAction($db, "ACTION", "$myuid attempts to submit a series of transactions for certain users");
+
             // Validate data
             // Create the group
             // If Banker, create the transactions directly

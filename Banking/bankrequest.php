@@ -28,6 +28,7 @@
 
             if ($isBanker) {
                 if (isset($mybb->input["submitApprove"])) {
+                    logAction($db, "ACTION", "$myuid attempts to approve a transfer request");
                     $querytext = "UPDATE mybb_banktransactiongroups SET bankerid=$myuid, isapproved=1, decisiondate=now() WHERE mybb_banktransactiongroups.id=$currBankRequestId";
                     $db->write_query($querytext);
 
@@ -67,6 +68,7 @@
                         echo '</div>';
                     }
                 } else if (isset($mybb->input["submitDecline"])) {
+                    logAction($db, "ACTION", "$myuid attempts to decline a transfer request");
                     $querytext = "UPDATE mybb_banktransactiongroups SET bankerid=$myuid, isapproved=0, decisiondate=now() WHERE mybb_banktransactiongroups.id=$currBankRequestId";
                     $db->query($querytext);
 

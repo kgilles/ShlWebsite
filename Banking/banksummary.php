@@ -26,6 +26,7 @@
 
         // If banker approved a transfer.
         if (isset($mybb->input["approvetransfer"], $mybb->input["approveid"]) && is_numeric($mybb->input["approveid"])) {
+            logAction($db, "ACTION", "$myuid attempts to approve a transfer request");
             if ($isBanker) {
                 $requestid = getSafeNumber($db, $mybb->input["approveid"]);
                 $xQuery = $db->simple_select("banktransferrequests", "*", "id=$requestid", array("limit" => 1));
@@ -48,6 +49,7 @@
 
         // If banker declined a transfer.
         else if (isset($mybb->input["declinetransfer"], $mybb->input["declineid"]) && is_numeric($mybb->input["declineid"])) {
+            logAction($db, "ACTION", "$myuid attempts to decline a transfer request");
             if ($isBanker) {
                 $declineid = getSafeNumber($db, $mybb->input["declineid"]);
 

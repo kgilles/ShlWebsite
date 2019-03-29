@@ -7,6 +7,9 @@ include 'bankerOps.php';
 header('Content-Type: text/csv');
 header('Content-Disposition: attachment; filename="shlbankbalances.csv"');
 
+$myuid = getUserId($mybb);
+logAction($db, "ACTION", "$myuid attempts to export a bank account");
+
 $querytext =
     "SELECT uid, username, bankbalance
         FROM mybb_users

@@ -68,6 +68,7 @@
         // Submitted list of names to search for
         // Split by commas if present. otherwise split by new lines
         if (isset($mybb->input["submitnames"])) {
+            logAction($db, "ACTION", "$myuid attempts to submit a list of names for team assignments");
             $charToSplit = (strpos($namelist, ',') !== false) ? "," : "\n";
             $namesArray = array_map('trim', explode($charToSplit, $namelist));
 
@@ -85,6 +86,7 @@
 
         // Submitted add team from roster forum
         else if (isset($mybb->input["submitforumroster"])) {
+            logAction($db, "ACTION", "$myuid attempts to get a list of names for team assignments");
             $teamid = getSafeNumber($db, $mybb->input["massteamforum"]);
 
             $xQuery = $db->simple_select("teams", "*", "id=$teamid", array("limit" => 1));
@@ -127,6 +129,7 @@
 
         // Submitted player names to teams
         else if (isset($mybb->input["submitmassseparate"])) {
+            logAction($db, "ACTION", "$myuid attempts to assign a list of users to a team");
             $isValid = true;
 
             $x = 0;

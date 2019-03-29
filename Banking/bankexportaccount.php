@@ -17,6 +17,9 @@ if ($curruser == null) {
 header('Content-Type: text/csv');
 header('Content-Disposition: attachment; filename="shlbankaccount_'.$userid.'.csv"');
 
+$myuid = getUserId($mybb);
+logAction($db, "ACTION", "$myuid attempts to export a bank account");
+
 if ($curruser['teamid'] !== null) {
     $xQuery = $db->simple_select("teams", "*", "id=" . $curruser['teamid'], array("limit" => 1));
     if ($xRow = $db->fetch_array($xQuery))

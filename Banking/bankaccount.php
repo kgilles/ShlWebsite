@@ -85,6 +85,7 @@
 
         // If banker undid a transaction.
         if (isset($mybb->input["undotransaction"], $mybb->input["undoid"]) && is_numeric($mybb->input["undoid"])) {
+            logAction($db, "ACTION", "$myuid attempts to undo a transaction");
             if ($isBanker) {
                 $transid = getSafeNumber($db, $mybb->input["undoid"]);
                 $xQuery = $db->simple_select("banktransactions", "*", "id=$transid", array("limit" => 1));
@@ -114,6 +115,7 @@
 
         // If banker approved a transfer.
         else if (isset($mybb->input["approvetransfer"], $mybb->input["approveid"])) {
+            logAction($db, "ACTION", "$myuid attempts to approve a transfer");
             if ($isBanker) {
                 $transferRequestId = getSafeNumber($db, $mybb->input["approveid"]);
                 $xQuery = $db->simple_select("banktransferrequests", "*", "id=$transferRequestId", array("limit" => 1));
@@ -141,6 +143,7 @@
 
         // If banker declined a transfer.
         else if (isset($mybb->input["declinetransfer"], $mybb->input["declineid"])) {
+            logAction($db, "ACTION", "$myuid attempts to decline a transfer");
             if ($isBanker) {
                 $declineid = getSafeNumber($db, $mybb->input["declineid"]);
                 $xQuery = $db->simple_select("banktransferrequests", "*", "id=$declineid", array("limit" => 1));
@@ -171,6 +174,7 @@
 
         // If banker submitted a transaction.
         else if (isset($mybb->input["submittransaction"], $mybb->input["transactionamount"])) {
+            logAction($db, "ACTION", "$myuid attempts to submit a transaction as a banker");
             if ($isBanker) {
                 $transAmount = getSafeNumber($db, $mybb->input["transactionamount"]);
                 $transTitle = getSafeAlpNum($db, $mybb->input["transactiontitle"]);
@@ -187,6 +191,7 @@
 
         // If the user submitted a transaction himself.
         else if (isset($mybb->input["submitpurchase"], $mybb->input["purchaseamount"])) {
+            logAction($db, "ACTION", "$myuid attempts to make a transaction");
             if ($isMyAccount) {
                 $transAmount = -abs(getSafeNumber($db, $mybb->input["purchaseamount"]));
                 $transTitle = getSafeAlpNum($db, $mybb->input["purchasetitle"]);
@@ -206,6 +211,7 @@
 
         // If the user submitted a training +5
         else if (isset($mybb->input["submittraining"], $mybb->input["trainingvalue"]) && is_numeric($mybb->input["trainingvalue"])) {
+            logAction($db, "ACTION", "$myuid attempts to do a training");
             if ($isMyAccount) {
                 $trainvalue = getSafeNumber($db, $mybb->input["trainingvalue"]);
                 switch ($trainvalue) {
@@ -240,6 +246,7 @@
 
         // If user submitted a transfer request for another user.
         else if (isset($mybb->input["submitrequest"], $mybb->input["requestamount"])) {
+            logAction($db, "ACTION", "$myuid attempts to submit a transfer request");
             if (!$isMyAccount) {
                 $transAmount = abs(getSafeNumber($db, $mybb->input["requestamount"]));
                 $transTitle = getSafeAlpNum($db, $mybb->input["requesttitle"]);

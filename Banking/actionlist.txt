@@ -1,0 +1,33 @@
+General Public
+
+### Bank Account
+Buying training
+Buy anything else
+transfer money to another user
+View transaction history
+View pending transaction requests
+View pending transfer requests
+Export a user's bank account
+
+### Bank Summary
+Submit deposit requests
+Export league bank balances
+View balances by team
+View league pending grouped transaction requests 
+View league grouped transaction history
+View league active transfer requests
+
+
+Bankers
+
+### Bank Account
+Undo Transactions
+Add transaction for user
+Approve/Decline transaction requests
+Approve/Decline transfer requests
+
+### Bank Summary
+Submit deposit requests (auto approved)
+Assign users to teams
+Approve/Decline transaction requests
+Approve/Decline transfer requests

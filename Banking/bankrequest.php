@@ -97,12 +97,12 @@
             $groupBanker = $xRow['bankerusername'];
             $isapproved = $xRow['isapproved'];
 
-            if ($isapproved == 1)
+            if ($isapproved == null)
+                $approveText = "No Decision";
+            else if ($isapproved == 1)
                 $approveText = "Approved";
             else if ($isapproved == 0)
                 $approveText = "Declined";
-            else
-                $approveText = "No Decision";
 
             $requestDate = new DateTime($xRow['requestdate']);
 

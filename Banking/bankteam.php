@@ -77,7 +77,7 @@
     </div>
 
     <!-- Banker Controls: Bankers only -->
-    <if ($isBanker) then>
+    <if $isBanker then>
 
         <!-- Add a transaction -->
         <div class="bojoSection navigation">

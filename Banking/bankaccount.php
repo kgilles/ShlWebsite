@@ -64,6 +64,13 @@
         exit;
     }
 
+    function displayNotEnoughtMoney() {
+        echo '<div class="errorSection">';
+        echo "<h4>Error</h4>";
+        echo '<p>Not enough money for transaction. Your balance cannot go below $1,500,000 without a banker.</p>';
+        echo '</div>';
+    }
+
     $isMyAccount = ($myuid == $currentUserId);
     $currbankbalance = $curruser["bankbalance"];
     $currname = $curruser["username"];
@@ -199,8 +206,12 @@
                 if (strlen($transDescription) == 0) $transDescription = null;
 
                 if ($transAmount != 0 && strlen($transTitle)) {
-                    $currbankbalance = addBankTransaction($db, $currentUserId, $transAmount, $transTitle, $transDescription, $currentUserId);
-                    displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "User Purchase");
+                    if ($currbankbalance + $transAmount >= -1500000) {
+                        $currbankbalance = addBankTransaction($db, $currentUserId, $transAmount, $transTitle, $transDescription, $currentUserId);
+                        displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "User Purchase");
+                    } else {
+                        displayNotEnoughtMoney();
+                    }
                 } else
                     displayErrorTransaction();
             } else {
@@ -209,7 +220,7 @@
             }
         }
 
-        // If the user submitted a training +5
+        // If the user submitted a training
         else if (isset($mybb->input["submittraining"], $mybb->input["trainingvalue"]) && is_numeric($mybb->input["trainingvalue"])) {
             logAction($db, "ACTION", "$myuid attempts to do a training");
             if ($isMyAccount) {
@@ -232,8 +243,12 @@
                 if ($transAmount < -10) {
                     $transTitle = "Training +$trainvalue";
                     $transDescription = 'Purchased training for player.';
-                    $currbankbalance = addBankTransaction($db, $currentUserId, $transAmount, $transTitle, $transDescription, $currentUserId);
-                    displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "User Training");
+                    if ($currbankbalance + $transAmount >= -1500000) {
+                        $currbankbalance = addBankTransaction($db, $currentUserId, $transAmount, $transTitle, $transDescription, $currentUserId);
+                        displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "User Training");
+                    } else {
+                        displayNotEnoughtMoney();
+                    }
                 } else {
                     echo "there was an error with the buttons somehow";
                     exit;
@@ -356,7 +371,7 @@
         $transactionQuery =
             "SELECT bt.*, groups.id as 'gid', groups.groupname, groups.requestdate
                 FROM mybb_banktransactionrequests bt
-                LEFT JOIN mybb_banktransactiongroups groups ON bt.groupid=groups.id && groups.isapproved IS NULL
+                JOIN mybb_banktransactiongroups groups ON bt.groupid=groups.id && groups.isapproved IS NULL
                 WHERE bt.uid=$currentUserId
                 ORDER BY groups.requestdate DESC
                 LIMIT 50";
@@ -483,8 +498,8 @@
     <!-- New Purchase: Only available to the actual user -->
     <if ($currentUserId==$myuid) then>
         <div class="bojoSection navigation">
-            <h2>New Purchase <span class="expandclick" onclick="toggleArea(this, 'purchasearea')">(expand)</span></h2>
-            <div id="purchasearea" class="hideme">
+            <h2>New Purchase</h2>
+            <div id="purchasearea">
                 <h4>Weekly Training</h4>
                 <table>
                     <tr>
@@ -550,6 +565,7 @@
                     </if>
                 </table>
                 <p><em>+5 Training only available when you've been drafted to an SHL team</em></p>
+                <hr />
                 <form onsubmit="return areYouSure();" method="post">
                     <h4 style="margin-top: 10px;">Other Purchases</h4>
                     <table>

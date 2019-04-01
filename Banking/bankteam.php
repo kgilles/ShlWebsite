@@ -32,7 +32,7 @@
         $teamforumid = $xRow['rosterforumid'];
 
         // Get users with matching team
-        $xQueryUser = $db->simple_select("users", "*", "teamid=$currentTeamId", array());
+        $xQueryUser = $db->simple_select("users", "*", "teamid=$currentTeamId", array("order_by" => 'username', "order_dir" => 'ASC'));
         while ($xRowUser = $db->fetch_array($xQueryUser)) {
             $userid = intval($xRowUser['uid']);
             $username = $xRowUser['username'];
@@ -43,11 +43,6 @@
                 "bankbalance" => $userbalance,
             ];
         }
-
-        // Sorts by name
-        usort($teamusers, function ($item1, $item2) {
-            return $item1['username'] <=> $item2['username'];
-        });
     }
 
     ?>

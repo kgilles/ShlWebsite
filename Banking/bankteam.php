@@ -56,16 +56,18 @@
                 <th>Balance</th>
             </tr>
             <?php
-            foreach ($teamusers as $user) {
-                $negativeSign = ($user["bankbalance"] < 0) ? '-' : '';
-                $bankoutput = $negativeSign . '$' . number_format(abs($user["bankbalance"]), 0);
-                $userid = intval($user["uid"]);
-                $userlink = getBankAccountLink($userid);
+            if ($teamusers !== null) {
+                foreach ($teamusers as $user) {
+                    $negativeSign = ($user["bankbalance"] < 0) ? '-' : '';
+                    $bankoutput = $negativeSign . '$' . number_format(abs($user["bankbalance"]), 0);
+                    $userid = intval($user["uid"]);
+                    $userlink = getBankAccountLink($userid);
 
-                echo '<tr>
+                    echo '<tr>
                         <td><a href="' . $userlink . '">' . $user["username"] . '</a></td>
                         <td>' . $bankoutput . '</td>
                       </tr>';
+                }
             }
             ?>
         </table>
@@ -88,4 +90,4 @@
     {$footer}
 </body>
 
-</html> 
+</html>

@@ -30,32 +30,49 @@
         // TODO: team change summary
     }
 
-    function getTeamDropDown($teams, $rowIndex)
+    function getTeamDropDown($shlTeams, $smjhlTeams, $rowIndex)
     {
         echo '<select name="massteamid_' . $rowIndex . '" id="massteamid_' . $rowIndex . '">
-                <option value="999">Unassigned</option>';
+        <option value="999">Unassigned</option>';
 
-        foreach ($teams as $item)
+        echo '<option value="0">---- SHL TEAMS ----</option>';
+
+        foreach ($shlTeams as $item)
+            echo '<option value="' . $item['id'] . '">' . $item['name'] . '</option>';
+
+        echo '<option value="0">---- SMJHL TEAMS ----</option>';
+
+        foreach ($smjhlTeams as $item)
             echo '<option value="' . $item['id'] . '">' . $item['name'] . '</option>';
 
         echo '</select>';
     }
 
-    function getTeamDropDownRosterForum($teams)
+    function getTeamDropDownRosterForum($shlTeams, $smjhlTeams)
     {
-        echo '<select name="massteamforum" id="massteamforum">';
-        foreach ($teams as $item)
+        echo '<select name="massrosterforum" id="massrosterforum">';
+        echo '<option value="0">Select a team...</option>';
+        echo '<option value="0">---- SHL TEAMS ----</option>';
+
+        foreach ($shlTeams as $item)
             echo '<option value="' . $item['id'] . '">' . $item['name'] . '</option>';
+
+        echo '<option value="0">---- SMJHL TEAMS ----</option>';
+
+        foreach ($smjhlTeams as $item)
+            echo '<option value="' . $item['id'] . '">' . $item['name'] . '</option>';
+
         echo '</select>';
     }
 
     $xQuery = $db->simple_select("teams", "*", "id > 1", array("order_by" => 'name', "order_dir" => 'ASC'));
 
     while ($xRow = $db->fetch_array($xQuery)) {
-        $teams[] = [
-            "id" => $xRow['id'],
-            "name" => $xRow['name'],
-        ];
+        if ($xRow['league'] == "SHL") {
+            $shlTeams[] = ["id" => $xRow['id'], "name" => $xRow['name']];
+        } else {
+            $smjhlTeams[] = ["id" => $xRow['id'], "name" => $xRow['name']];
+        }
     }
 
     // If a submit button was pressed
@@ -87,43 +104,49 @@
         // Submitted add team from roster forum
         else if (isset($mybb->input["submitforumroster"])) {
             logAction($db, "ACTION", "$myuid attempts to get a list of names for team assignments");
-            $teamid = getSafeNumber($db, $mybb->input["massteamforum"]);
 
-            $xQuery = $db->simple_select("teams", "*", "id=$teamid", array("limit" => 1));
-            if ($xRow = $db->fetch_array($xQuery)) {
-                $teamname = $xRow['name'];
-                $teamforumid = intval($xRow['rosterforumid']);
+            $teamid = getSafeNumber($db, $mybb->input["massrosterforum"]);
 
-                // Updates users in team subforum
-                $threadquery = $db->simple_select("threads", "*", "fid=$teamforumid", array());
-                while ($row = $db->fetch_array($threadquery)) {
-                    $userid = $row['uid'];
-                    $usernames[] = $row['username'];
-                    $db->update_query("users", array("teamid" => $teamid), "uid=$userid", 1);
-                }
+            if ($teamid > 0) {
+                $xQuery = $db->simple_select("teams", "*", "id=$teamid", array("limit" => 1));
+                if ($xRow = $db->fetch_array($xQuery)) {
+                    $teamname = $xRow['name'];
+                    $teamforumid = intval($xRow['rosterforumid']);
 
-                // Updates users in team prospects subforum
-                $threadquery = $db->simple_select("forums", "*", "pid=$teamforumid", array());
-                while ($subrow = $db->fetch_array($threadquery)) {
-                    $prospectforumid = intval($subrow['fid']);
-                    $threadquery = $db->simple_select("threads", "*", "fid=$prospectforumid", array());
+                    // removes all users assigned to the team
+                    $db->update_query("users", array("teamid" => null), "teamid=$teamid");
+
+                    // Updates users in team subforum
+                    $threadquery = $db->simple_select("threads", "*", "fid=$teamforumid", array());
                     while ($row = $db->fetch_array($threadquery)) {
                         $userid = $row['uid'];
                         $usernames[] = $row['username'];
                         $db->update_query("users", array("teamid" => $teamid), "uid=$userid", 1);
                     }
-                }
 
-                echo '<div class="successSection">
+                    // Updates users in team prospects subforum
+                    $threadquery = $db->simple_select("forums", "*", "pid=$teamforumid", array());
+                    while ($subrow = $db->fetch_array($threadquery)) {
+                        $prospectforumid = intval($subrow['fid']);
+                        $threadquery = $db->simple_select("threads", "*", "fid=$prospectforumid", array());
+                        while ($row = $db->fetch_array($threadquery)) {
+                            $userid = $row['uid'];
+                            $usernames[] = $row['username'];
+                            $db->update_query("users", array("teamid" => $teamid), "uid=$userid", 1);
+                        }
+                    }
+
+                    echo '<div class="successSection">
                         <h4>Success: Players added from Roster Forum</h4>
                         Team: ' . $teamname .
-                    '<ul>';
+                        '<ul>';
 
-                foreach ($usernames as $item)
-                    echo '<li>' . $item . '</li>';
+                    foreach ($usernames as $item)
+                        echo '<li>' . $item . '</li>';
 
-                echo '</ul>
+                    echo '</ul>
                       </div>';
+                }
             }
         }
 
@@ -136,6 +159,12 @@
             while (isset($mybb->input["massid_" . $x])) {
                 $currId = getSafeNumber($db, $mybb->input["massid_$x"]);
                 $teamid = getSafeNumber($db, $mybb->input["massteamid_$x"]);
+
+                // Invalid options
+                if ($teamid == 0) {
+                    $x++;
+                    continue;
+                }
 
                 // Unassigning a player
                 if ($teamid == 999)
@@ -175,7 +204,7 @@
     <div class="bojoSection navigation">
         <h2>Add Users to Team from Roster Forum</h2>
         <form method="post">
-            <?php getTeamDropDownRosterForum($teams); ?>
+            <?php getTeamDropDownRosterForum($shlTeams, $smjhlTeams); ?>
             <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code; ?>" />
             <input type="submit" name="submitforumroster" value="Update Users from Roster Forum" />
         </form>
@@ -212,7 +241,7 @@
                     echo "<tr><td>" . $xRow['username'] . "</td>";
 
                     echo '<td>';
-                    getTeamDropDown($teams, $massIndex);
+                    getTeamDropDown($shlTeams, $smjhlTeams, $massIndex);
                     echo "</td>";
 
                     echo '<input type="hidden" name="massid_' . $massIndex . '" value="' . $xRow['uid'] . '" />
@@ -288,4 +317,4 @@
     {$footer}
 </body>
 
-</html> 
+</html>

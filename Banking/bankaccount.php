@@ -64,7 +64,8 @@
         exit;
     }
 
-    function displayNotEnoughtMoney() {
+    function displayNotEnoughtMoney()
+    {
         echo '<div class="errorSection">';
         echo "<h4>Error</h4>";
         echo '<p>Not enough money for transaction. Your balance cannot go below $1,500,000 without a banker.</p>';
@@ -77,13 +78,17 @@
     $currteamid = $curruser["teamid"];
 
     if ($currteamid !== null) {
-        $xQuery = $db->simple_select("teams", "name", "id=$currteamid", array("limit" => 1));
-        if ($xRow = $db->fetch_array($xQuery))
+        $xQuery = $db->simple_select("teams", "*", "id=$currteamid", array("limit" => 1));
+        if ($xRow = $db->fetch_array($xQuery)) {
             $teamName = $xRow['name'];
-        else
+            $teamLeague = $xRow['league'];
+        } else {
             $teamName = "Unassigned";
+            $teamLeague = "Unassigned";
+        }
     } else {
         $teamName = "Unassigned";
+        $teamLeague = "Unassigned";
     }
 
     // If a submit button was pressed
@@ -290,7 +295,7 @@
             <tr>
                 <th>Balance</th>
                 <td>
-                    <?php 
+                    <?php
                     if ($currbankbalance < 0) {
                         $balanceclass = "red negative";
                         $negativesign = '-';
@@ -326,7 +331,7 @@
                 </if>
             </tr>
 
-            <?php 
+            <?php
             // Bank Transactions
             $transactionQuery =
                 "SELECT bt.*, creator.username AS 'creator'
@@ -366,7 +371,7 @@
         <hr />
         <h4>Requests Pending Approval</h4>
 
-        <?php 
+        <?php
         // Transfer Requests
         $transactionQuery =
             "SELECT bt.*, groups.id as 'gid', groups.groupname, groups.requestdate
@@ -417,7 +422,7 @@
         <hr />
         <h4>Transfers Pending Approval</h4>
 
-        <?php 
+        <?php
         // Transfer Requests
         $transactionQuery =
             "SELECT bt.*, utarget.username AS 'utarget', ubanker.username AS 'ubanker', urequester.username AS 'urequester'
@@ -506,7 +511,7 @@
                         <th>Points</th>
                         <th>Cost</th>
                     </tr>
-                    <if $currteamid==null then>
+                    <if $teamLeague != "SHL" then>
                         <tr>
                             <td>+3</td>
                             <td>$500,000</td>
@@ -681,4 +686,4 @@
     {$footer}
 </body>
 
-</html> 
+</html>

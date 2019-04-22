@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>SHL Hockey -> Bank Summary</title>
+    <title>SHL Hockey -> Bank</title>
     {$headerinclude}
 </head>
 
@@ -68,9 +68,8 @@
     ?>
 
     <div class="bojoSection navigation">
-        <h2>Banker Portal</h2>
-        <p>At a glance view of active requests requiring banker decisions.</p>
-        <p>Links:
+        <h2>Bank Portal</h2>
+        <p>
             <ul>
                 <li><a href="http://simulationhockey.com/bankaccount.php">Your Bank Account</a></li>
                 <li><a href="http://simulationhockey.com/banksubmitrequest.php">Submit Request</a></li>
@@ -141,7 +140,6 @@
             <th>Group Name</th>
             <th>Requester</th>
             <th class="hideSmall">Date Requested</th>
-            <th class="hideSmall">Description</th>
             </tr>';
 
             while ($row = $db->fetch_array($bankRows)) {
@@ -155,7 +153,6 @@
                 echo '<td><a href="' . $ugroupLink . '">' . $row['groupname'] . '</a></td>';
                 echo '<td><a href="' . $urequesterLink . '">' . $row['urequester'] . '</a></td>';
                 echo '<td class="hideSmall">' . $requestdate . "</td>";
-                echo '<td class="hideSmall">' . $row['description'] . "</a></td>";
                 echo "</tr>";
             }
             echo '</table>';

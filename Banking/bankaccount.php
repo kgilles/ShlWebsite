@@ -324,8 +324,8 @@
             <tr>
                 <th>Title</th>
                 <th>Amount</th>
-                <th>Date</th>
-                <th>Made By</th>
+                <th class="hideSmall">Date</th>
+                <th class="hideSmall">Made By</th>
                 <if $isBanker then>
                     <th></th>
                 </if>
@@ -354,8 +354,8 @@
                 echo '<tr>';
                 echo "<td>$transactionLink" . $row['title'] . '</a></td>';
                 echo "<td>$transactionLink<span class=\"$amountClass\">" . $negativeSign . '$' . $numberformat . "</span></a></td>";
-                echo "<td>$dateformat</td>";
-                echo "<td>$creatorLink" . $row['creator'] . "</a></td>";
+                echo "<td class='hideSmall'>$dateformat</td>";
+                echo "<td class='hideSmall'>$creatorLink" . $row['creator'] . "</a></td>";
 
                 if ($isBanker) {
                     echo '<form method="post"><td><input type="submit" name="undotransaction" value="Undo" /></td>';
@@ -372,7 +372,7 @@
         <h4>Requests Pending Approval</h4>
 
         <?php
-        // Transfer Requests
+        // Transaction Requests
         $transactionQuery =
             "SELECT bt.*, groups.id as 'gid', groups.groupname, groups.requestdate
                 FROM mybb_banktransactionrequests bt
@@ -412,86 +412,6 @@
                 echo "<td>$grouplink<span class=\"$amountClass\">$negativeSign" . '$' . "$amountformat</span></a></td>";
                 echo "<td>$requestdate</td>";
                 echo "<td>$description</td>";
-                echo "</tr>";
-            }
-            echo '</table>';
-        }
-
-        ?>
-
-        <hr />
-        <h4>Transfers Pending Approval</h4>
-
-        <?php
-        // Transfer Requests
-        $transactionQuery =
-            "SELECT bt.*, utarget.username AS 'utarget', ubanker.username AS 'ubanker', urequester.username AS 'urequester'
-                FROM mybb_banktransferrequests bt
-                LEFT JOIN mybb_users urequester ON bt.userrequestid=urequester.uid
-                LEFT JOIN mybb_users utarget ON bt.usertargetid=utarget.uid
-                LEFT JOIN mybb_users ubanker ON bt.bankerapproverid=ubanker.uid
-                WHERE (bt.userrequestid=$currentUserId OR bt.usertargetid=$currentUserId) AND bankerapproverid IS NULL
-                ORDER BY bt.requestdate DESC
-                LIMIT 50";
-
-        $bankRows = $db->query($transactionQuery);
-        $bankRowCount = mysqli_num_rows($bankRows);
-
-        if ($bankRowCount <= 0) {
-            echo '<p>No active transfer requests for this user</p>';
-        } else {
-            echo
-                '<table>
-                <tr>
-                <th>Title</th>
-                <th>Requester</th>
-                <th>Target</th>
-                <th>Amount</th>
-                <th>Date Requested</th>';
-            if ($isBanker) {
-                echo '<th></th><th></th>';
-            }
-            echo '<th>Description</th>
-                </tr>';
-
-            while ($row = $db->fetch_array($bankRows)) {
-                $requestdate = new DateTime($row['requestdate']);
-                $requestdate = $requestdate->format('m/d/y');
-
-                if ($row['approvaldate'] === null) {
-                    $approvedate = '';
-                } else {
-                    $approvedate = new DateTime($row['approvaldate']);
-                    $approvedate = $approvedate->format('m/d/y');
-                }
-
-                $urequesterLink = '<a href="' . getBankAccountLink($row['userrequestid']) . '">';
-                $utargetLink = '<a href="' . getBankAccountLink($row['usertargetid']) . '">';
-                $amountClass = ($row['amount'] < 0) ? 'negative' : 'positive';
-                $amountformat = number_format(abs($row['amount']), 0);
-                $title = $row['title'];
-
-                echo "<tr>";
-                echo "<td>$title</td>";
-                echo "<td>$urequesterLink" . $row['urequester'] . "</a></td>";
-                echo "<td>$utargetLink" . $row['utarget'] . "</a></td>";
-                echo '<td class="' . $amountClass . '">$' . $amountformat . "</td>";
-                echo "<td>$requestdate</td>";
-
-                if ($isBanker) {
-                    if ($row['bankerapproverid'] == null) {
-                        echo '<form method="post"><td><input type="submit" name="approvetransfer" value="Accept" /></td>';
-                        echo '<input type="hidden" name="approveid" value="' . $row['id'] . '" />';
-                        echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" /></form>';
-
-                        echo '<form method="post"><td><input type="submit" name="declinetransfer" value="Decline" /></td>';
-                        echo '<input type="hidden" name="declineid" value="' . $row['id'] . '" />';
-                        echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" /></form>';
-                    } else {
-                        echo '<td></td><td></td>';
-                    }
-                }
-                echo '<td>' . $row['description'] . "</a></td>";
                 echo "</tr>";
             }
             echo '</table>';
@@ -594,37 +514,6 @@
                     </table>
                 </form>
                 <p style="margin-bottom: 0px"><em>Write a postive number for a purchase transaction. No approvals necessary.</em></p>
-            </div>
-        </div>
-    </if>
-
-    <!-- New Transfer Request: Only available when on another user's page -->
-    <if ($currentUserId !==$myuid) then>
-        <div class="bojoSection navigation">
-            <h2>New Transfer Request <span class="expandclick" onclick="toggleArea(this, 'transferarea')">(expand)</span></h2>
-            <div id="transferarea" class="hideme">
-                <form onsubmit="return areYouSure();" method="post">
-                    <table>
-                        <tr>
-                            <th>Amount</th>
-                            <td><input type="number" name="requestamount" placeholder="Enter amount..." /></td>
-                        </tr>
-                        <tr>
-                            <th>Title</th>
-                            <td><input type="text" name="requesttitle" placeholder="Enter title..." /></td>
-                        </tr>
-                        <tr>
-                            <th>Description</th>
-                            <td><input type="text" name="requestdescription" placeholder="Enter description..." /></td>
-                        </tr>
-                        <tr>
-                            <th></th>
-                            <td><input type="submit" name="submitrequest" value="Request" /></td>
-                        </tr>
-                        <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
-                    </table>
-                </form>
-                <p style="margin-bottom: 0px"><em>Write a postive number to send to this user. A request will be sent to the bankers who will need to approve all requests.</em></p>
             </div>
         </div>
     </if>

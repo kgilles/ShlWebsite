@@ -121,7 +121,7 @@
             }
 
             echo '<tr><td style="height: 15px;"></td></tr>';
-            echo "<tr><th>User</th><th>Amount</th><th>Title</th><th>Description</th></tr>";
+            echo "<tr><th>User</th><th>Amount</th><th class='hideSmall'>Description</th></tr>";
 
             if ($isapproved == 1)
                 $transactiontable = "mybb_banktransactions";
@@ -145,8 +145,8 @@
                 else
                     echo "<td class='positive'>$" . number_format($xRow['amount'], 0) . "</td>";
 
-                echo '<td>' . $xRow['title'] . '</td>';
-                echo '<td>' . $xRow['description'] . '</td>';
+                // echo '<td>' . $xRow['title'] . '</td>';
+                echo '<td class="hideSmall">' . $xRow['description'] . '</td>';
                 echo '</tr>';
             }
             echo '</table>';

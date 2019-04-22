@@ -108,3 +108,9 @@ hr {
     font-weight: normal;
     cursor: pointer;
 }
+
+@media (max-width: 768px) {
+    .hideSmall {
+        display: none;        
+    }
+}

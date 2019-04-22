@@ -116,12 +116,11 @@
             while (isset($mybb->input["massid_" . $x])) {
                 $currId = getSafeNumber($db, $mybb->input["massid_$x"]);
                 $currAmount = getSafeNumber($db, $mybb->input["massamount_$x"]);
-                $currTitle = getSafeAlpNum($db, $mybb->input["masstitle_$x"]);
                 $currDescription = getSafeAlpNum($db, $mybb->input["massdescription_$x"]);
                 if (strlen($currDescription) == 0) $currDescription = null;
 
-                if (strlen($currTitle) <= 0 || $currAmount == 0) {
-                    echo 'no ammount or title';
+                if ($currAmount == 0) {
+                    echo 'no amount';
                     $isValid = false;
                     break;
                 }
@@ -131,7 +130,7 @@
                     $massinsert[] = [
                         "uid" => $currId,
                         "amount" => $currAmount,
-                        "title" => $currTitle,
+                        "title" => $groupName,
                         "description" => $currDescription,
                         "createdbyuserid" => $myuid,
                         "bankerapproverid" => $myuid,
@@ -140,7 +139,7 @@
                     $massinsert[] = [
                         "uid" => $currId,
                         "amount" => $currAmount,
-                        "title" => $currTitle,
+                        "title" => $groupName,
                         "description" => $currDescription,
                     ];
                 }
@@ -216,23 +215,23 @@
 
     <div class="bojoSection navigation">
         <if $isBanker then>
-            <h2>Group Transactions</h2>
-            <p>Submit a group transaction. <strong>As a banker no approvals are necessary</strong></p>
+            <h2>Submit Transactions</h2>
+            <p>Submit a transaction. <strong>As a banker no approvals are necessary</strong></p>
             <else>
-                <h2>Group Transactions Request</h2>
-                <p>Submit a group transaction. <strong style='color: red;'>Will require a banker's approval before the transactions can be completed.</strong></p>
+                <h2>Submit Transaction Request</h2>
+                <p>Submit a transaction. <strong style='color: red;'>Will require a banker's approval before the transactions can be completed.</strong></p>
         </if>
         <p>First enter a list of user names for the transaction. Then enter amounts for each person. Positive if deposits otherwise negative. Enter Titles and descriptions. Click "Fill the rest" to have the rest of the users copy the first user's information. The group name should summarize the group's transactions, but can usually just be same as the titles for each person.</p>
     </div>
 
     <div class="bojoSection navigation">
-        <if $currentTeamId == null then>
-        <small>submit a list of usernames separated by either commas or new lines.</small>
-        <form method="post">
-            <textarea name="namelist" rows="8"><?php echo $namelist ?></textarea><br />
-            <input type="submit" name="submitnames" value="Get Users" />
-            <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code; ?>" />
-        </form>
+        <if $currentTeamId==null then>
+            <small>submit a list of usernames separated by either commas or new lines.</small>
+            <form method="post">
+                <textarea name="namelist" rows="8"><?php echo $namelist ?></textarea><br />
+                <input type="submit" name="submitnames" value="Get Users" />
+                <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code; ?>" />
+            </form>
         </if>
         <?php
         if ($nameEnteredCount > 0) {
@@ -246,30 +245,26 @@
                 echo count($namesArray) . ' names entered<br/>' . $nameCount . ' names found';
                 echo '</div>
                     <form onsubmit="return validateForms()" method="post">
-                    <table class="namesTable">
-                        <tr><th>username</th><th>amount</th><th>title</th><th>description</th></tr>';
+                    <table class="namesTable" style="width: 100%; max-width: 500px;">';
 
+                echo '<tr><th>transaction group name:</th><td colspan="2"><input type="text" id="massgroupname" name="massgroupname"" /></td></tr>';
+                echo '<tr><td style="height: 10px;"></td></td>';
+                echo '<tr><td colspan="2"></td><td><input type="button" onclick="fillInUsers()" value="Copy from first" /></td></tr>';
+                echo '<tr><th>username</th><th>amount</th><th>description</th></tr>';
                 $massIndex = 0;
                 while ($xRow = $db->fetch_array($xQueryNames)) {
                     echo '<tr>
                         <td>' . $xRow['username'] . '</td>
                         <td><input type="number" id="massamount_' . $massIndex . '" name="massamount_' . $massIndex . '" value="0" /></td>
-                        <td><input type="text" id="masstitle_' . $massIndex . '" name="masstitle_' . $massIndex . '" /></td>
                         <td><input type="text" id="massdescription_' . $massIndex . '" name="massdescription_' . $massIndex . '" /></td>
                         <input type="hidden" name="massid_' . $massIndex . '" value="' . $xRow['uid'] . '" />
-                        <input type="hidden" name="massname_' . $massIndex . '" value="' . $xRow['username'] . '" />';
-
-                    if ($massIndex === 0)
-                        echo '<td><input type="button" onclick="fillInUsers()" value="Fill the rest" /></td>';
-
-                    echo "</tr>";
+                        <input type="hidden" name="massname_' . $massIndex . '" value="' . $xRow['username'] . '" />
+                        </tr>';
                     $massIndex++;
                 }
 
-                echo '<tr><td style="height: 20px"></td></td></tr>
-                  <tr><th>transaction group name:</th><td colspan="2"><input type="text" id="massgroupname" name="massgroupname"" /></td></tr>
-                  <tr><td style="height: 8px"></td></tr>
-                  <tr><td colspan="3"></td><td><input type="submit" name="submitmassseparate" value="Submit Transactions" /></td></tr>
+                echo '<tr><td style="height: 8px"></td></tr>
+                  <tr><td colspan="2"></td><td><input type="submit" name="submitmassseparate" value="Submit Transactions" /></td></tr>
                   </table>
                   <input type="hidden" name="namelist" value="' . $namelist . '" />
                   <input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" />
@@ -285,20 +280,16 @@
         function fillInUsers() {
             var i = 0;
             var firstAmount = 0;
-            var firstTitle = "";
             var firstDescription = "";
             while (true) {
                 var idAmount = "massamount_" + i;
-                var idTitle = "masstitle_" + i;
                 var idDescription = "massdescription_" + i;
                 if (document.getElementById(idAmount) !== null) {
                     if (i == 0) {
                         firstAmount = document.getElementById(idAmount).value;
-                        firstTitle = document.getElementById(idTitle).value;
                         firstDescription = document.getElementById(idDescription).value;
                     } else {
                         document.getElementById(idAmount).value = firstAmount;
-                        document.getElementById(idTitle).value = firstTitle;
                         document.getElementById(idDescription).value = firstDescription;
                     }
                 } else {
@@ -306,24 +297,17 @@
                 }
                 i++;
             }
-            document.getElementById("massgroupname").value = firstTitle;
         }
 
         function validateForms() {
             var i = 0;
             while (true) {
                 var idAmount = "massamount_" + i;
-                var idTitle = "masstitle_" + i;
                 if (document.getElementById(idAmount) !== null) {
                     i++;
                     var amount = document.getElementById(idAmount).value;
-                    var title = document.getElementById(idTitle).value;
                     if (amount == 0) {
                         alert("A field has an invalid amount");
-                        return false;
-                    }
-                    if (title.length <= 0) {
-                        alert("A title is invalid");
                         return false;
                     }
                 } else {
@@ -353,4 +337,4 @@
     {$footer}
 </body>
 
-</html> 
+</html>

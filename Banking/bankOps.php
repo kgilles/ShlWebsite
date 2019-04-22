@@ -7,9 +7,9 @@ function getSafeString($db, $inputText) {
     return trim($db->escape_string($inputText));
 }
 
-function getSafeNumber($db, $inputText) {
-    $safeInput = getSafeString($db, $inputText);
-    return intval(getAlpNum($safeInput));
+function getSafeNumber($db, $safeInput) {
+    // $safeInput = getSafeString($db, $inputText);
+    return intval($safeInput);
 }
 
 function getSafeAlpNum($db, $inputText) {

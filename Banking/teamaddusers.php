@@ -30,37 +30,37 @@
         // TODO: team change summary
     }
 
-    function getTeamDropDown($shlTeams, $smjhlTeams, $rowIndex)
+    function getTeamDropDown($shlTeams, $rowIndex)
     {
         echo '<select name="massteamid_' . $rowIndex . '" id="massteamid_' . $rowIndex . '">
         <option value="999">Unassigned</option>';
 
-        echo '<option value="0">---- SHL TEAMS ----</option>';
+        // echo '<option value="0">---- SHL TEAMS ----</option>';
 
         foreach ($shlTeams as $item)
             echo '<option value="' . $item['id'] . '">' . $item['name'] . '</option>';
 
-        echo '<option value="0">---- SMJHL TEAMS ----</option>';
+        // echo '<option value="0">---- SMJHL TEAMS ----</option>';
 
-        foreach ($smjhlTeams as $item)
-            echo '<option value="' . $item['id'] . '">' . $item['name'] . '</option>';
+        // foreach ($smjhlTeams as $item)
+        //     echo '<option value="' . $item['id'] . '">' . $item['name'] . '</option>';
 
         echo '</select>';
     }
 
-    function getTeamDropDownRosterForum($shlTeams, $smjhlTeams)
+    function getTeamDropDownRosterForum($shlTeams)
     {
         echo '<select name="massrosterforum" id="massrosterforum">';
         echo '<option value="0">Select a team...</option>';
-        echo '<option value="0">---- SHL TEAMS ----</option>';
+        // echo '<option value="0">---- SHL TEAMS ----</option>';
 
         foreach ($shlTeams as $item)
             echo '<option value="' . $item['id'] . '">' . $item['name'] . '</option>';
 
-        echo '<option value="0">---- SMJHL TEAMS ----</option>';
+        // echo '<option value="0">---- SMJHL TEAMS ----</option>';
 
-        foreach ($smjhlTeams as $item)
-            echo '<option value="' . $item['id'] . '">' . $item['name'] . '</option>';
+        // foreach ($smjhlTeams as $item)
+        //     echo '<option value="' . $item['id'] . '">' . $item['name'] . '</option>';
 
         echo '</select>';
     }
@@ -70,9 +70,10 @@
     while ($xRow = $db->fetch_array($xQuery)) {
         if ($xRow['league'] == "SHL") {
             $shlTeams[] = ["id" => $xRow['id'], "name" => $xRow['name']];
-        } else {
-            $smjhlTeams[] = ["id" => $xRow['id'], "name" => $xRow['name']];
-        }
+        } 
+        // else {
+        //     $smjhlTeams[] = ["id" => $xRow['id'], "name" => $xRow['name']];
+        // }
     }
 
     // If a submit button was pressed
@@ -204,7 +205,7 @@
     <div class="bojoSection navigation">
         <h2>Add Users to Team from Roster Forum</h2>
         <form method="post">
-            <?php getTeamDropDownRosterForum($shlTeams, $smjhlTeams); ?>
+            <?php getTeamDropDownRosterForum($shlTeams); ?>
             <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code; ?>" />
             <input type="submit" name="submitforumroster" value="Update Users from Roster Forum" />
         </form>
@@ -241,7 +242,7 @@
                     echo "<tr><td>" . $xRow['username'] . "</td>";
 
                     echo '<td>';
-                    getTeamDropDown($shlTeams, $smjhlTeams, $massIndex);
+                    getTeamDropDown($shlTeams, $massIndex);
                     echo "</td>";
 
                     echo '<input type="hidden" name="massid_' . $massIndex . '" value="' . $xRow['uid'] . '" />

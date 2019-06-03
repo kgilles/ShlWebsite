@@ -116,7 +116,7 @@
             while (isset($mybb->input["massid_" . $x])) {
                 $currId = getSafeNumber($db, $mybb->input["massid_$x"]);
                 $currAmount = getSafeNumber($db, $mybb->input["massamount_$x"]);
-                $currDescription = getSafeAlpNum($db, $mybb->input["massdescription_$x"]);
+                $currDescription = getSafeString($db, $mybb->input["massdescription_$x"]);
                 if (strlen($currDescription) == 0) $currDescription = null;
 
                 if ($currAmount == 0) {

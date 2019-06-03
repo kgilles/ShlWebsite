@@ -91,28 +91,29 @@
         if ($teamrow['league'] == "SHL") {
             $teamsShl[] = [ "id" => $teamrow['id'], "name" => $teamrow['name']];
         }
-        else {
-            $teamsSmjhl[] = [ "id" => $teamrow['id'], "name" => $teamrow['name']];
-        }
+        // else {
+        //     $teamsSmjhl[] = [ "id" => $teamrow['id'], "name" => $teamrow['name']];
+        // }
     }
     ?>
     <div class="bojoSection navigation">
         <h2>User Accounts by Team</h2>
         <p>
-            <h4>SHL</h4>
+            <!-- <h4>SHL</h4> -->
             <ul>
                 <?php
                 foreach ($teamsShl as $item)
                     echo '<li><a href="http://simulationhockey.com/bankteam.php?id=' . $item["id"] . '">' . $item["name"] . '</a></li>';
                 ?>
             </ul>
-            <h4>SMJHL</h4>
+            <!-- TODO: Add unassigned players -->
+            <!-- <h4>SMJHL</h4>
             <ul>
                 <?php
-                foreach ($teamsSmjhl as $item)
-                    echo '<li><a href="http://simulationhockey.com/bankteam.php?id=' . $item["id"] . '">' . $item["name"] . '</a></li>';
+                // foreach ($teamsSmjhl as $item)
+                //     echo '<li><a href="http://simulationhockey.com/bankteam.php?id=' . $item["id"] . '">' . $item["name"] . '</a></li>';
                 ?>
-            </ul>
+            </ul> -->
         </p>
     </div>
 

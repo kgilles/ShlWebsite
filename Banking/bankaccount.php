@@ -190,7 +190,7 @@
             if ($isBanker) {
                 $transAmount = getSafeNumber($db, $mybb->input["transactionamount"]);
                 $transTitle = getSafeAlpNum($db, $mybb->input["transactiontitle"]);
-                $transDescription = getSafeAlpNum($db, $mybb->input["transactiondescription"]);
+                $transDescription = getSafeString($db, $mybb->input["transactiondescription"]);
                 if (strlen($transDescription) == 0) $transDescription = null;
 
                 // Adds a transaction via banker
@@ -207,7 +207,7 @@
             if ($isMyAccount) {
                 $transAmount = -abs(getSafeNumber($db, $mybb->input["purchaseamount"]));
                 $transTitle = getSafeAlpNum($db, $mybb->input["purchasetitle"]);
-                $transDescription = getSafeAlpNum($db, $mybb->input["purchasedescription"]);
+                $transDescription = getSafeString($db, $mybb->input["purchasedescription"]);
                 if (strlen($transDescription) == 0) $transDescription = null;
 
                 if ($transAmount != 0 && strlen($transTitle)) {
@@ -270,9 +270,9 @@
             if (!$isMyAccount) {
                 $transAmount = abs(getSafeNumber($db, $mybb->input["requestamount"]));
                 $transTitle = getSafeAlpNum($db, $mybb->input["requesttitle"]);
-                $transDescription = getSafeAlpNum($db, $mybb->input["requestdescription"]);
+                $transDescription = getSafeString($db, $mybb->input["requestdescription"]);
                 if (strlen($transDescription) == 0) $transDescription = null;
-
+                alert($transDescription);
                 if ($transAmount != 0 && strlen($transTitle)) {
                     addBankTransferRequest($db, $myuid, $currentUserId, $transAmount, $transTitle, $transDescription);
                     displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "Transfer Request");

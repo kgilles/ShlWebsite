@@ -18,21 +18,39 @@
         exit;
     }
 
-    // Gets id of team from URL
-    if (isset($_GET["id"]) && is_numeric($_GET["id"]))
-        $currentTeamId = getSafeNumber($db, $_GET["id"]);
-    else
-        header('Location: http://simulationhockey.com/banksummary.php');
-
     $isBanker = checkIfBanker($mybb);
 
-    $xQuery = $db->simple_select("teams", "*", "id=$currentTeamId", array("limit" => 1));
-    if ($xRow = $db->fetch_array($xQuery)) {
-        $teamname = $xRow['name'];
-        $teamforumid = $xRow['rosterforumid'];
+    // Gets id of team from URL
+    if (isset($_GET["id"]) && is_numeric($_GET["id"]))
+    {
+        $currentTeamId = getSafeNumber($db, $_GET["id"]);
+
+        $xQuery = $db->simple_select("teams", "*", "id=$currentTeamId", array("limit" => 1));
+        if ($xRow = $db->fetch_array($xQuery)) {
+            $teamname = $xRow['name'];
+            $teamforumid = $xRow['rosterforumid'];
+
+            // Get users with matching team
+            $xQueryUser = $db->simple_select("users", "*", "teamid=$currentTeamId", array("order_by" => 'username', "order_dir" => 'ASC'));
+            while ($xRowUser = $db->fetch_array($xQueryUser)) {
+                $userid = intval($xRowUser['uid']);
+                $username = $xRowUser['username'];
+                $userbalance = intval($xRowUser['bankbalance']);
+                $teamusers[] = [
+                    "uid" => $userid,
+                    "username" => $username,
+                    "bankbalance" => $userbalance,
+                ];
+            }
+        }
+    }
+    else {
+        $currentTeamId = -1;
+        $teamname = "Players with no SHL team";
+        $noTeam = true;
 
         // Get users with matching team
-        $xQueryUser = $db->simple_select("users", "*", "teamid=$currentTeamId", array("order_by" => 'username', "order_dir" => 'ASC'));
+        $xQueryUser = $db->simple_select("users", "*", "teamid IS NULL AND bankbalance != 0", array("order_by" => 'username', "order_dir" => 'ASC'));
         while ($xRowUser = $db->fetch_array($xQueryUser)) {
             $userid = intval($xRowUser['uid']);
             $username = $xRowUser['username'];
@@ -74,8 +92,7 @@
     </div>
 
     <!-- Banker Controls: Bankers only -->
-    <if $isBanker then>
-
+    <if $isBanker && $noTeam then>
         <!-- Add a transaction -->
         <div class="bojoSection navigation">
             <h2>Banker Controls</h2>

@@ -48,6 +48,7 @@
     }
 
     $isBanker = checkIfBanker($mybb);
+    $flippedClaim = false;
 
     // Gets id of user from URL
     if (isset($_GET["uid"]) && is_numeric($_GET["uid"]))
@@ -284,6 +285,18 @@
                 exit;
             }
         }
+
+        // If the banker flipped the free500k eligibility.
+        else if (isset($mybb->input["flipClaim"])) {
+            logAction($db, "ACTION", "$myuid as a banker attempts to flip the status of $currentUserId free500 eligibility");
+            $flippedClaim = true;
+            $claimQuery = $db->simple_select("users", "claimedFreeTraining", "uid=$currentUserId", array("limit" => 1));
+            if ($xRow = $db->fetch_array($claimQuery)) { $claimValue = $xRow['claimedFreeTraining']; }
+            else { $claimValue = 0; }
+            if ($claimValue == 1) $claimValue = 0;
+            else $claimValue = 1;
+            $db->update_query("users", array("claimedFreeTraining" => $claimValue), "uid=$currentUserId");
+        }
     }
     ?>
 
@@ -316,6 +329,9 @@
                 <td><a href="http://simulationhockey.com/bankexportaccount.php?uid=<?php echo $currentUserId; ?>">Export Data</a></td>
             </tr>
         </table>
+
+        <br />
+        <a href="http://simulationhockey.com/bank.php">Link to main Bank page</a>
 
         <hr />
 
@@ -547,6 +563,19 @@
                         <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code; ?>" />
                     </table>
                     <p style="margin-bottom: 0px"><em>Adds a transaction. If removing money, make sure to add the negative sign.</em></p>
+                </form>
+                <hr />
+                <?php
+                if ($flippedClaim == false) {
+                    $claimQuery = $db->simple_select("users", "claimedFreeTraining", "uid=$currentUserId", array("limit" => 1));
+                    if ($xRow = $db->fetch_array($claimQuery)) { $claimValue = $xRow['claimedFreeTraining']; }
+                }
+                ?>
+                <h4>Set Free 500k claim eligibility</h4>
+                <form method="post">
+                    <p>Can this user claim the free 500k? <b><?php echo $claimValue == 1 ? "No" : "Yes"; ?></b></p>
+                    <td><input type="submit" name="flipClaim" value="Flip Eligibility" /></td>
+                    <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code; ?>" />
                 </form>
             </div>
         </div>

@@ -20,6 +20,8 @@
 
     $isBanker = checkIfBanker($mybb);
 
+    $hideFree500 = $mybb->user['claimedFreeTraining'];
+
     // If a submit button was pressed
     if (isset($mybb->input["bojopostkey"])) {
         verify_post_check($mybb->input["bojopostkey"]);
@@ -64,6 +66,17 @@
                 exit;
             }
         }
+
+        // If the user claims a free 500k.
+        else if (isset($mybb->input["free500"])) {
+            logAction($db, "ACTION", "$myuid attempts to claim their free $500,000");
+            $transAmount = 500000;
+            $transTitle = "Free 500k";
+            $transDescription = "Free transaction for newcomers";
+            $currbankbalance = addBankTransaction($db, $myuid, $transAmount, $transTitle, $transDescription, $myuid);
+            $db->update_query("users", array("claimedFreeTraining" => 1), "uid=$myuid");
+            header('Location: http://simulationhockey.com/bankaccount.php');
+        }
     }
     ?>
 
@@ -74,12 +87,25 @@
                 <li><a href="http://simulationhockey.com/bankaccount.php">Your Bank Account</a></li>
                 <li><a href="http://simulationhockey.com/banksubmitrequest.php">Submit Request</a></li>
                 <li><a href="http://simulationhockey.com/bankexportbalances.php">Download Bank Balances</a></li>
+                <li><a href="http://simulationhockey.com/showthread.php?tid=19878">Submit an Issue</a></li>
                 <?php if ($isBanker) {
                     echo '<li><a href="http://simulationhockey.com/teamaddusers.php">Assign Users to Team</a></li>';
                 } ?>
             </ul>
         </p>
     </div>
+
+    <if $isBanker && !$hideFree500 then>
+    <div class="bojoSection navigation">
+        <h2>Free $500k!</h2>
+        <p>Welcome! You are eligible for a free $500,000 for joining the site. Click the button below and it will be added to your account.</p>
+        <p>We hope you enjoy the site!</p>
+        <form method="post">
+            <td><input type="submit" name="free500" value="Claim $500k" /></td>
+            <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+        </form>
+    </div>
+    </if>
 
     <?php
     $teamRows = $db->simple_select("teams", "*", "id > 1", array(
@@ -102,10 +128,12 @@
             <!-- <h4>SHL</h4> -->
             <ul>
                 <?php
-                foreach ($teamsShl as $item)
+                foreach ($teamsShl as $item) {
                     echo '<li><a href="http://simulationhockey.com/bankteam.php?id=' . $item["id"] . '">' . $item["name"] . '</a></li>';
+                }
                 ?>
             </ul>
+            <?php echo '<a href="http://simulationhockey.com/bankteam.php">Non-SHL Players</a>'; ?>
             <!-- TODO: Add unassigned players -->
             <!-- <h4>SMJHL</h4>
             <ul>

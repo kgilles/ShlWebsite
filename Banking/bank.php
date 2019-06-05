@@ -95,7 +95,7 @@
         </p>
     </div>
 
-    <if $isBanker && !$hideFree500 then>
+    <if !$hideFree500 then>
     <div class="bojoSection navigation">
         <h2>Free $500k!</h2>
         <p>Welcome! You are eligible for a free $500,000 for joining the site. Click the button below and it will be added to your account.</p>

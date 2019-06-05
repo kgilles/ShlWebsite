@@ -576,6 +576,7 @@
                     <p>Can this user claim the free 500k? <b><?php echo $claimValue == 1 ? "No" : "Yes"; ?></b></p>
                     <td><input type="submit" name="flipClaim" value="Flip Eligibility" /></td>
                     <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code; ?>" />
+                    <p><i>Note: Don't refresh after clicking. A popup should warn you that it might resubmit, and it would go back to what is was before!</i></p>
                 </form>
             </div>
         </div>

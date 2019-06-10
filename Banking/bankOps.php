@@ -4,6 +4,7 @@ function getAlpNum($inputText) {
 }
 
 function getSafeString($db, $inputText) {
+    $inputText = str_replace("'", "", $inputText);
     return trim($db->escape_string($inputText));
 }
 

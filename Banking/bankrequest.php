@@ -36,7 +36,7 @@
                     if ($xRow = $db->fetch_array($xQuery)) {
                         $bankerid = intval($xRow['bankerid']);
                         $requesterid = intval($xRow['creatorid']);
-                        $groupname = $xRow['groupname'];
+                        $groupname = getSafeString($db, $xRow['groupname']);
                         $decisiondate = $xRow['decisiondate'];
 
                         $requestrows = $db->simple_select("banktransactionrequests", "*", "groupid='$currBankRequestId'", array());
@@ -44,8 +44,8 @@
                             $requestdata[] = [
                                 "uid" => $requestresult['uid'],
                                 "amount" => $requestresult['amount'],
-                                "title" => $requestresult['title'],
-                                "description" => $requestresult['description'],
+                                "title" => getSafeString($db, $requestresult['title']),
+                                "description" => getSafeString($db, $requestresult['description']),
                                 "createdbyuserid" => $requesterid,
                                 "bankerapproverid" => $bankerid,
                                 "date" => $decisiondate,

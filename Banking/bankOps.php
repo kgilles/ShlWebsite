@@ -4,12 +4,11 @@ function getAlpNum($inputText) {
 }
 
 function getSafeString($db, $inputText) {
-    $inputText = str_replace("'", "", $inputText);
+    // $inputText = str_replace("'", "", $inputText);
     return trim($db->escape_string($inputText));
 }
 
 function getSafeNumber($db, $safeInput) {
-    // $safeInput = getSafeString($db, $inputText);
     return intval($safeInput);
 }
 
@@ -44,6 +43,8 @@ function getBankTransactionLink($linkid) {
 }
 
 function logAction($db, $title, $details) {
+    $title = getSafeString($db, $title);
+    $details = getSafeString($db, $details);
     $db->insert_query("banklogs", array("title" => $title, "details" => $details));
 }
 

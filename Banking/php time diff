@@ -1,0 +1,10 @@
+$s = 'June 11, 2019, 7am';
+$time = strtotime($s);
+$start = strtotime('last monday, 5am', $time);
+$format = 'l, F j, Y g:i A';
+$start_day = date($format, $start);
+$input_day = date($format, $time);
+$diff = ($time - $start) / 3600;
+echo "Input: $input_day <br>";
+echo "Output: $start_day <br>";
+echo "Diff: $diff";

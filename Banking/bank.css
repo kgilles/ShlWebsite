@@ -9,6 +9,7 @@
 .bojoSection td {
     padding: 0px 10px;
     text-align: right;
+    vertical-align: top;
 }
 
 .bojoSection th:nth-child(1),

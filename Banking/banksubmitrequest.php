@@ -247,17 +247,24 @@
                     <form onsubmit="return validateForms()" method="post">
                     <table class="namesTable" style="width: 100%; max-width: 500px;">';
 
-                echo '<tr><th>transaction group name:</th><td colspan="2"><input type="text" id="massgroupname" name="massgroupname"" /></td></tr>';
+                echo '<tr><th>transaction name:</th><td colspan="2"><input type="text" id="massgroupname" name="massgroupname"" /></td></tr>';
                 echo '<tr><td style="height: 10px;"></td></td>';
-                echo '<tr><td colspan="2"></td><td><input type="button" onclick="fillInUsers()" value="Copy from first" /></td></tr>';
+                if ($nameCount > 1) {
+                    echo '<tr><td colspan="2"></td><td><input type="button" onclick="fillInUsers()" value="Copy from first" /></td></tr>';
+                }
                 echo '<tr><th>username</th><th>amount</th><th>description</th></tr>';
                 $massIndex = 0;
                 while ($xRow = $db->fetch_array($xQueryNames)) {
                     echo '<tr>
                         <td>' . $xRow['username'] . '</td>
-                        <td><input type="number" id="massamount_' . $massIndex . '" name="massamount_' . $massIndex . '" value="0" /></td>
-                        <td><input type="text" id="massdescription_' . $massIndex . '" name="massdescription_' . $massIndex . '" /></td>
-                        <input type="hidden" name="massid_' . $massIndex . '" value="' . $xRow['uid'] . '" />
+                        <td><input type="number" id="massamount_' . $massIndex . '" name="massamount_' . $massIndex . '" value="0" /></td>';
+                    if ($nameCount > 1) {
+                        echo '<td><input type="text" id="massdescription_' . $massIndex . '" name="massdescription_' . $massIndex . '" /></td>';
+                    }
+                    else {
+                        echo '<td><textarea id="massdescription_' . $massIndex . '" name="massdescription_' . $massIndex . '"></textarea></td>';
+                    }
+                    echo '<input type="hidden" name="massid_' . $massIndex . '" value="' . $xRow['uid'] . '" />
                         <input type="hidden" name="massname_' . $massIndex . '" value="' . $xRow['username'] . '" />
                         </tr>';
                     $massIndex++;

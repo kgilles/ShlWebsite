@@ -374,7 +374,7 @@
                 echo "<td class='hideSmall'>$creatorLink" . $row['creator'] . "</a></td>";
 
                 if ($isBanker) {
-                    echo '<form method="post"><td><input type="submit" name="undotransaction" value="Undo" /></td>';
+                    echo '<form onsubmit="return areYouSureUndo();" method="post"><td><input type="submit" name="undotransaction" value="Undo" /></td>';
                     echo '<input type="hidden" name="undoid" value="' . $row['id'] . '" />';
                     echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" /></form>';
                 }
@@ -520,7 +520,9 @@
                         </tr>
                         <tr>
                             <th>Description</th>
-                            <td><input type="text" name="purchasedescription" placeholder="Enter description..." /></td>
+                            <td>
+                                <textarea name="purchasedescription"></textarea>
+                            </td>
                         </tr>
                         <tr>
                             <th></th>
@@ -530,6 +532,7 @@
                     </table>
                 </form>
                 <p style="margin-bottom: 0px"><em>Write a postive number for a purchase transaction. No approvals necessary.</em></p>
+                <p style="margin-bottom: 0px"><em>Put details about the transaction in the description. For example if you're purchasing equipment write out what you're buying.</em></p>
             </div>
         </div>
     </if>
@@ -595,6 +598,10 @@
 
         function areYouSure() {
             return confirm("Are you sure you want to make this transaction?");
+        }
+
+        function areYouSureUndo() {
+            return confirm("Are you sure you want to do this?");
         }
     </script>
 

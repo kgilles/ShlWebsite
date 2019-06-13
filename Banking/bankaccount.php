@@ -196,6 +196,7 @@
 
                 // Adds a transaction via banker
                 $currbankbalance = doTransaction($db, $transAmount, $transTitle, $transDescription, $currentUserId, $myuid, $currname, "Banker Transaction");
+                goToLatestTransaction($db, $myuid);
             } else {
                 echo "You're not a banker. shoo.";
                 exit;
@@ -215,6 +216,7 @@
                     if ($currbankbalance + $transAmount >= -1500000) {
                         $currbankbalance = addBankTransaction($db, $currentUserId, $transAmount, $transTitle, $transDescription, $currentUserId);
                         displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "User Purchase");
+                        goToLatestTransaction($db, $myuid);
                     } else {
                         displayNotEnoughtMoney();
                     }
@@ -252,6 +254,7 @@
                     if ($currbankbalance + $transAmount >= -1500000) {
                         $currbankbalance = addBankTransaction($db, $currentUserId, $transAmount, $transTitle, $transDescription, $currentUserId);
                         displaySuccessTransaction($currname, $transAmount, $transTitle, $transDescription, "User Training");
+                        goToLatestTransaction($db, $myuid);
                     } else {
                         displayNotEnoughtMoney();
                     }
@@ -303,35 +306,23 @@
 
     <!-- User Information -->
     <div class="bojoSection navigation">
-        <h2>{$currname}</h2>
-        <table>
-            <tr>
-                <th>Balance</th>
-                <td>
-                    <?php
-                    if ($currbankbalance < 0) {
-                        $balanceclass = "red negative";
-                        $negativesign = '-';
-                    } else {
-                        $balanceclass = "positive";
-                        $negativesign = '';
-                    }
-                    $bankbalancedisplay = number_format(abs($currbankbalance), 0);
-                    echo "<span class=\"$balanceclass\">$negativesign" . "$" . $bankbalancedisplay . "</span>";
-                    ?>
-                </td>
-            </tr>
-            <tr>
-                <th>SHL Team</th>
-                <td><a href="http://simulationhockey.com/bankteam.php?id=<?php echo $curruser['teamid']; ?>"><?php echo $teamName; ?></a></td>
-            </tr>
-            <tr>
-                <td><a href="http://simulationhockey.com/bankexportaccount.php?uid=<?php echo $currentUserId; ?>">Export Data</a></td>
-            </tr>
-        </table>
-
-        <br />
-        <a href="http://simulationhockey.com/bank.php">Link to main Bank page</a>
+        <h2>{$currname}<br />
+        <?php
+        if ($currbankbalance < 0) {
+            $balanceclass = "red negative";
+            $negativesign = '-';
+        } else {
+            $balanceclass = "positive";
+            $negativesign = '';
+        }
+        $bankbalancedisplay = number_format(abs($currbankbalance), 0);
+        echo "<span class=\"$balanceclass\">$negativesign" . "$" . $bankbalancedisplay . "</span>";
+        ?>
+        </h2>
+        <ul>
+            <li><a href="http://simulationhockey.com/bank.php">Main Bank page</a></li>
+            <li><a href="http://simulationhockey.com/bankexportaccount.php?uid=<?php echo $currentUserId; ?>">Export Data</a></li>
+        </ul>
 
         <hr />
 
@@ -442,6 +433,7 @@
             <h2>New Purchase</h2>
             <div id="purchasearea">
                 <h4>Weekly Training</h4>
+                <h4>SHL Team: <a href="http://simulationhockey.com/bankteam.php?id=<?php echo $curruser['teamid']; ?>"><?php echo $teamName; ?></a></h4>
                 <table>
                     <tr>
                         <th>Points</th>
@@ -505,7 +497,6 @@
                             </tr>
                     </if>
                 </table>
-                <p><em>+5 Training only available when you've been drafted to an SHL team</em></p>
                 <hr />
                 <form onsubmit="return areYouSure();" method="post">
                     <h4 style="margin-top: 10px;">Other Purchases</h4>
@@ -531,8 +522,8 @@
                         <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
                     </table>
                 </form>
-                <p style="margin-bottom: 0px"><em>Write a postive number for a purchase transaction. No approvals necessary.</em></p>
-                <p style="margin-bottom: 0px"><em>Put details about the transaction in the description. For example if you're purchasing equipment write out what you're buying.</em></p>
+                <p>No approvals necessary. Entered amount will be negative. </p>
+                <p style="margin-bottom: 0px">For overdrafts or deposit go to the Submit Request section in the Bank.</em></p>
             </div>
         </div>
     </if>
@@ -586,6 +577,10 @@
     </if>
 
     <script>
+        $(document).on("keydown", "form", function(event) { 
+            return event.key != "Enter";
+        });
+
         function toggleArea(spanlink, idToHide) {
             if (document.getElementById(idToHide).className != 'hideme') {
                 document.getElementById(idToHide).className = 'hideme';

@@ -137,6 +137,18 @@ function acceptTransferRequest($db, $uid, $bankerid, $approveid, $approverequest
     return 0;
 }
 
+function goToLatestTransaction($db, $userId) {
+    $xQuery = $db->simple_select("banktransactions", "id", "uid=$userId", array("limit" => 1, "order_by" => "id", "order_dir" => 'DESC'));
+    if ($xRow = $db->fetch_array($xQuery)) { 
+        $newTransId = $xRow['id']; 
+        header('Location: http://simulationhockey.com/banktransaction.php?id=' . $newTransId);
+    }
+    else {
+        echo 'something went wrong';
+        exit;
+    }
+}
+
 function displaySuccessTransaction($disName, $disAmount, $disTitle, $disDescription, $displayMessage) {
     echo '<div class="successSection">';
     echo "<h4>Success: $displayMessage</h4>";

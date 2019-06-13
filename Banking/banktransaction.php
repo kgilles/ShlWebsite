@@ -33,10 +33,12 @@
         if ($xRow = $db->fetch_array($xQuery)) {
             if ($xRow['uid'] > 0) {
                 echo '<div class="bojoSection navigation">
-                        <h4>Bank Transaction</h4>
                         <h2>' . $xRow['title'] . '</h2>
                         <p>' . $xRow['description'] . '</p>
                         <table>';
+
+                $transUserId = $xRow['uid'];
+                $transUserName = $xRow['username'];
 
                 if ($xRow['amount'] < 0)
                     echo "<tr><th>Amount</th><td class='negative'>-$" . number_format(abs($xRow['amount']), 0) . "</td></tr>";
@@ -53,12 +55,14 @@
                 echo '<tr><th>User</th><td><a href="' . $ba1Link . '">' . $xRow['username'] . '</a></td></tr>
                       <tr><th>Made by</th><td><a href="' . $ba2Link . '">' . $xRow['owner'] . '</a></td></tr>
                       <tr><th>Date</th><td>' . $date->format('m/d/y') . '</td></tr>
-                      <tr><th>Time</th><td>' . $date->format('g:i A') . ' ET</td></tr>
-                      <tr><th>Group*</th><td><a href="' . $requestLink . '">' . $xRow['groupname'] . '</a></td></tr>
-                      <tr><th>Banker**</th><td><a href="' . $ba3Link . '">' . $xRow['bankername'] . '</a></td></tr>
-                      </table>
-                      </div>
-                      <p>* If part of a mass group update.<br />** Only neccessary for transactions that require approval.</p>';
+                      <tr><th>Time</th><td>' . $date->format('g:i A') . ' ET</td></tr>';
+                if ($xRow['groupid'] != null) {
+                    echo '<tr><th>Group</th><td><a href="' . $requestLink . '">' . $xRow['groupname'] . '</a></td></tr>';
+                }
+                if ($xRow['bankerapproverid'] != null) {
+                    echo '<tr><th>Banker</th><td><a href="' . $ba3Link . '">' . $xRow['bankername'] . '</a></td></tr>';
+                }
+                echo '</table></div>';
             } else {
                 echo '<div class="bojoSection"><p>No transaction found</p></div>';
             }
@@ -69,6 +73,24 @@
         echo '<div class="bojoSection"><p>No transaction found</p></div>';
     }
     ?>
+
+    <div>
+    </div>
+
+    <div class="bojoSection navigation">
+        <h4>Link to this page in your updates when claiming training, equipment, or any other bank related TPE claim.</h3>
+        <h3>Bank Links</h3>
+
+        <ul>
+            <li><a href="http://simulationhockey.com/bank.php">Main Page</a></li>
+            <?php 
+            if ($currentTransactionId > 0) {
+                echo '<li><a href="http://simulationhockey.com/bankaccount.php?uid=' . $transUserId . '">' . $transUserName . '\'s Account</a></li>';
+            }
+            ?>
+            <li><a href="http://simulationhockey.com/bankaccount.php">Your Account</a></li>
+        </ul>
+    </div>
 
     <?php $db->close; ?>
 

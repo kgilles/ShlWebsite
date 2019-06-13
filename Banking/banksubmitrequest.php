@@ -214,21 +214,44 @@
     ?>
 
     <div class="bojoSection navigation">
+        <h2>Submitting a Request</h2>
         <if $isBanker then>
-            <h2>Submit Transactions</h2>
-            <p>Submit a transaction. <strong>As a banker no approvals are necessary</strong></p>
-            <else>
-                <h2>Submit Transaction Request</h2>
-                <p>Submit a transaction. <strong style='color: red;'>Will require a banker's approval before the transactions can be completed.</strong></p>
+            <p><strong>As a banker no approvals are necessary</strong></p>
+            <ul>
+                <li><a href="http://simulationhockey.com/bank.php">Main Page</a></li>
+                <li><a href="http://simulationhockey.com/bankaccount.php">Your Account</a></li>
+            </ul>
+        <else>
+            <h2>Submit Transaction Request</h2>
+            <p><strong style='color: red;'>Will require a banker's approval before the transactions can be completed.</strong></p>
         </if>
-        <p>First enter a list of user names for the transaction. Then enter amounts for each person. Positive if deposits otherwise negative. Enter Titles and descriptions. Click "Fill the rest" to have the rest of the users copy the first user's information. The group name should summarize the group's transactions, but can usually just be same as the titles for each person.</p>
+        <hr />
+        <h3>Example Request Scenarios</h3>
+        <ul>
+            <li><strong>Grouped Deposits</strong> (Contracts, Media Pay, Job Pay)</li>
+            <li><strong>Money Transfers</strong> (Bets, Sig Payments)</li>
+            <li><strong>Overdraft Requests</strong> (Current balance will increase with unprocessed deposits)</li>
+        </ul>
+        <hr />
+        <h3>Instructions</h3>
+        <ol>
+            <li>Enter list of user names separated by commas or new lines.</li>
+            <li>Click "Get Users". Checks if the users exist.</li>
+            <li>Enter a short title for the transaction.</li>
+            <li>Enter amounts for deposits or withdrawls. Remember to use the negative sign if withdrawing.</li>
+            <li>Add a description for each user. Required for withdrawls.</li>
+            <li>Click "Submit Transactions"</li>
+        </ol>
+        <p>The "Copy from First" button will populate all the users with the same info provided for the first user.</p>
     </div>
 
     <div class="bojoSection navigation">
+        <h2>Submit Transactions</h2>
         <if $currentTeamId==null then>
-            <small>submit a list of usernames separated by either commas or new lines.</small>
+            <p><i>Enter list of usernames separated by commas or new lines.</i></p>
             <form method="post">
-                <textarea name="namelist" rows="8"><?php echo $namelist ?></textarea><br />
+                <input type="button" onclick="document.getElementById('namelist').value='<?php echo $mybb->user['username']; ?>'" value="Add Just Myself" /><br />
+                <textarea id="namelist" name="namelist" rows="8"><?php echo $namelist ?></textarea><br />
                 <input type="submit" name="submitnames" value="Get Users" />
                 <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code; ?>" />
             </form>
@@ -284,6 +307,10 @@
     </div>
 
     <script>
+        $(document).on("keydown", ":input:not(textarea)", function(event) {
+            return event.key != "Enter";
+        });
+
         function fillInUsers() {
             var i = 0;
             var firstAmount = 0;

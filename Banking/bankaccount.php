@@ -734,7 +734,7 @@
                             </table>
                             <hr />
                             <div id="purchasearea">
-                                <h4>Seasonly Equipment Training</h4>
+                                <h4>Seasonal Equipment Training</h4>
                                 <form method="post">
                                     <select name="shlEquipment">
                                         <option>SHL Equipment</option>

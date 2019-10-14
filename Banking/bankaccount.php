@@ -671,12 +671,12 @@
                             <h4>SHL Team: <a href="http://simulationhockey.com/bankteam.php?id=<?php echo $curruser['teamid']; ?>"><?php echo $teamName; ?></a></h4>
                             <table>
                                 <tr>
-                                    <th>Points</th>
+                                    <th style="height: 30px;">Points</th>
                                     <th>Cost</th>
                                 </tr>
                                 <if $teamLeague !="SHL" then>
                                     <tr>
-                                        <td>+3</td>
+                                        <td style="height: 30px;">+3</td>
                                         <td>$500,000</td>
                                         <form onsubmit="return areYouSure();" method="post">
                                             <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
@@ -685,7 +685,7 @@
                                         </form>
                                     </tr>
                                     <tr>
-                                        <td>+2</td>
+                                        <td style="height: 30px;">+2</td>
                                         <td>$250,000</td>
                                         <form onsubmit="return areYouSure();" method="post">
                                             <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
@@ -704,7 +704,7 @@
                                     </tr>
                                     <else>
                                         <tr>
-                                            <td>+5</td>
+                                            <td style="height: 30px;">+5</td>
                                             <td>$1,000,000</td>
                                             <form onsubmit="return areYouSure();" method="post">
                                                 <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
@@ -713,7 +713,7 @@
                                             </form>
                                         </tr>
                                         <tr>
-                                            <td>+3</td>
+                                            <td style="height: 30px;">+3</td>
                                             <td>$500,000</td>
                                             <form onsubmit="return areYouSure();" method="post">
                                                 <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
@@ -817,15 +817,15 @@
                                     <table>
                                         <tr>
                                             <th>Amount</th>
-                                            <td><input type="number" name="purchaseamount" placeholder="Enter amount..." /></td>
+                                            <td style="height: 30px"><input type="number" name="purchaseamount" placeholder="Enter amount..." /></td>
                                         </tr>
                                         <tr>
                                             <th>Title</th>
-                                            <td><input type="text" name="purchasetitle" placeholder="Enter title..." /></td>
+                                            <td style="height: 30px"><input type="text" name="purchasetitle" placeholder="Enter title..." /></td>
                                         </tr>
                                         <tr>
                                             <th>Description</th>
-                                            <td>
+                                            <td style="height: 60px">
                                                 <textarea name="purchasedescription"></textarea>
                                             </td>
                                         </tr>

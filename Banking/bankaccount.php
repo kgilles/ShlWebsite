@@ -555,7 +555,7 @@
                         ?>
                     </h2>
                     <ul>
-                        <li><a href="https://simulationhockey.com/member.php?action=profile&uid=<?php echo $myuid; ?>">Profile Page</a></li>
+                        <li><a href="https://simulationhockey.com/member.php?action=profile&uid=<?php echo $currentUserId; ?>">Profile Page</a></li>
                         <li><a href="http://simulationhockey.com/bank.php">Main Bank page</a></li>
                         <li><a href="http://simulationhockey.com/bankexportaccount.php?uid=<?php echo $currentUserId; ?>">Export Data</a></li>
                     </ul>

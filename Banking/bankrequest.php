@@ -157,8 +157,8 @@
                 echo '<input type="submit" name="submitDecline" value="Decline" />';
                 echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" />';
                 echo '</form></p>';
-                echo "</div>";
             }
+            echo "</div>";
         }
         else {
             echo '<div class="bojoSection"';
@@ -173,6 +173,14 @@
     ?>
 
     <?php $db->close; ?>
+
+    <div class="bojoSection navigation">
+        <h3>Bank Links</h3>
+        <ul>
+            <li><a href="http://simulationhockey.com/bank.php">Main Page</a></li>
+            <li><a href="http://simulationhockey.com/bankaccount.php">Your Account</a></li>
+        </ul>
+    </div>
 
     {$boardstats}
     <br class="clear" />

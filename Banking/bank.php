@@ -12,6 +12,20 @@
 
     $myuid = getUserId($mybb);
 
+    $page = 1;
+    if(isset($_GET["page"])) {
+        if(is_numeric($_GET["page"])) {
+            $page = getSafeNumber($db, $_GET["page"]);
+        }
+        else
+        {
+            echo 'incorrect parameter';
+            exit;
+        }
+    }
+    $rowsPerPage = 25;
+    $offset = ($page - 1) * $rowsPerPage;   
+
     // if not logged in, go away
     if ($myuid <= 0) {
         echo 'You are not logged in';
@@ -191,7 +205,16 @@
 
         <hr />
 
-        <h3>Review History (Last 25)</h3>
+        <h3 id="history">Review History</h3>
+        <p>
+        <?php
+        if ($page > 1) {
+            echo '<a href="bank.php?page=' . ($page - 1) . '#history">PREV</a>';
+        }
+        ?>
+        <span> - Page <?php echo $page; ?> - </span>
+        <?php echo '<a href="bank.php?page=' . ($page + 1) . '#history">NEXT</a>'; ?>
+        </p>
         <?php
         // Transfer Requests
         $transactionQuery =
@@ -200,8 +223,8 @@
             LEFT JOIN mybb_users urequester ON bt.creatorid=urequester.uid
             LEFT JOIN mybb_users ubanker ON bt.bankerid=ubanker.uid
             WHERE bt.isapproved IS NOT NULL
-            ORDER BY bt.requestdate DESC
-            LIMIT 25";
+            ORDER BY bt.decisiondate DESC
+            LIMIT " . $rowsPerPage . " OFFSET " . $offset;
 
         $bankRows = $db->query($transactionQuery);
         $bankRowCount = mysqli_num_rows($bankRows);
@@ -244,6 +267,7 @@
         }
 
         ?>
+        <p><i>Ordered by Date Decision</i></p>
     </div>
 
     <?php $db->close; ?>

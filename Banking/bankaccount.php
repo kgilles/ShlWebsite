@@ -180,127 +180,33 @@
             logAction($db, "ACTION", "$myuid attempts to make an equipment transaction");
             if ($isMyAccount) {
                 $equipment = getSafeString($db, $mybb->input["shlEquipment"]);
-                $transTitle = "SHL Equipment";
+                $transTitle = "SHL Personal Coaching";
                 switch ($equipment) {
-                    case "stick1":
-                        $transAmount = -2500000;
-                        $transTitle .= " - Stick";
-                        $transDescription = "Nike Bauer Vapor XXX lite";
-                        break;
-                    case "stick2":
-                        $transAmount = -1500000;
-                        $transTitle .= " - Stick";
-                        $transDescription = "Easton Synergy";
-                        break;
-                    case "stick3":
-                        $transAmount = -500000;
-                        $transTitle .= " - Stick";
-                        $transDescription = "Koho Revolution";
-                        break;
-                    case "stick4":
-                        $transAmount = -250000;
-                        $transTitle .= " - Stick";
-                        $transDescription = "Wood Sticks";
-                        break;
-                    case "glove1":
+                    case "tier1":
                         $transAmount = -2000000;
-                        $transTitle .= " - Gloves";
-                        $transDescription = "Nike Bauer Vapor XXX";
+                        $transTitle .= " - Tier 1";
+                        $transDescription = "9 TPE: Train with an ex SHL player on hockey skills.";
                         break;
-                    case "glove2":
-                        $transAmount = -1000000;
-                        $transTitle .= " - Gloves";
-                        $transDescription = "Mission";
+                    case "tier2":
+                        $transAmount = -4000000;
+                        $transTitle .= " - Tier 2";
+                        $transDescription = "16 TPE: Train with a Hall of Fame player on Hockey skills.";
                         break;
-                    case "glove3":
-                        $transAmount = -500000;
-                        $transTitle .= " - Gloves";
-                        $transDescription = "Easton";
+                    case "tier3":
+                        $transAmount = -5000000;
+                        $transTitle .= " - Tier 3";
+                        $transDescription = "19 TPE: Train with an Olympic conditioning coach on mental and physical aspects of your game in the off-season.";
                         break;
-                    case "glove4":
-                        $transAmount = -500000;
-                        $transTitle .= " - Gloves";
-                        $transDescription = "CCM";
+                    case "tier4":
+                        $transAmount = -6500000;
+                        $transTitle .= " - Tier 4";
+                        // Damn canadians and their "programmes"
+                        $transDescription = "23 TPE: Programme of film study and hockey skills with former SMJHL head coach.";
                         break;
-                    case "skate1":
-                        $transAmount = -2000000;
-                        $transTitle .= " - Skates";
-                        $transDescription = "Nike Bauer Vapor XXX";
-                        break;
-                    case "skate2":
-                        $transAmount = -1500000;
-                        $transTitle .= " - Skates";
-                        $transDescription = "Easton";
-                        break;
-                    case "skate3":
-                        $transAmount = -1000000;
-                        $transTitle .= " - Skates";
-                        $transDescription = "Mission";
-                        break;
-                    case "skate4":
-                        $transAmount = -500000;
-                        $transTitle .= " - Skates";
-                        $transDescription = "CCM";
-                        break;
-                    case "shoulder1":
-                        $transAmount = -2000000;
-                        $transTitle .= " - Shoulder Pads";
-                        $transDescription = "Mission Fuel";
-                        break;
-                    case "shoulder2":
-                        $transAmount = -1000000;
-                        $transTitle .= " - Shoulder Pads";
-                        $transDescription = "Easton Synergy";
-                        break;
-                    case "shoulder3":
-                        $transAmount = -500000;
-                        $transTitle .= " - Shoulder Pads";
-                        $transDescription = "CCM";
-                        break;
-                    case "g-skate1":
-                        $transAmount = -2000000;
-                        $transTitle .= " - Goalie Skates";
-                        $transDescription = "Reebok";
-                        break;
-                    case "g-skate2":
-                        $transAmount = -1000000;
-                        $transTitle .= " - Goalie Skates";
-                        $transDescription = "CCM";
-                        break;
-                    case "g-skate3":
-                        $transAmount = -500000;
-                        $transTitle .= " - Goalie Skates";
-                        $transDescription = "Bauer";
-                        break;
-                    case "g-glove1":
-                        $transAmount = -2000000;
-                        $transTitle .= " - Goalie Gloves";
-                        $transDescription = "Koho";
-                        break;
-                    case "g-glove2":
-                        $transAmount = -1000000;
-                        $transTitle .= " - Goalie Gloves";
-                        $transDescription = "Franklin";
-                        break;
-                    case "g-glove3":
-                        $transAmount = -500000;
-                        $transTitle .= " - Goalie Gloves";
-                        $transDescription = "Itech";
-                        break;
-                    case "g-pads1":
-                        $transAmount = -2000000;
-                        $transTitle .= " - Goalie Pads";
-                        $transDescription = "Mission";
-                        break;
-                    case "g-pads2":
-                        $transAmount = -1000000;
-                        $transTitle .= " - Goalie Pads";
-                        $transDescription = "Itech";
-                        break;
-                    case "g-pads3":
-                        $transAmount = -500000;
-                        $transTitle .= " - Goalie Pads";
-                        $transDescription = "Reebok";
+                    case "tier5":
+                        $transAmount = -8500000;
+                        $transTitle .= " - Tier 5";
+                        $transDescription = "28 TPE: Programme of film study and Hockey skills with former SHL head coach.";
                         break;
 
                     default:
@@ -330,93 +236,24 @@
             logAction($db, "ACTION", "$myuid attempts to make an smjhl equipment transaction");
             if ($isMyAccount) {
                 $equipment = getSafeString($db, $mybb->input["smjhlEquipment"]);
-                $transTitle = "SMJHL Equipment";
+                $transTitle = "SMJHL Personal Coaching";
                 switch ($equipment) {
-                    case "stick1":
-                        $transAmount = -1000000;
-                        $transTitle .= " - Stick";
-                        $transDescription = "CCM RBZ Speedburner";
+                    case "juniorTier1":
+                        $transAmount = -2000000;
+                        $transTitle .= " - Tier 1";
+                        $transDescription = "8 TPE: Rookie Symposium - Study the playbook and film with the team coaches.";
                         break;
-                    case "stick2":
-                        $transAmount = -1000000;
-                        $transTitle .= " - Stick";
-                        $transDescription = "Easton EQ50";
+                    case "juniorTier2":
+                        $transAmount = -300000;
+                        $transTitle .= " - Tier 2";
+                        $transDescription = "14 TPE: Rookie Workout - A one-on-one session with the team personal trainers.";
                         break;
-                    case "stick3":
-                        $transAmount = -500000;
-                        $transTitle .= " - Stick";
-                        $transDescription = "Warrior Dolomite";
+                    case "juniorTier3":
+                        $transAmount = -450000;
+                        $transTitle .= " - Tier 3";
+                        $transDescription = "20 TPE: Intense Rookie Coaching - A grind of physical and mental training that increases all aspects of your game.";
                         break;
-                    case "glove1":
-                        $transAmount = -1500000;
-                        $transTitle .= " - Gloves";
-                        $transDescription = "CCM CL 500";
-                        break;
-                    case "glove2":
-                        $transAmount = -1000000;
-                        $transTitle .= " - Gloves";
-                        $transDescription = "Warrior Franchises";
-                        break;
-                    case "glove3":
-                        $transAmount = -500000;
-                        $transTitle .= " - Gloves";
-                        $transDescription = "Bauer Vapors";
-                        break;
-                    case "skate1":
-                        $transAmount = -1000000;
-                        $transTitle .= " - Skates";
-                        $transDescription = "GRAF PK7700";
-                        break;
-                    case "skate2":
-                        $transAmount = -1000000;
-                        $transTitle .= " - Skates";
-                        $transDescription = "CCM Tacks";
-                        break;
-                    case "skate3":
-                        $transAmount = -500000;
-                        $transTitle .= " - Skates";
-                        $transDescription = "Bauer Vapor X900";
-                        break;
-                    case "shoulder1":
-                        $transAmount = -1000000;
-                        $transTitle .= " - Shoulder Pads";
-                        $transDescription = "Bauer";
-                        break;
-                    case "shoulder2":
-                        $transAmount = -500000;
-                        $transTitle .= " - Shoulder Pads";
-                        $transDescription = "CCM";
-                        break;
-                    case "g-skate1":
-                        $transAmount = -1000000;
-                        $transTitle .= " - Goalie Skates";
-                        $transDescription = "CCM";
-                        break;
-                    case "g-skate2":
-                        $transAmount = -500000;
-                        $transTitle .= " - Goalie Skates";
-                        $transDescription = "Reebok";
-                        break;
-                    case "g-glove1":
-                        $transAmount = -1000000;
-                        $transTitle .= " - Goalie Gloves";
-                        $transDescription = "Vaughn";
-                        break;
-                    case "g-glove2":
-                        $transAmount = -500000;
-                        $transTitle .= " - Goalie Gloves";
-                        $transDescription = "Reebok";
-                        break;
-                    case "g-pads1":
-                        $transAmount = -1000000;
-                        $transTitle .= " - Goalie Pads";
-                        $transDescription = "Vaughn";
-                        break;
-                    case "g-pads2":
-                        $transAmount = -500000;
-                        $transTitle .= " - Goalie Pads";
-                        $transDescription = "Reebok";
-                        break;
+
                     default:
                         $transAmount = 0; // throws error
                         break;
@@ -735,72 +572,25 @@
                             </table>
                             <hr />
                             <div id="purchasearea">
-                                <h4>Seasonal Equipment Training</h4>
+                                <h4>Seasonal Personal Coaching</h4>
                                 <form method="post">
                                     <select name="shlEquipment">
-                                        <option>SHL Equipment</option>
-                                        <option>-- Sticks --</option>
-                                        <option value="stick1">$2.5m - Nike Bauer Vapor XX lite</option>
-                                        <option value="stick2">$1.5m - Easton Synergy</option>
-                                        <option value="stick3">$0.5m - Koho Revolution</option>
-                                        <option value="stick4">$0.25m - Wood Sticks</option>
-                                        <option>-- Gloves --</option>
-                                        <option value="glove1">$2.0m - Nike Bauer Vapor XX lite</option>
-                                        <option value="glove2">$1.0m - Mission</option>
-                                        <option value="glove3">$0.5m - Easton</option>
-                                        <option value="glove4">$0.5m - CCM</option>
-                                        <option>-- Skates --</option>
-                                        <option value="skate1">$2.0m - Nike Bauer Vapor XX lite</option>
-                                        <option value="skate2">$1.5m - Easton</option>
-                                        <option value="skate3">$1.0m - Mission</option>
-                                        <option value="skate4">$0.5m - CCM</option>
-                                        <option>-- Shoulder Pads --</option>
-                                        <option value="shoulder1">$2.0m - Mission Fuel</option>
-                                        <option value="shoulder2">$1.0m - Easton Synergy</option>
-                                        <option value="shoulder3">$0.5m - CCM</option>
-                                        <option>-- Goalie Skates --</option>
-                                        <option value="g-skate1">$2.0m - Reebok</option>
-                                        <option value="g-skate2">$1.0m - CCM</option>
-                                        <option value="g-skate3">$0.5m - Bauer</option>
-                                        <option>-- Goalie Gloves --</option>
-                                        <option value="g-glove1">$2.0m - Koho</option>
-                                        <option value="g-skate2">$1.0m - Franklin</option>
-                                        <option value="g-skate3">$0.5m - Itech</option>
-                                        <option>-- Goalie Pads --</option>
-                                        <option value="g-pads1">$2.0m - Mission</option>
-                                        <option value="g-pads2">$1.0m - Itech</option>
-                                        <option value="g-pads3">$0.5m - Reebok</option>
+                                        <option>SHL Personal Coaching</option>
+                                        <option value="tier1">$2.0m - Tier 1</option>
+                                        <option value="tier2">$4.0m - Tier 2</option>
+                                        <option value="tier3">$5.0m - Tier 3</option>
+                                        <option value="tier4">$6.5m - Tier 4</option>
+                                        <option value="tier5">$8.5m - Tier 5</option>
                                     </select>
                                     <br />
-                                    <input type="submit" name="submitshlequipment" value="Purchase SHL Equipment" />
+                                    <input type="submit" name="submitshlequipment" value="Purchase SHL Coaching" />
                                     <br />
                                     <br />
                                     <select name="smjhlEquipment">
-                                        <option>SMJHL Equipment</option>
-                                        <option>-- Sticks --</option>
-                                        <option value="stick1">$1.0m - CCM RBZ Speedburner</option>
-                                        <option value="stick2">$1.0m - Easton EQ50</option>
-                                        <option value="stick3">$0.5m - Warrior Dolomite</option>
-                                        <option>-- Gloves --</option>
-                                        <option value="glove1">$1.5m - CCM CL 500</option>
-                                        <option value="glove2">$1.0m - Warrior Franchises</option>
-                                        <option value="glove3">$0.5m - Bauer Vapors</option>
-                                        <option>-- Skates --</option>
-                                        <option value="skate1">$1.0m - GRAF PK7700</option>
-                                        <option value="skate2">$1.0m - CCM Tacks</option>
-                                        <option value="skate3">$0.5m - Bauer Vapor X900</option>
-                                        <option>-- Shoulder Pads --</option>
-                                        <option value="shoulder1">$1.0m - Bauer</option>
-                                        <option value="shoulder2">$0.5m - CCM</option>
-                                        <option>-- Goalie Skates --</option>
-                                        <option value="g-skate1">$1.0m - CCM</option>
-                                        <option value="g-skate2">$0.5m - Reebok</option>
-                                        <option>-- Goalie Gloves --</option>
-                                        <option value="g-glove1">$1.0m - Vaughn</option>
-                                        <option value="g-glove2">$0.5m - Reebok</option>
-                                        <option>-- Goalie Pads --</option>
-                                        <option value="g-pads1">$1.0m - Vaughn</option>
-                                        <option value="g-pads2">$0.5m - Reebok</option>
+                                        <option>SMJHL Personal Coaching</option>
+                                        <option value="juniorTier1">$2.0m - Tier 1</option>
+                                        <option value="juniorTier2">$3.0m - Tier 2</option>
+                                        <option value="juniorTier3">$4.5m - Tier 3</option>
                                     </select>
                                     <br />
                                     <input type="submit" name="submitsmjhlequipment" value="Purchase SMJHL Equipment" />

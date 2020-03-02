@@ -244,12 +244,12 @@
                         $transDescription = "8 TPE: Rookie Symposium - Study the playbook and film with the team coaches.";
                         break;
                     case "juniorTier2":
-                        $transAmount = -300000;
+                        $transAmount = -3000000;
                         $transTitle .= " - Tier 2";
                         $transDescription = "14 TPE: Rookie Workout - A one-on-one session with the team personal trainers.";
                         break;
                     case "juniorTier3":
-                        $transAmount = -450000;
+                        $transAmount = -4500000;
                         $transTitle .= " - Tier 3";
                         $transDescription = "20 TPE: Intense Rookie Coaching - A grind of physical and mental training that increases all aspects of your game.";
                         break;
@@ -576,11 +576,11 @@
                                 <form method="post">
                                     <select name="shlEquipment">
                                         <option>SHL Personal Coaching</option>
-                                        <option value="tier1">$2.0m - Tier 1</option>
-                                        <option value="tier2">$4.0m - Tier 2</option>
-                                        <option value="tier3">$5.0m - Tier 3</option>
-                                        <option value="tier4">$6.5m - Tier 4</option>
-                                        <option value="tier5">$8.5m - Tier 5</option>
+                                        <option value="tier1">$2.0m - 9 TPE</option>
+                                        <option value="tier2">$4.0m - 16 TPE</option>
+                                        <option value="tier3">$5.0m - 19 TPE</option>
+                                        <option value="tier4">$6.5m - 23 TPE</option>
+                                        <option value="tier5">$8.5m - 28 TPE</option>
                                     </select>
                                     <br />
                                     <input type="submit" name="submitshlequipment" value="Purchase SHL Coaching" />
@@ -588,20 +588,15 @@
                                     <br />
                                     <select name="smjhlEquipment">
                                         <option>SMJHL Personal Coaching</option>
-                                        <option value="juniorTier1">$2.0m - Tier 1</option>
-                                        <option value="juniorTier2">$3.0m - Tier 2</option>
-                                        <option value="juniorTier3">$4.5m - Tier 3</option>
+                                        <option value="juniorTier1">$2.0m - 8 TPE</option>
+                                        <option value="juniorTier2">$3.0m - 14 TPE</option>
+                                        <option value="juniorTier3">$4.5m - 20 TPE</option>
                                     </select>
                                     <br />
-                                    <input type="submit" name="submitsmjhlequipment" value="Purchase SMJHL Equipment" />
+                                    <input type="submit" name="submitsmjhlequipment" value="Purchase SMJHL Coaching" />
                                     <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
                                 </form>
-                                <ul>
-                                    <li><a href="https://simulationhockey.com/showthread.php?tid=63301&pid=1799265#pid1799265">Equipment Rules</a></li>
-                                    <li><a href="https://simulationhockey.com/showthread.php?tid=57766">SHL Equipment</a></li>
-                                    <li><a href="https://simulationhockey.com/showthread.php?tid=92299">SMJHL Equipment</a></li>
-                                </ul>
-                                <p>If you are unsure what to do please contact your GM or updater</p>
+                                <p><a href="https://simulationhockey.com/showthread.php?tid=103800">Click here for the Announcement thread detailing how to use personal coaching.</a> If you are unsure what to do please contact your GM or updater.</p>
                                 <hr />
                                 <form onsubmit="return areYouSure();" method="post">
                                     <h4 style="margin-top: 10px;">Other Purchases</h4>

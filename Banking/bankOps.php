@@ -194,7 +194,7 @@ function canDoTraining($db, $userId) {
     
     $lastTrainingDate = getLatestTrainingDate($db, $userId);
     if ($lastTrainingDate == null) {
-        return false;
+        return true;
     }
     
     $lastMonday = strtotime('Monday this week');

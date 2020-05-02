@@ -189,8 +189,8 @@ function getLatestTrainingDate($db, $userId) {
 function canDoTraining($db, $userId) {
 
     // Server Timezone is GMT (UTC+0)
-    // Deadline is midnight ET
-    date_default_timezone_set('America/New_York');
+    // Deadline is Pacific (california)
+    date_default_timezone_set('America/Los_Angeles');
     
     $lastTrainingDate = getLatestTrainingDate($db, $userId);
     if ($lastTrainingDate == null) {

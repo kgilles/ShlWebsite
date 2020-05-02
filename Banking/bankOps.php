@@ -193,21 +193,12 @@ function canDoTraining($db, $userId) {
     date_default_timezone_set('America/New_York');
     
     $lastTrainingDate = getLatestTrainingDate($db, $userId);
-    
-    if($lastTrainingDate == null) 
-    {
+    if ($lastTrainingDate == null) {
         return false;
     }
     
     $lastMonday = strtotime('Monday this week');
     $nowDate = strtotime('now');
-    
-    echo date('Y-m-d H:i', $lastMonday) . ' -- monday';
-    echo '<br />';
-    echo date('Y-m-d H:i', $lastTrainingDate) . ' -- training';
-    echo '<br />';
-    echo date('Y-m-d H:i', $nowDate) . ' -- now';
-    echo '<br />';
 
     return ($lastTrainingDate < $lastMonday) || ($lastTrainingDate > $nowDate);
 } 

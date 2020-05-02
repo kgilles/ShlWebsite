@@ -247,6 +247,7 @@
 
     <div class="bojoSection navigation">
         <h2>Submit Transactions</h2>
+        <p>Read First: <a href="showthread.php?tid=105079">Guide to Transfers Between Users</a></p>
         <if $currentTeamId==null then>
             <p><i>Enter list of usernames separated by commas or new lines.</i></p>
             <form method="post">

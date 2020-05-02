@@ -29,6 +29,8 @@
         exit;
     }
 
+    $canDoWeekTraining = canDoTraining($db, $myuid);
+
 
     $curruser = getUser($db, $currentUserId);
     if ($curruser == null) {
@@ -504,128 +506,133 @@
                 <if ($currentUserId==$myuid) then>
                     <div class="bojoSection navigation">
                         <h2>New Purchase</h2>
-                        <div id="purchasearea">
-                            <h4>Weekly Training</h4>
-                            <h4>SHL Team: <a href="http://simulationhockey.com/bankteam.php?id=<?php echo $curruser['teamid']; ?>"><?php echo $teamName; ?></a></h4>
-                            <table>
-                                <tr>
-                                    <th style="height: 30px;">Points</th>
-                                    <th>Cost</th>
-                                </tr>
-                                <if $teamLeague !="SHL" then>
-                                    <tr>
-                                        <td style="height: 30px;">+3</td>
-                                        <td>$500,000</td>
-                                        <form onsubmit="return areYouSure();" method="post">
-                                            <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
-                                            <input type="hidden" name="trainingvalue" value="3" />
-                                            <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
-                                        </form>
-                                    </tr>
-                                    <tr>
-                                        <td style="height: 30px;">+2</td>
-                                        <td>$250,000</td>
-                                        <form onsubmit="return areYouSure();" method="post">
-                                            <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
-                                            <input type="hidden" name="trainingvalue" value="2" />
-                                            <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
-                                        </form>
-                                    </tr>
-                                    <tr>
-                                        <td>+1</td>
-                                        <td>$100,000</td>
-                                        <form onsubmit="return areYouSure();" method="post">
-                                            <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
-                                            <input type="hidden" name="trainingvalue" value="1" />
-                                            <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
-                                        </form>
-                                    </tr>
-                                    <else>
-                                        <tr>
-                                            <td style="height: 30px;">+5</td>
-                                            <td>$1,000,000</td>
-                                            <form onsubmit="return areYouSure();" method="post">
-                                                <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
-                                                <input type="hidden" name="trainingvalue" value="5" />
-                                                <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
-                                            </form>
-                                        </tr>
-                                        <tr>
-                                            <td style="height: 30px;">+3</td>
-                                            <td>$500,000</td>
-                                            <form onsubmit="return areYouSure();" method="post">
-                                                <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
-                                                <input type="hidden" name="trainingvalue" value="3" />
-                                                <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
-                                            </form>
-                                        </tr>
-                                        <tr>
-                                            <td>+1</td>
-                                            <td>$100,000</td>
-                                            <form onsubmit="return areYouSure();" method="post">
-                                                <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
-                                                <input type="hidden" name="trainingvalue" value="1" />
-                                                <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
-                                            </form>
-                                        </tr>
-                                </if>
-                            </table>
-                            <hr />
                             <div id="purchasearea">
-                                <h4>Seasonal Personal Coaching</h4>
-                                <form method="post">
-                                    <select name="shlEquipment">
-                                        <option>SHL Personal Coaching</option>
-                                        <option value="tier1">$2.0m - 9 TPE</option>
-                                        <option value="tier2">$4.0m - 16 TPE</option>
-                                        <option value="tier3">$5.0m - 19 TPE</option>
-                                        <option value="tier4">$6.5m - 23 TPE</option>
-                                        <option value="tier5">$8.5m - 28 TPE</option>
-                                    </select>
-                                    <br />
-                                    <input type="submit" name="submitshlequipment" value="Purchase SHL Coaching" />
-                                    <br />
-                                    <br />
-                                    <select name="smjhlEquipment">
-                                        <option>SMJHL Personal Coaching</option>
-                                        <option value="juniorTier1">$2.0m - 8 TPE</option>
-                                        <option value="juniorTier2">$3.0m - 14 TPE</option>
-                                        <option value="juniorTier3">$4.5m - 20 TPE</option>
-                                    </select>
-                                    <br />
-                                    <input type="submit" name="submitsmjhlequipment" value="Purchase SMJHL Coaching" />
-                                    <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
-                                </form>
-                                <p><a href="https://simulationhockey.com/showthread.php?tid=103800">Click here for the Announcement thread detailing how to use personal coaching.</a> If you are unsure what to do please contact your GM or updater.</p>
-                                <hr />
-                                <form onsubmit="return areYouSure();" method="post">
-                                    <h4 style="margin-top: 10px;">Other Purchases</h4>
+                                <h4>Weekly Training</h4>
+                                <h4>SHL Team: <a href="http://simulationhockey.com/bankteam.php?id=<?php echo $curruser['teamid']; ?>"><?php echo $teamName; ?></a></h4>
+                                <if ($canDoWeekTraining) then>
                                     <table>
                                         <tr>
-                                            <th>Amount</th>
-                                            <td style="height: 30px"><input type="number" name="purchaseamount" placeholder="Enter amount..." /></td>
+                                            <th style="height: 30px;">Points</th>
+                                            <th>Cost</th>
                                         </tr>
-                                        <tr>
-                                            <th>Title</th>
-                                            <td style="height: 30px"><input type="text" name="purchasetitle" placeholder="Enter title..." /></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Description</th>
-                                            <td style="height: 60px">
-                                                <textarea name="purchasedescription"></textarea>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th></th>
-                                            <td><input type="submit" name="submitpurchase" value="Make Purchase" /></td>
-                                        </tr>
-                                        <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                                        <if $teamLeague !="SHL" then>
+                                            <tr>
+                                                <td style="height: 30px;">+3</td>
+                                                <td>$500,000</td>
+                                                <form onsubmit="return areYouSure();" method="post">
+                                                    <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
+                                                    <input type="hidden" name="trainingvalue" value="3" />
+                                                    <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                                                </form>
+                                            </tr>
+                                            <tr>
+                                                <td style="height: 30px;">+2</td>
+                                                <td>$250,000</td>
+                                                <form onsubmit="return areYouSure();" method="post">
+                                                    <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
+                                                    <input type="hidden" name="trainingvalue" value="2" />
+                                                    <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                                                </form>
+                                            </tr>
+                                            <tr>
+                                                <td>+1</td>
+                                                <td>$100,000</td>
+                                                <form onsubmit="return areYouSure();" method="post">
+                                                    <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
+                                                    <input type="hidden" name="trainingvalue" value="1" />
+                                                    <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                                                </form>
+                                            </tr>
+                                        <else>
+                                            <tr>
+                                                <td style="height: 30px;">+5</td>
+                                                <td>$1,000,000</td>
+                                                <form onsubmit="return areYouSure();" method="post">
+                                                    <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
+                                                    <input type="hidden" name="trainingvalue" value="5" />
+                                                    <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                                                </form>
+                                            </tr>
+                                            <tr>
+                                                <td style="height: 30px;">+3</td>
+                                                <td>$500,000</td>
+                                                <form onsubmit="return areYouSure();" method="post">
+                                                    <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
+                                                    <input type="hidden" name="trainingvalue" value="3" />
+                                                    <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                                                </form>
+                                            </tr>
+                                            <tr>
+                                                <td>+1</td>
+                                                <td>$100,000</td>
+                                                <form onsubmit="return areYouSure();" method="post">
+                                                    <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
+                                                    <input type="hidden" name="trainingvalue" value="1" />
+                                                    <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                                                </form>
+                                            </tr>
+                                        </if>
                                     </table>
-                                </form>
-                                <p>No approvals necessary. Entered amount will be negative. </p>
-                                <p style="margin-bottom: 0px">For overdrafts or deposit go to the Submit Request section in the Bank.</em></p>
+                                <else>
+                                    <p>You have already done training for the week</p>
+                                </if>
+                                <hr />
+                                <div id="purchasearea">
+                                    <h4>Seasonal Personal Coaching</h4>
+                                    <form method="post">
+                                        <select name="shlEquipment">
+                                            <option>SHL Personal Coaching</option>
+                                            <option value="tier1">$2.0m - 9 TPE</option>
+                                            <option value="tier2">$4.0m - 16 TPE</option>
+                                            <option value="tier3">$5.0m - 19 TPE</option>
+                                            <option value="tier4">$6.5m - 23 TPE</option>
+                                            <option value="tier5">$8.5m - 28 TPE</option>
+                                        </select>
+                                        <br />
+                                        <input type="submit" name="submitshlequipment" value="Purchase SHL Coaching" />
+                                        <br />
+                                        <br />
+                                        <select name="smjhlEquipment">
+                                            <option>SMJHL Personal Coaching</option>
+                                            <option value="juniorTier1">$2.0m - 8 TPE</option>
+                                            <option value="juniorTier2">$3.0m - 14 TPE</option>
+                                            <option value="juniorTier3">$4.5m - 20 TPE</option>
+                                        </select>
+                                        <br />
+                                        <input type="submit" name="submitsmjhlequipment" value="Purchase SMJHL Coaching" />
+                                        <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                                    </form>
+                                    <p><a href="https://simulationhockey.com/showthread.php?tid=103800">Click here for the Announcement thread detailing how to use personal coaching.</a> If you are unsure what to do please contact your GM or updater.</p>
+                                    <hr />
+                                    <form onsubmit="return areYouSure();" method="post">
+                                        <h4 style="margin-top: 10px;">Other Purchases</h4>
+                                        <table>
+                                            <tr>
+                                                <th>Amount</th>
+                                                <td style="height: 30px"><input type="number" name="purchaseamount" placeholder="Enter amount..." /></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Title</th>
+                                                <td style="height: 30px"><input type="text" name="purchasetitle" placeholder="Enter title..." /></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Description</th>
+                                                <td style="height: 60px">
+                                                    <textarea name="purchasedescription"></textarea>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th></th>
+                                                <td><input type="submit" name="submitpurchase" value="Make Purchase" /></td>
+                                            </tr>
+                                            <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                                        </table>
+                                    </form>
+                                    <p>No approvals necessary. Entered amount will be negative. </p>
+                                    <p style="margin-bottom: 0px">For overdrafts or deposit go to the Submit Request section in the Bank.</em></p>
+                                </div>
                             </div>
-                        </div>
+                    </div>
                 </if>
 
                 <!-- Banker Controls: Bankers only -->

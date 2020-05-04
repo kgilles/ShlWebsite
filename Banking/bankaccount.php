@@ -29,14 +29,13 @@
         exit;
     }
 
-    $canDoWeekTraining = canDoTraining($db, $myuid);
-
-
     $curruser = getUser($db, $currentUserId);
     if ($curruser == null) {
         header('Location: http://simulationhockey.com/bankaccount.php?uid=' . $myuid . '#peep');
         exit;
     }
+
+    $canDoWeekTraining = canDoTraining($db, $currentUserId);
 
     function displayNotEnoughtMoney()
     {
@@ -681,6 +680,11 @@
                                 <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code; ?>" />
                                 <p><i>Note: Don't refresh after clicking. A popup should warn you that it might resubmit, and it would go back to what is was before!</i></p>
                             </form>
+                            <hr />
+                            <h4>Weekly Training</h4>
+                            <p>Can do weekly training? 
+                                <b><?php if ($canDoWeekTraining) echo "YES"; else echo 'NO'; ?></b>
+                            </p>
                         </div>
                     </div>
                 </if>

@@ -179,8 +179,8 @@ function displayErrorTransaction() {
 function getLatestTrainingDate($db, $userId) {
     $xQuery = $db->simple_select("banktransactions", "date", "uid=$userId AND title like 'Training +%'", array("limit" => 1, "order_by" => "id", "order_dir" => 'DESC'));
     if ($xRow = $db->fetch_array($xQuery)) { 
-        $foundDate = $xRow['date']; 
-        return strtotime($foundDate);
+        $foundDate = $xRow['date'];
+        return $foundDate;
     }
 
     return null;
@@ -188,19 +188,32 @@ function getLatestTrainingDate($db, $userId) {
 
 function canDoTraining($db, $userId) {
 
-    // Server Timezone is GMT (UTC+0)
-    // Deadline is Pacific (california)
-    date_default_timezone_set('America/Los_Angeles');
-    
-    $lastTrainingDate = getLatestTrainingDate($db, $userId);
-    if ($lastTrainingDate == null) {
+    $latestTraining = getLatestTrainingDate($db, $userId);
+    if ($latestTraining == null) {
         return true;
     }
-    
-    $lastMonday = strtotime('Monday this week');
-    $nowDate = strtotime('now');
 
-    return ($lastTrainingDate < $lastMonday) || ($lastTrainingDate > $nowDate);
+    // Server Timezone is GMT (UTC+0)
+    // Deadline is Pacific (california)
+
+    $gmt = new DateTimeZone('UTC');
+    $tz = new DateTimeZone('America/Los_Angeles');
+    
+    $nowDate = strtotime('now');
+    // $dateformat = "Y-m-d H:i:s";
+
+    $lastMondayDate = new DateTime('Monday this week', $gmt);
+    // echo $lastMondayDate->format($dateformat) . " -- monday<br />";
+
+    $lastTrainingdate = new DateTime($latestTraining, $gmt);
+    $lastTrainingdate->setTimezone($tz);
+    // echo $lastTrainingdate->format($dateformat) . " -- training<br />";
+
+    $nowDate = new DateTime('now', $gmt);
+    $nowDate->setTimezone($tz);
+    // echo $nowDate->format($dateformat) . " -- now<br />";
+
+    return $lastTrainingdate < $lastMondayDate;
 } 
 
 ?>

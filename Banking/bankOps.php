@@ -176,44 +176,50 @@ function displayErrorTransaction() {
     echo '</div>';
 }
 
-function getLatestTrainingDate($db, $userId) {
-    $xQuery = $db->simple_select("banktransactions", "date", "uid=$userId AND title like 'Training +%'", array("limit" => 1, "order_by" => "id", "order_dir" => 'DESC'));
-    if ($xRow = $db->fetch_array($xQuery)) { 
-        $foundDate = $xRow['date'];
-        return $foundDate;
+function getLatestTrainingDates($db, $userId) {
+    $xQuery = $db->simple_select("banktransactions", "date", "uid=$userId AND title like 'Training +%'", array("limit" => 2, "order_by" => "id", "order_dir" => 'DESC'));
+    $cart = array();
+    while($xRow = $db->fetch_array($xQuery)) {
+        array_push($cart, $xRow['date']);
     }
-
-    return null;
+    return $cart;
 }
 
 function canDoTraining($db, $userId) {
 
-    $latestTraining = getLatestTrainingDate($db, $userId);
-    if ($latestTraining == null) {
+    $tz = new DateTimeZone('America/Los_Angeles');
+    $newWeekEnd = new DateTime('Monday this week +3 hours', $tz);
+   
+    $trainings = getLatestTrainingDates($db, $userId);
+    $trainingCount = count($trainings);
+
+    if ($trainingCount == 0) {
         return true;
     }
-
-    // Server Timezone is GMT (UTC+0)
-    // Deadline is Pacific (california)
-
-    $gmt = new DateTimeZone('UTC');
-    $tz = new DateTimeZone('America/Los_Angeles');
     
-    $nowDate = strtotime('now');
-    // $dateformat = "Y-m-d H:i:s";
+    $lastTraining = new DateTime($trainings[0], $tz);
+ 
+    if ($trainingCount == 1) {
+        return $lastTraining < $newWeekEnd;
+    }
 
-    $lastMondayDate = new DateTime('Monday this week', $gmt);
-    // echo $lastMondayDate->format($dateformat) . " -- monday<br />";
+    $point = new DateTime('now', $tz);
+    $prevTraining = new DateTime($trainings[1], $tz);
+    $newWeekStart = new DateTime('Monday this week', $tz);
+    $result = false;
 
-    $lastTrainingdate = new DateTime($latestTraining, $gmt);
-    $lastTrainingdate->setTimezone($tz);
-    // echo $lastTrainingdate->format($dateformat) . " -- training<br />";
+    // if within overlap
+    if ($newWeekStart < $point && $point < $newWeekEnd) {
+        $result = ($prevTraining < $newWeekStart);
+    }
+    else {
+        $oldWeekStart = new DateTime('Monday this week -7 days', $tz);
+        $result = 
+            ($lastTraining < $newWeekStart) ||
+            ($lastTraining < $newWeekEnd && $prevTraining < $oldWeekStart);
+    }
 
-    $nowDate = new DateTime('now', $gmt);
-    $nowDate->setTimezone($tz);
-    // echo $nowDate->format($dateformat) . " -- now<br />";
-
-    return $lastTrainingdate < $lastMondayDate;
+    return $result;
 } 
 
 ?>

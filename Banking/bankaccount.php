@@ -25,13 +25,13 @@
     if (isset($_GET["uid"]) && is_numeric($_GET["uid"]))
         $currentUserId = getSafeNumber($db, $_GET["uid"]);
     else {
-        header('Location: http://simulationhockey.com/bankaccount.php?uid=' . $myuid . '#' . $_GET["uid"]);
+        header('Location: http://simulationhockey.com/banktest.php?uid=' . $myuid . '#' . $_GET["uid"]);
         exit;
     }
 
     $curruser = getUser($db, $currentUserId);
     if ($curruser == null) {
-        header('Location: http://simulationhockey.com/bankaccount.php?uid=' . $myuid . '#peep');
+        header('Location: http://simulationhockey.com/banktest.php?uid=' . $myuid . '#peep');
         exit;
     }
 
@@ -240,19 +240,24 @@
                 $transTitle = "SMJHL Personal Coaching";
                 switch ($equipment) {
                     case "juniorTier1":
-                        $transAmount = -2000000;
+                        $transAmount = -1500000;
                         $transTitle .= " - Tier 1";
                         $transDescription = "8 TPE: Rookie Symposium - Study the playbook and film with the team coaches.";
                         break;
                     case "juniorTier2":
-                        $transAmount = -3000000;
+                        $transAmount = -2500000;
                         $transTitle .= " - Tier 2";
-                        $transDescription = "14 TPE: Rookie Workout - A one-on-one session with the team personal trainers.";
+                        $transDescription = "12 TPE: Rookie Workout - A one-on-one session with the team personal trainers.";
                         break;
                     case "juniorTier3":
-                        $transAmount = -4500000;
+                        $transAmount = -3500000;
                         $transTitle .= " - Tier 3";
-                        $transDescription = "20 TPE: Intense Rookie Coaching - A grind of physical and mental training that increases all aspects of your game.";
+                        $transDescription = "16 TPE: Intense Rookie Coaching - A grind of physical and mental training that increases all aspects of your game.";
+                        break;
+                    case "juniorTier4":
+                        $transAmount = -4500000;
+                        $transTitle .= " - Tier 4";
+                        $transDescription = "20 TPE: Very Intense Rookie Coaching - An even harder grind of physical and mental training that increases all aspects of your game.";
                         break;
 
                     default:
@@ -377,99 +382,99 @@
         }
     }
     ?>
-                <!-- User Information -->
-                <div class="bojoSection navigation">
-                    <h2>{$currname}<br />
-                        <?php
-                        if ($currbankbalance < 0) {
-                            $balanceclass = "red negative";
-                            $negativesign = '-';
-                        } else {
-                            $balanceclass = "positive";
-                            $negativesign = '';
-                        }
-                        $bankbalancedisplay = number_format(abs($currbankbalance), 0);
-                        echo "<span class=\"$balanceclass\">$negativesign" . "$" . $bankbalancedisplay . "</span>";
-                        ?>
-                    </h2>
-                    <ul>
-                        <li><a href="https://simulationhockey.com/member.php?action=profile&uid=<?php echo $currentUserId; ?>">Profile Page</a></li>
-                        <li><a href="http://simulationhockey.com/bank.php">Main Bank page</a></li>
-                        <li><a href="http://simulationhockey.com/bankexportaccount.php?uid=<?php echo $currentUserId; ?>">Export Data</a></li>
-                    </ul>
+    <!-- User Information -->
+    <div class="bojoSection navigation">
+        <h2>{$currname}<br />
+            <?php
+            if ($currbankbalance < 0) {
+                $balanceclass = "red negative";
+                $negativesign = '-';
+            } else {
+                $balanceclass = "positive";
+                $negativesign = '';
+            }
+            $bankbalancedisplay = number_format(abs($currbankbalance), 0);
+            echo "<span class=\"$balanceclass\">$negativesign" . "$" . $bankbalancedisplay . "</span>";
+            ?>
+        </h2>
+        <ul>
+            <li><a href="https://simulationhockey.com/member.php?action=profile&uid=<?php echo $currentUserId; ?>">Profile Page</a></li>
+            <li><a href="http://simulationhockey.com/bank.php">Main Bank page</a></li>
+            <li><a href="http://simulationhockey.com/bankexportaccount.php?uid=<?php echo $currentUserId; ?>">Export Data</a></li>
+        </ul>
 
-                    <hr />
+        <hr />
 
-                    <h4>Bank Transactions</h4>
-                    <table style="margin-bottom: 20px;">
-                        <tr>
-                            <th>Title</th>
-                            <th>Amount</th>
-                            <th class="hideSmall">Date</th>
-                            <th class="hideSmall">Made By</th>
-                            <if $isBanker then>
-                                <th></th>
-                            </if>
-                        </tr>
+        <h4>Bank Transactions</h4>
+        <table style="margin-bottom: 20px;">
+            <tr>
+                <th>Title</th>
+                <th>Amount</th>
+                <th class="hideSmall">Date</th>
+                <th class="hideSmall">Made By</th>
+                <if $isBanker then>
+                    <th></th>
+                </if>
+            </tr>
 
-                        <?php
-                        // Bank Transactions
-                        $transactionQuery =
-                            "SELECT bt.*, creator.username AS 'creator'
+            <?php
+            // Bank Transactions
+            $transactionQuery =
+                "SELECT bt.*, creator.username AS 'creator'
                 FROM mybb_banktransactions bt
                 LEFT JOIN mybb_users creator ON bt.createdbyuserid=creator.uid
                 WHERE bt.uid=$currentUserId
                 ORDER BY bt.date DESC
                 LIMIT 50";
 
-                        $bankRows = $db->query($transactionQuery);
-                        while ($row = $db->fetch_array($bankRows)) {
-                            $date = new DateTime($row['date']);
-                            $amountClass = ($row['amount'] < 0) ? 'negative' : 'positive';
-                            $transactionLink = '<a class="' . $amountClass . '" href="' . getBankTransactionLink($row['id']) . '">';
-                            $creatorLink = '<a class="' . $amountClass . '" href="' . getBankAccountLink($row['createdbyuserid']) . '">';
-                            $negativeSign = ($row['amount'] < 0) ? '-' : '';
-                            $dateformat = $date->format('m/d/y');
-                            $numberformat = number_format(abs($row['amount']), 0);
+            $bankRows = $db->query($transactionQuery);
+            while ($row = $db->fetch_array($bankRows)) {
+                $date = new DateTime($row['date']);
+                $amountClass = ($row['amount'] < 0) ? 'negative' : 'positive';
+                $transactionLink = '<a class="' . $amountClass . '" href="' . getBankTransactionLink($row['id']) . '">';
+                $creatorLink = '<a class="' . $amountClass . '" href="' . getBankAccountLink($row['createdbyuserid']) . '">';
+                $negativeSign = ($row['amount'] < 0) ? '-' : '';
+                $dateformat = $date->format('m/d/y');
+                $numberformat = number_format(abs($row['amount']), 0);
 
-                            echo '<tr>';
-                            echo "<td>$transactionLink" . $row['title'] . '</a></td>';
-                            echo "<td>$transactionLink<span class=\"$amountClass\">" . $negativeSign . '$' . $numberformat . "</span></a></td>";
-                            echo "<td class='hideSmall'>$dateformat</td>";
-                            echo "<td class='hideSmall'>$creatorLink" . $row['creator'] . "</a></td>";
+                echo '<tr>';
+                echo "<td>$transactionLink" . $row['title'] . '</a></td>';
+                echo "<td>$transactionLink<span class=\"$amountClass\">" . $negativeSign . '$' . $numberformat . "</span></a></td>";
+                echo "<td class='hideSmall'>$dateformat</td>";
+                echo "<td class='hideSmall'>$creatorLink" . $row['creator'] . "</a></td>";
 
-                            if ($isBanker) {
-                                echo '<form onsubmit="return areYouSureUndo();" method="post"><td><input type="submit" name="undotransaction" value="Undo" /></td>';
-                                echo '<input type="hidden" name="undoid" value="' . $row['id'] . '" />';
-                                echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" /></form>';
-                            }
+                if ($isBanker) {
+                    echo '<form onsubmit="return areYouSureUndo();" method="post"><td><input type="submit" name="undotransaction" value="Undo" /></td>';
+                    echo '<input type="hidden" name="undoid" value="' . $row['id'] . '" />';
+                    echo '<input type="hidden" name="bojopostkey" value="' . $mybb->post_code . '" /></form>';
+                }
 
-                            echo "</tr>";
-                        }
-                        ?>
-                    </table>
+                echo "</tr>";
+            }
+            ?>
+        </table>
 
-                    <hr />
-                    <h4>Requests Pending Approval</h4>
+        <hr />
+        <h4>Requests Pending Approval</h4>
 
-                    <?php
-                    // Transaction Requests
-                    $transactionQuery =
-                        "SELECT bt.*, groups.id as 'gid', groups.groupname, groups.requestdate
+        <?php
+        // Transaction Requests
+        $transactionQuery =
+            "SELECT bt.*, groups.id as 'gid', groups.groupname, groups.requestdate
                 FROM mybb_banktransactionrequests bt
                 JOIN mybb_banktransactiongroups groups ON bt.groupid=groups.id && groups.isapproved IS NULL
                 WHERE bt.uid=$currentUserId
                 ORDER BY groups.requestdate DESC
                 LIMIT 50";
 
-                    $bankRows = $db->query($transactionQuery);
-                    $bankRowCount = mysqli_num_rows($bankRows);
+        $bankRows = $db->query($transactionQuery);
+        $bankRowCount = mysqli_num_rows($bankRows);
 
-                    if ($bankRowCount <= 0) {
-                        echo '<p>No active requests for this user</p>';
-                    } else {
-                        echo
-                            '<table>
+        if ($bankRowCount <= 0) {
+            echo '<p>No active requests for this user</p>';
+        } else {
+            echo
+                '<table>
                 <tr>
                 <th>Title</th>
                 <th>Amount</th>
@@ -477,247 +482,250 @@
                 <th>Description</th>
                 </tr>';
 
-                        while ($row = $db->fetch_array($bankRows)) {
-                            $requestdate = new DateTime($row['requestdate']);
-                            $requestdate = $requestdate->format('m/d/y');
+            while ($row = $db->fetch_array($bankRows)) {
+                $requestdate = new DateTime($row['requestdate']);
+                $requestdate = $requestdate->format('m/d/y');
 
-                            $amountClass = ($row['amount'] < 0) ? 'negative' : 'positive';
-                            $grouplink = '<a href="http://simulationhockey.com/bankrequest.php?id=' . $row['gid'] . '">';
-                            $negativeSign = ($row['amount'] < 0) ? '-' : '';
-                            $description = $row['description'];
-                            $title = $row['title'];
-                            $amountformat = number_format(abs($row['amount']), 0);
+                $amountClass = ($row['amount'] < 0) ? 'negative' : 'positive';
+                $grouplink = '<a href="http://simulationhockey.com/bankrequest.php?id=' . $row['gid'] . '">';
+                $negativeSign = ($row['amount'] < 0) ? '-' : '';
+                $description = $row['description'];
+                $title = $row['title'];
+                $amountformat = number_format(abs($row['amount']), 0);
 
-                            echo '<tr>';
-                            echo "<td>$grouplink" . $title . "</a></td>";
-                            echo "<td>$grouplink<span class=\"$amountClass\">$negativeSign" . '$' . "$amountformat</span></a></td>";
-                            echo "<td>$requestdate</td>";
-                            echo "<td>$description</td>";
-                            echo "</tr>";
-                        }
-                        echo '</table>';
-                    }
+                echo '<tr>';
+                echo "<td>$grouplink" . $title . "</a></td>";
+                echo "<td>$grouplink<span class=\"$amountClass\">$negativeSign" . '$' . "$amountformat</span></a></td>";
+                echo "<td>$requestdate</td>";
+                echo "<td>$description</td>";
+                echo "</tr>";
+            }
+            echo '</table>';
+        }
 
-                    ?>
-                </div>
+        ?>
+    </div>
 
-                <!-- New Purchase: Only available to the actual user -->
-                <if ($currentUserId==$myuid) then>
-                    <div class="bojoSection navigation">
-                        <h2>New Purchase</h2>
-                            <div id="purchasearea">
-                                <h4>Weekly Training</h4>
-                                <h4>SHL Team: <a href="http://simulationhockey.com/bankteam.php?id=<?php echo $curruser['teamid']; ?>"><?php echo $teamName; ?></a></h4>
-                                <if ($canDoWeekTraining) then>
-                                    <table>
-                                        <tr>
-                                            <th style="height: 30px;">Points</th>
-                                            <th>Cost</th>
-                                        </tr>
-                                        <if $teamLeague !="SHL" then>
-                                            <tr>
-                                                <td style="height: 30px;">+3</td>
-                                                <td>$500,000</td>
-                                                <form onsubmit="return areYouSure();" method="post">
-                                                    <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
-                                                    <input type="hidden" name="trainingvalue" value="3" />
-                                                    <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
-                                                </form>
-                                            </tr>
-                                            <tr>
-                                                <td style="height: 30px;">+2</td>
-                                                <td>$250,000</td>
-                                                <form onsubmit="return areYouSure();" method="post">
-                                                    <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
-                                                    <input type="hidden" name="trainingvalue" value="2" />
-                                                    <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
-                                                </form>
-                                            </tr>
-                                            <tr>
-                                                <td>+1</td>
-                                                <td>$100,000</td>
-                                                <form onsubmit="return areYouSure();" method="post">
-                                                    <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
-                                                    <input type="hidden" name="trainingvalue" value="1" />
-                                                    <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
-                                                </form>
-                                            </tr>
-                                        <else>
-                                            <tr>
-                                                <td style="height: 30px;">+5</td>
-                                                <td>$1,000,000</td>
-                                                <form onsubmit="return areYouSure();" method="post">
-                                                    <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
-                                                    <input type="hidden" name="trainingvalue" value="5" />
-                                                    <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
-                                                </form>
-                                            </tr>
-                                            <tr>
-                                                <td style="height: 30px;">+3</td>
-                                                <td>$500,000</td>
-                                                <form onsubmit="return areYouSure();" method="post">
-                                                    <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
-                                                    <input type="hidden" name="trainingvalue" value="3" />
-                                                    <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
-                                                </form>
-                                            </tr>
-                                            <tr>
-                                                <td>+1</td>
-                                                <td>$100,000</td>
-                                                <form onsubmit="return areYouSure();" method="post">
-                                                    <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
-                                                    <input type="hidden" name="trainingvalue" value="1" />
-                                                    <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
-                                                </form>
-                                            </tr>
-                                        </if>
-                                    </table>
-                                <else>
-                                    <p>You have already done training for the week</p>
-                                </if>
-                                <hr />
-                                <div id="purchasearea">
-                                    <h4>Seasonal Personal Coaching</h4>
-                                    <form method="post">
-                                        <select name="shlEquipment">
-                                            <option>SHL Personal Coaching</option>
-                                            <option value="tier1">$2.0m - 9 TPE</option>
-                                            <option value="tier2">$4.0m - 16 TPE</option>
-                                            <option value="tier3">$5.0m - 19 TPE</option>
-                                            <option value="tier4">$6.5m - 23 TPE</option>
-                                            <option value="tier5">$8.5m - 28 TPE</option>
-                                        </select>
-                                        <br />
-                                        <input type="submit" name="submitshlequipment" value="Purchase SHL Coaching" />
-                                        <br />
-                                        <br />
-                                        <select name="smjhlEquipment">
-                                            <option>SMJHL Personal Coaching</option>
-                                            <option value="juniorTier1">$2.0m - 8 TPE</option>
-                                            <option value="juniorTier2">$3.0m - 14 TPE</option>
-                                            <option value="juniorTier3">$4.5m - 20 TPE</option>
-                                        </select>
-                                        <br />
-                                        <input type="submit" name="submitsmjhlequipment" value="Purchase SMJHL Coaching" />
+    <!-- New Purchase: Only available to the actual user -->
+    <if ($currentUserId==$myuid) then>
+        <div class="bojoSection navigation">
+            <h2>New Purchase</h2>
+            <div id="purchasearea">
+                <h4>Weekly Training</h4>
+                <h4>SHL Team: <a href="http://simulationhockey.com/bankteam.php?id=<?php echo $curruser['teamid']; ?>"><?php echo $teamName; ?></a></h4>
+                <if ($canDoWeekTraining) then>
+                    <table>
+                        <tr>
+                            <th style="height: 30px;">Points</th>
+                            <th>Cost</th>
+                        </tr>
+                        <if $teamLeague !="SHL" then>
+                            <tr>
+                                <td style="height: 30px;">+3</td>
+                                <td>$500,000</td>
+                                <form onsubmit="return areYouSure();" method="post">
+                                    <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
+                                    <input type="hidden" name="trainingvalue" value="3" />
+                                    <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                                </form>
+                            </tr>
+                            <tr>
+                                <td style="height: 30px;">+2</td>
+                                <td>$250,000</td>
+                                <form onsubmit="return areYouSure();" method="post">
+                                    <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
+                                    <input type="hidden" name="trainingvalue" value="2" />
+                                    <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                                </form>
+                            </tr>
+                            <tr>
+                                <td>+1</td>
+                                <td>$100,000</td>
+                                <form onsubmit="return areYouSure();" method="post">
+                                    <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
+                                    <input type="hidden" name="trainingvalue" value="1" />
+                                    <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                                </form>
+                            </tr>
+                            <else>
+                                <tr>
+                                    <td style="height: 30px;">+5</td>
+                                    <td>$1,000,000</td>
+                                    <form onsubmit="return areYouSure();" method="post">
+                                        <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
+                                        <input type="hidden" name="trainingvalue" value="5" />
                                         <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
                                     </form>
-                                    <p><a href="https://simulationhockey.com/showthread.php?tid=103800">Click here for the Announcement thread detailing how to use personal coaching.</a> If you are unsure what to do please contact your GM or updater.</p>
-                                    <hr />
+                                </tr>
+                                <tr>
+                                    <td style="height: 30px;">+3</td>
+                                    <td>$500,000</td>
                                     <form onsubmit="return areYouSure();" method="post">
-                                        <h4 style="margin-top: 10px;">Other Purchases</h4>
-                                        <table>
-                                            <tr>
-                                                <th>Amount</th>
-                                                <td style="height: 30px"><input type="number" name="purchaseamount" placeholder="Enter amount..." /></td>
-                                            </tr>
-                                            <tr>
-                                                <th>Title</th>
-                                                <td style="height: 30px"><input type="text" name="purchasetitle" placeholder="Enter title..." /></td>
-                                            </tr>
-                                            <tr>
-                                                <th>Description</th>
-                                                <td style="height: 60px">
-                                                    <textarea name="purchasedescription"></textarea>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th></th>
-                                                <td><input type="submit" name="submitpurchase" value="Make Purchase" /></td>
-                                            </tr>
-                                            <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
-                                        </table>
+                                        <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
+                                        <input type="hidden" name="trainingvalue" value="3" />
+                                        <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
                                     </form>
-                                    <p>No approvals necessary. Entered amount will be negative. </p>
-                                    <p style="margin-bottom: 0px">For overdrafts or deposit go to the Submit Request section in the Bank.</em></p>
-                                </div>
-                            </div>
-                    </div>
+                                </tr>
+                                <tr>
+                                    <td>+1</td>
+                                    <td>$100,000</td>
+                                    <form onsubmit="return areYouSure();" method="post">
+                                        <td><input type="submit" name="submittraining" value="Purchase Training" /></td>
+                                        <input type="hidden" name="trainingvalue" value="1" />
+                                        <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                                    </form>
+                                </tr>
+                        </if>
+                    </table>
+                    <else>
+                        <p>You have already done training for the week</p>
                 </if>
+                <hr />
+                <div id="purchasearea">
+                    <h4>Seasonal Personal Coaching</h4>
+                    <form method="post">
+                        <if $currteamid then>
+                            <select name="shlEquipment">
+                                <option>SHL Personal Coaching</option>
+                                <option value="tier1">$2.0m - 9 TPE</option>
+                                <option value="tier2">$4.0m - 16 TPE</option>
+                                <option value="tier3">$5.0m - 19 TPE</option>
+                                <option value="tier4">$6.5m - 23 TPE</option>
+                                <option value="tier5">$8.5m - 28 TPE</option>
+                            </select>
+                            <br />
+                            <input type="submit" name="submitshlequipment" value="Purchase SHL Coaching" />
+                        <else>
+                            <select name="smjhlEquipment">
+                                <option>SMJHL Personal Coaching</option>
+                                <option value="juniorTier1">$1.5m - 8 TPE</option>
+                                <option value="juniorTier2">$2.5m - 12 TPE</option>
+                                <option value="juniorTier3">$3.5m - 16 TPE</option>
+                                <option value="juniorTier4">$4.5m - 20 TPE</option>
+                            </select>
+                            <br />
+                            <input type="submit" name="submitsmjhlequipment" value="Purchase SMJHL Coaching" />
+                        </if>
+                        <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />                        
+                    </form>
+                    <p><a href="https://simulationhockey.com/showthread.php?tid=103800">Click here for the Announcement thread detailing how to use personal coaching.</a> If you are unsure what to do please contact your GM or updater.</p>
+                    <hr />
+                    <form onsubmit="return areYouSure();" method="post">
+                        <h4 style="margin-top: 10px;">Other Purchases</h4>
+                        <table>
+                            <tr>
+                                <th>Amount</th>
+                                <td style="height: 30px"><input type="number" name="purchaseamount" placeholder="Enter amount..." /></td>
+                            </tr>
+                            <tr>
+                                <th>Title</th>
+                                <td style="height: 30px"><input type="text" name="purchasetitle" placeholder="Enter title..." /></td>
+                            </tr>
+                            <tr>
+                                <th>Description</th>
+                                <td style="height: 60px">
+                                    <textarea name="purchasedescription"></textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th></th>
+                                <td><input type="submit" name="submitpurchase" value="Make Purchase" /></td>
+                            </tr>
+                            <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code ?>" />
+                        </table>
+                    </form>
+                    <p>No approvals necessary. Entered amount will be negative. </p>
+                    <p style="margin-bottom: 0px">For overdrafts or deposit go to the Submit Request section in the Bank.</em></p>
+                </div>
+            </div>
+        </div>
+    </if>
 
-                <!-- Banker Controls: Bankers only -->
-                <if ($isBanker) then>
+    <!-- Banker Controls: Bankers only -->
+    <if ($isBanker) then>
 
-                    <!-- Add a transaction -->
-                    <div class="bojoSection navigation">
-                        <h2>Banker Controls <span class="expandclick" onclick="toggleArea(this, 'bankerarea')">(expand)</span></h2>
-                        <div id="bankerarea" class="hideme">
-                            <h4>Add Transaction</h4>
-                            <form onsubmit="return areYouSure();" method="post">
-                                <table>
-                                    <tr>
-                                        <th>Amount</th>
-                                        <td><input type="number" name="transactionamount" placeholder="Enter amount..." /></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Title</th>
-                                        <td><input type="text" name="transactiontitle" placeholder="Enter title..." /></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Description</th>
-                                        <td><input type="text" name="transactiondescription" placeholder="Enter description..." /></td>
-                                    </tr>
-                                    <tr>
-                                        <th></th>
-                                        <td><input type="submit" name="submittransaction" value="Add Transaction" /></td>
-                                    </tr>
-                                    <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code; ?>" />
-                                </table>
-                                <p style="margin-bottom: 0px"><em>Adds a transaction. If removing money, make sure to add the negative sign.</em></p>
-                            </form>
-                            <hr />
-                            <?php
-                            if ($flippedClaim == false) {
-                                $claimQuery = $db->simple_select("users", "claimedFreeTraining", "uid=$currentUserId", array("limit" => 1));
-                                if ($xRow = $db->fetch_array($claimQuery)) {
-                                    $claimValue = $xRow['claimedFreeTraining'];
-                                }
-                            }
-                            ?>
-                            <h4>Set Free 500k claim eligibility</h4>
-                            <form method="post">
-                                <p>Can this user claim the free 500k? <b><?php echo $claimValue == 1 ? "No" : "Yes"; ?></b></p>
-                                <td><input type="submit" name="flipClaim" value="Flip Eligibility" /></td>
-                                <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code; ?>" />
-                                <p><i>Note: Don't refresh after clicking. A popup should warn you that it might resubmit, and it would go back to what is was before!</i></p>
-                            </form>
-                            <hr />
-                            <h4>Weekly Training</h4>
-                            <p>Can do weekly training? 
-                                <b><?php if ($canDoWeekTraining) echo "YES"; else echo 'NO'; ?></b>
-                            </p>
-                        </div>
-                    </div>
-                </if>
-
-                <script>
-                    $(document).on("keydown", "form", function(event) {
-                        return event.key != "Enter";
-                    });
-
-                    function toggleArea(spanlink, idToHide) {
-                        if (document.getElementById(idToHide).className != 'hideme') {
-                            document.getElementById(idToHide).className = 'hideme';
-                            spanlink.innerHTML = "(expand)";
-                        } else {
-                            document.getElementById(idToHide).className = '';
-                            spanlink.innerHTML = "(hide)";
-                        }
+        <!-- Add a transaction -->
+        <div class="bojoSection navigation">
+            <h2>Banker Controls <span class="expandclick" onclick="toggleArea(this, 'bankerarea')">(expand)</span></h2>
+            <div id="bankerarea" class="hideme">
+                <h4>Add Transaction</h4>
+                <form onsubmit="return areYouSure();" method="post">
+                    <table>
+                        <tr>
+                            <th>Amount</th>
+                            <td><input type="number" name="transactionamount" placeholder="Enter amount..." /></td>
+                        </tr>
+                        <tr>
+                            <th>Title</th>
+                            <td><input type="text" name="transactiontitle" placeholder="Enter title..." /></td>
+                        </tr>
+                        <tr>
+                            <th>Description</th>
+                            <td><input type="text" name="transactiondescription" placeholder="Enter description..." /></td>
+                        </tr>
+                        <tr>
+                            <th></th>
+                            <td><input type="submit" name="submittransaction" value="Add Transaction" /></td>
+                        </tr>
+                        <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code; ?>" />
+                    </table>
+                    <p style="margin-bottom: 0px"><em>Adds a transaction. If removing money, make sure to add the negative sign.</em></p>
+                </form>
+                <hr />
+                <?php
+                if ($flippedClaim == false) {
+                    $claimQuery = $db->simple_select("users", "claimedFreeTraining", "uid=$currentUserId", array("limit" => 1));
+                    if ($xRow = $db->fetch_array($claimQuery)) {
+                        $claimValue = $xRow['claimedFreeTraining'];
                     }
+                }
+                ?>
+                <h4>Set Free 500k claim eligibility</h4>
+                <form method="post">
+                    <p>Can this user claim the free 500k? <b><?php echo $claimValue == 1 ? "No" : "Yes"; ?></b></p>
+                    <td><input type="submit" name="flipClaim" value="Flip Eligibility" /></td>
+                    <input type="hidden" name="bojopostkey" value="<?php echo $mybb->post_code; ?>" />
+                    <p><i>Note: Don't refresh after clicking. A popup should warn you that it might resubmit, and it would go back to what is was before!</i></p>
+                </form>
+                <hr />
+                <h4>Weekly Training</h4>
+                <p>Can do weekly training?
+                    <b><?php if ($canDoWeekTraining) echo "YES";
+                        else echo 'NO'; ?></b>
+                </p>
+            </div>
+        </div>
+    </if>
 
-                    function areYouSure() {
-                        return confirm("Are you sure you want to make this transaction?");
-                    }
+    <script>
+        $(document).on("keydown", "form", function(event) {
+            return event.key != "Enter";
+        });
 
-                    function areYouSureUndo() {
-                        return confirm("Are you sure you want to do this?");
-                    }
-                </script>
+        function toggleArea(spanlink, idToHide) {
+            if (document.getElementById(idToHide).className != 'hideme') {
+                document.getElementById(idToHide).className = 'hideme';
+                spanlink.innerHTML = "(expand)";
+            } else {
+                document.getElementById(idToHide).className = '';
+                spanlink.innerHTML = "(hide)";
+            }
+        }
 
-                <?php $db->close; ?>
+        function areYouSure() {
+            return confirm("Are you sure you want to make this transaction?");
+        }
 
-                {$boardstats}
-                <br class="clear" />
-                {$footer}
+        function areYouSureUndo() {
+            return confirm("Are you sure you want to do this?");
+        }
+    </script>
+
+    <?php $db->close; ?>
+
+    {$boardstats}
+    <br class="clear" />
+    {$footer}
 </body>
 
 </html>

@@ -25,17 +25,18 @@
     if (isset($_GET["uid"]) && is_numeric($_GET["uid"]))
         $currentUserId = getSafeNumber($db, $_GET["uid"]);
     else {
-        header('Location: http://simulationhockey.com/banktest.php?uid=' . $myuid . '#' . $_GET["uid"]);
+        header('Location: http://simulationhockey.com/bankaccount.php?uid=' . $myuid . '#' . $_GET["uid"]);
         exit;
     }
 
     $curruser = getUser($db, $currentUserId);
     if ($curruser == null) {
-        header('Location: http://simulationhockey.com/banktest.php?uid=' . $myuid . '#peep');
+        header('Location: http://simulationhockey.com/bankaccount.php?uid=' . $myuid . '#peep');
         exit;
     }
 
-    $canDoWeekTraining = canDoTraining($db, $currentUserId);
+    // $canDoWeekTraining = canDoTraining($db, $currentUserId);
+    $canDoWeekTraining = true;
 
     function displayNotEnoughtMoney()
     {

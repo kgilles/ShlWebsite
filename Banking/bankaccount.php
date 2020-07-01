@@ -616,7 +616,8 @@
                         <table>
                             <tr>
                                 <th>Amount</th>
-                                <td style="height: 30px"><input type="number" name="purchaseamount" placeholder="Enter amount..." /></td>
+                                <input type="hidden" id="purchaseamount" name="purchaseamount" />
+                                <td style="height: 30px"><input type="text" class="dollaramount" placeholder="Enter amount..." data-id="purchaseamount" /></td>
                             </tr>
                             <tr>
                                 <th>Title</th>
@@ -654,7 +655,8 @@
                     <table>
                         <tr>
                             <th>Amount</th>
-                            <td><input type="number" name="transactionamount" placeholder="Enter amount..." /></td>
+                            <input type="hidden" name="transactionamount" id="transactionamount" />
+                            <td><input type="text" class="dollaramount" placeholder="Enter amount..." data-id="transactionamount" /></td>
                         </tr>
                         <tr>
                             <th>Title</th>
@@ -699,6 +701,27 @@
     </if>
 
     <script>
+        function disallowNonNumbers(event) {
+            if (!event.code.match(/Digit/)) {
+                event.preventDefault();
+            }
+        }
+
+        function addCommasToAmount(event) {
+            var inputField = event.target;
+            var mappedHiddenInputId = inputField.dataset.id;
+            var currentAmount = inputField.value.replace(/,/g, "");
+            var amountWithCommas = currentAmount.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            inputField.value = amountWithCommas;
+            document.getElementById(mappedHiddenInputId).value = currentAmount;
+        }
+
+        var amountInputs = document.getElementsByClassName("dollaramount");
+        for (var i = 0; i < amountInputs.length; i++) {
+            amountInputs[i].addEventListener('keydown', disallowNonNumbers);
+            amountInputs[i].addEventListener('input', addCommasToAmount);
+        }
+
         $(document).on("keydown", "form", function(event) {
             return event.key != "Enter";
         });

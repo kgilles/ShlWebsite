@@ -702,7 +702,12 @@
 
     <script>
         function disallowNonNumbers(event) {
-            if (!event.code.match(/Digit/)) {
+            var eventCode = event.code;
+            if (eventCode) {
+                if (!eventCode.match(/Digit/)) {
+                    event.preventDefault();
+                }
+            } else if (!event.char.match(/\d/)) { // IE 11
                 event.preventDefault();
             }
         }

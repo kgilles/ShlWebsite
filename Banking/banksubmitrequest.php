@@ -281,7 +281,8 @@
                 while ($xRow = $db->fetch_array($xQueryNames)) {
                     echo '<tr>
                         <td>' . $xRow['username'] . '</td>
-                        <td><input type="number" id="massamount_' . $massIndex . '" name="massamount_' . $massIndex . '" value="0" /></td>';
+                        <input type="hidden" id="massamount_' . $massIndex . '" name="massamount_' . $massIndex . '" value="0" />
+                        <td><input type="text" class="dollaramount" value="0" data-id="massamount_' . $massIndex . '" /></td>';
                     if ($nameCount > 1) {
                         echo '<td><input type="text" id="massdescription_' . $massIndex . '" name="massdescription_' . $massIndex . '" /></td>';
                     }
@@ -308,6 +309,32 @@
     </div>
 
     <script>
+        function disallowNonNumbers(event) {
+            var eventCode = event.code;
+            if (eventCode) {
+                if (!eventCode.match(/Digit/)) {
+                    event.preventDefault();
+                }
+            } else if (!event.char.match(/\d/)) { // IE 11
+                event.preventDefault();
+            }
+        }
+
+        function addCommasToAmount(event) {
+            var inputField = event.target;
+            var mappedHiddenInputId = inputField.dataset.id;
+            var currentAmount = inputField.value.replace(/,/g, "");
+            var amountWithCommas = currentAmount.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            inputField.value = amountWithCommas;
+            document.getElementById(mappedHiddenInputId).value = currentAmount;
+        }
+
+        var amountInputs = document.getElementsByClassName("dollaramount");
+        for (var i = 0; i < amountInputs.length; i++) {
+            amountInputs[i].addEventListener('keydown', disallowNonNumbers);
+            amountInputs[i].addEventListener('input', addCommasToAmount);
+        }
+
         $(document).on("keydown", ":input:not(textarea)", function(event) {
             return event.key != "Enter";
         });

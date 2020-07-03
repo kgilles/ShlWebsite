@@ -704,10 +704,10 @@
         function disallowNonNumbers(event) {
             var eventCode = event.code;
             if (eventCode) {
-                if (!eventCode.match(/Digit/)) {
+                if (!eventCode.match(/Digit/) && eventCode !== "Tab") {
                     event.preventDefault();
                 }
-            } else if (!event.char.match(/\d/)) { // IE 11
+            } else if (!event.char.match(/\d/) && event.key !== "Tab") { // IE 11
                 event.preventDefault();
             }
         }

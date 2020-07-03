@@ -282,7 +282,7 @@
                     echo '<tr>
                         <td>' . $xRow['username'] . '</td>
                         <input type="hidden" id="massamount_' . $massIndex . '" name="massamount_' . $massIndex . '" value="0" />
-                        <td><input type="text" class="dollaramount" value="0" data-id="massamount_' . $massIndex . '" /></td>';
+                        <td><input type="text" class="dollaramount" value="" data-id="massamount_' . $massIndex . '" /></td>';
                     if ($nameCount > 1) {
                         echo '<td><input type="text" id="massdescription_' . $massIndex . '" name="massdescription_' . $massIndex . '" /></td>';
                     }
@@ -310,23 +310,37 @@
 
     <script>
         function disallowNonNumbers(event) {
-            var eventCode = event.code;
-            if (eventCode) {
-                if (!eventCode.match(/Digit/) && eventCode !== "Tab") {
-                    event.preventDefault();
-                }
-            } else if (!event.char.match(/\d/) && event.key !== "Tab") { // IE 11
+            var eventKey = event.key;
+            if (eventKey && !eventKey.match(/Arrow|Left$|Right$|Delete$|Backspace$|Tab$|[\d-]/)) {
                 event.preventDefault();
             }
         }
 
         function addCommasToAmount(event) {
             var inputField = event.target;
+            var valueLength = inputField.value.length;
+            var start = inputField.selectionStart;
+            var end = inputField.selectionEnd;
             var mappedHiddenInputId = inputField.dataset.id;
+            var isNegativeAmount = inputField.value.match(/-/);
             var currentAmount = inputField.value.replace(/,/g, "");
             var amountWithCommas = currentAmount.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+            if (isNegativeAmount) {
+                amountWithCommas = "-" + amountWithCommas.replace(/-/g, "");
+                currentAmount = "-" + currentAmount.replace(/-/g, "");
+            }
+            if (!parseInt(currentAmount)) {
+                currentAmount = 0;
+            }
+
             inputField.value = amountWithCommas;
             document.getElementById(mappedHiddenInputId).value = currentAmount;
+
+            // Make sure cursor stays in the same position in the input field
+            var newValueLength = amountWithCommas.length;
+            var lengthDiff = newValueLength - valueLength;
+            inputField.setSelectionRange(start + lengthDiff, end + lengthDiff);
         }
 
         var amountInputs = document.getElementsByClassName("dollaramount");

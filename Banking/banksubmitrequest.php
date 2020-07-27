@@ -365,6 +365,9 @@
                         firstAmount = document.getElementById(idAmount).value;
                         firstDescription = document.getElementById(idDescription).value;
                     } else {
+                        var visibleAmountField = document.querySelector("input[data-id='" + idAmount + "']");
+                        visibleAmountField.value = firstAmount;
+                        visibleAmountField.dispatchEvent(new Event('input', { bubbles: true })); // To trigger value format callback
                         document.getElementById(idAmount).value = firstAmount;
                         document.getElementById(idDescription).value = firstDescription;
                     }
